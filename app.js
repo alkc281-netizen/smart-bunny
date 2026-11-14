@@ -115,3 +115,22 @@ $('rabbit').setAttribute('role','button');$('rabbit').tabIndex=0;$('rabbit').set
 function jump(){if([...players.values()].includes('win'))return;mood();void $('rabbit').offsetWidth;mood('happy');sound('jump')}
 $('rabbit').onclick=jump;$('rabbit').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jump()}};
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#keypad')&&!['test-victory','mute'].includes(b.id))sound('tap')});
+
+function formatMenuIcon(element) {
+  const match = element.textContent.match(/^(\p{Extended_Pictographic}\uFE0F?)\s+(.+)$/u);
+  if (!match) return;
+  const icon = document.createElement('span');
+  icon.className = 'menu-icon';
+  icon.textContent = match[1];
+  icon.setAttribute('aria-hidden', 'true');
+  element.replaceChildren(icon, ' ' + match[2]);
+}
+const menuHeading = document.getElementById('heading');
+for (const element of document.querySelectorAll('#heading, .theme-bar button, #game-menu button')) {
+  formatMenuIcon(element);
+}
+if (typeof MutationObserver === 'function') {
+  new MutationObserver(() => {
+    if (!menuHeading.firstElementChild) formatMenuIcon(menuHeading);
+  }).observe(menuHeading, { childList: true });
+}
