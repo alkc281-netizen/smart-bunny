@@ -144,3 +144,79 @@ h1{font-size:26px}
   margin-bottom: 10px;
 }
 .math-lengths button, #math-back { min-height: 44px; }
+
+.mario-prop { display: none; }
+.console.mario {
+  --shell: #dfeeff;
+  --edge: #5e75a7;
+  --panel: #fff9e9;
+  --text: #22324e;
+  --button: #fff4d9;
+  --accent: #a83617;
+}
+.console.mario .theme-bar button.selected { background: var(--accent); color: #fff; }
+.console.mario .rabbit-zone {
+  position: relative;
+  isolation: isolate;
+  min-height: 112px;
+  padding-bottom: 22px;
+  border-radius: 12px 12px 0 0;
+  margin-top: 8px;
+  background: linear-gradient(#8dbeff, #c5e7ff);
+}
+.console.mario .rabbit-zone::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 22px;
+  content: '';
+  background: url('assets/sprites/mario/BrickBlockBrown.png') left bottom / 22px 22px repeat-x;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.console.mario .rabbit {
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  background: url('assets/sprites/mario/MarioStanding.png') center bottom / auto 100% no-repeat;
+  image-rendering: pixelated;
+}
+.console.mario .rabbit.happy, .console.mario .rabbit.party {
+  background-image: url('assets/sprites/mario/MarioJumping.png');
+  z-index: 2;
+}
+.console.mario .rabbit > * { display: none; }
+.console.mario .mario-prop {
+  display: block;
+  position: absolute;
+  bottom: 22px;
+  width: clamp(23px, 8vw, 42px);
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.mario-mushroom { left: 7%; background-image: url('assets/sprites/mario/MagicMushroom.png'); }
+.mario-one-up { left: 23%; background-image: url('assets/sprites/mario/1upMushroom.png'); }
+.mario-goomba { right: 23%; background-image: url('assets/sprites/mario/LittleGoomba.png'); }
+.console.mario .mario-koopa {
+  right: 7%;
+  aspect-ratio: 2 / 3;
+  background-image: url('assets/sprites/mario/KoopaTroopaGreen.png');
+}
+.console.mario .rabbit.happy ~ .mario-koopa,
+.console.mario .rabbit.party ~ .mario-koopa {
+  background-image: url('assets/sprites/mario/KoopaTroopaShellGreen.png');
+  background-size: 100% auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .console.mario .rabbit { animation: none; }
+}
+@media (max-width: 380px) {
+  .theme-bar:has(#mario-theme:not([hidden])) button {
+    min-width: 0;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+}

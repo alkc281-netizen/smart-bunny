@@ -166,7 +166,34 @@ function settingsBack(){if(!settingsSnapshot)return;const saved=settingsSnapshot
 for(const [id,name] of Object.entries(names)){const b=document.createElement('button');b.textContent=icons[id]+' '+name;b.onclick=()=>id==='memory'?begin(id):chooseMathLength(id);$('game-menu').append(b)}
 for(const k of ['1','2','3','4','5','6','7','8','9','⌫','0','✕']){const b=document.createElement('button');b.textContent=k;b.onclick=()=>key(k);$('keypad').append(b)}
 for(let i=0;i<music.length;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${music[i].name}`;$('song').append(o)}$('song').disabled=true;
-document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-theme]').forEach(x=>x.classList.toggle('selected',x===b));$('app').classList.toggle('modern',b.dataset.theme==='modern')});
+const themeButtons = document.querySelectorAll('[data-theme]');
+function applyTheme(selected) {
+ const theme = selected.dataset.theme;
+ for (const button of themeButtons) {
+  button.classList.toggle('selected', button === selected);
+  button.setAttribute('aria-pressed', String(button === selected));
+ }
+ $('app').classList.toggle('modern', theme === 'modern');
+ $('app').classList.toggle('mario', theme === 'mario');
+ $('rabbit').setAttribute('aria-label', theme === 'mario' ? 'Прыжок Марио' : 'Прыгнуть');
+}
+for (const button of themeButtons) {
+ button.setAttribute('aria-pressed', String(button.dataset.theme === 'original'));
+ button.onclick = () => applyTheme(button);
+}
+
+if (typeof Image !== 'undefined') {
+ const sprites = ['MarioStanding', 'MarioJumping', 'MagicMushroom', '1upMushroom',
+  'LittleGoomba', 'KoopaTroopaGreen', 'KoopaTroopaShellGreen', 'BrickBlockBrown'];
+ Promise.all(sprites.map(name => new Promise((resolve, reject) => {
+  const image = new Image();
+  image.onload = resolve;
+  image.onerror = reject;
+  image.src = 'assets/sprites/mario/' + name + '.png';
+ }))).then(() => setVisible('mario-theme', true)).catch(() => {
+  // The Nintendo graphics are installed only on the home server.
+ });
+}
 $('home').onclick=home;$('math-back').onclick=home;$('replay').onclick=()=>game==='russian'?beginRussian(russianTopic):begin(game,mathRoundLength);$('open-settings').onclick=openSettings;$('settings-back').onclick=settingsBack;
 $('auto-music').onchange=e=>{autoMusic=e.target.checked;$('song').disabled=autoMusic;if(autoMusic&&(game||musicScreen()==='player-album')){if(game)selectedMusic=gameMusic[game];$('song').value=String(selectedMusic);startMusic(phase==='settings')}};
 $('song').onchange=e=>{selectedMusic=Number(e.target.value);if(musicWanted||musicNodes.length||phase==='settings')startMusic(phase==='settings')};
