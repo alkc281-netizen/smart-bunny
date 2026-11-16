@@ -1,9 +1,18 @@
 'use strict';
 
 (() => {
-  const replayLimit = 4200;
   const replayFrameMs = 1000 / 60.0988138974405;
   const assets = 'assets/emulation/';
+  // Controller inputs for World 1-1, recorded against JSNES 2.1.0.
+  // Each pair is [frame count, button mask] in RLDUTSBA order.
+  const route = [
+    [41,0], [1,16], [174,0], [128,65], [15,193], [17,65], [15,193], [41,65],
+    [15,193], [17,65], [32,193], [72,65], [23,193], [65,65], [15,193], [105,65],
+    [15,193], [33,65], [15,193], [65,65], [32,193], [40,0], [40,65], [40,193],
+    [32,65], [8,193], [16,65], [15,193], [65,65], [15,193], [9,65], [15,193],
+    [49,65], [15,193], [49,65], [32,193], [40,65], [15,193], [25,65], [15,193],
+    [81,65], [15,193], [52,65],
+  ];
   const progressLabel = $('nes-caption');
   const status = $('nes-status');
   const romInput = $('nes-rom');
@@ -40,35 +49,10 @@
     });
   }
 
-  function parseReplay(text) {
-    if (!/^version 3\r?$/m.test(text) || !/^palFlag 0\r?$/m.test(text)) {
-      throw Error('Не удалось прочитать запись маршрута.');
-    }
-    const frames = [];
-    // Only the first part is needed for World 1-1.
-    for (const line of text.slice(0,200000).split(/\r?\n/)) {
-      if (!line.startsWith('|')) continue;
-      const [, command, player] = line.split('|');
-      if (!/^[RLDUTSBA. ]{8}$/.test(player) || (command !== '0' && frames.length > 0)) break;
-      let buttons = 0;
-      for (let i=0;i<8;i++) {
-        if (player[i] !== '.' && player[i] !== ' ') buttons |= 1<<i;
-      }
-      frames.push(buttons);
-      if (frames.length === replayLimit) break;
-    }
-    if (frames.length < 240) throw Error('Запись маршрута слишком короткая.');
-    return frames;
-  }
-
-  function loadDependencies() {
+  function loadReplayEngine() {
     if (!dependencies) {
       const engine = window.jsnes ? Promise.resolve(window.jsnes) : loadEngine();
-      const replay = fetch(assets+'smb-warpless.fm2').then(response => {
-        if (!response.ok) throw Error('Запись маршрута доступна по домашнему адресу игры.');
-        return response.text();
-      }).then(parseReplay);
-      dependencies = Promise.all([engine,replay]).catch(error => { dependencies=null; throw error; });
+      dependencies = engine.catch(error => { dependencies=null; throw error; });
     }
     return dependencies;
   }
@@ -109,22 +93,23 @@
     for (let i=0;i<buttons.length;i++) {
       if (version!==loadVersion) return null;
       probe.step(buttons[i]);
-      // RAM symbols from the Super Mario Bros. disassembly: OperMode, WorldNumber,
-      // LevelNumber, DisableScreenFlag, GameEngineSubroutine and Player_PageLoc.
       const ram=probe.nes.cpu.mem;
-      const inLevel=ram[0x0770]===1 && ram[0x075f]===0 && ram[0x075c]===0;
+      // OperMode and OperMode_Task identify the active level after the title screen.
+      // WorldNumber and LevelNumber confirm that it is World 1-1.
+      const inLevel=ram[0x0770]===1 && ram[0x0772]===3 && ram[0x075f]===0 && ram[0x075c]===0;
+      // GameEngineSubroutine: 8 plays the level, 4 slides the flag, 5 ends the level.
       const routine=ram[0x0e];
       if (start<0 && inLevel && ram[0x0774]===0 && routine===8) start=i;
-      if (start>=0 && inLevel && routine===4 && ram[0x6d]>=8) flag=i;
+      if (flag<0 && start>=0 && inLevel && routine===4 && ram[0x6d]>=8) flag=i;
       if (flag>=0 && inLevel && routine===5) {
-        return {engine,rom,buttons,start,end:i};
+        return {engine,rom,buttons,start,flag,end:i};
       }
       if (performance.now()>deadline) {
         await new Promise(resolve=>setTimeout(resolve,0));
         deadline=performance.now()+8;
       }
     }
-    throw Error('Маршрут не дошёл до флага в эмуляторе. Проверьте версию файла игры.');
+    throw Error('Маршрут мира 1-1 на выбранном файле не дошёл до флага.');
   }
 
   function paint(buffer) {
@@ -217,7 +202,8 @@
       if (file.size>131072) throw Error('Выберите файл Super Mario Bros. для NES.');
       const rom=new Uint8Array(await file.arrayBuffer());
       validateRomHeader(rom);
-      const [engine,buttons]=await loadDependencies();
+      const engine=await loadReplayEngine();
+      const buttons=route.flatMap(([length,mask])=>Array(length).fill(mask));
       const result=await verifyRoute(engine,rom,buttons,version);
       if (!result||version!==loadVersion) return;
       chosen=true;
@@ -252,7 +238,8 @@
         return;
       }
       if(total<=0)return;
-      target=verified.start+Math.floor((verified.end-verified.start)*Math.min(1,completed/total));
+      target=completed>=total ? verified.end
+        : verified.start+Math.floor((verified.flag-1-verified.start)*completed/total);
       updateCaption();
       schedulePlayback();
     },
