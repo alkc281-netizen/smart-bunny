@@ -137,6 +137,7 @@ h1{font-size:26px}
 .album-tray { margin-top: 10px; }
 .album-tray button span { display: block; margin-top: 3px; font-size: 12px; }
 .sticker-art img { width: 100%; height: 100%; object-fit: contain; }
+.sticker-art canvas { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
 .sticker-art.mario-coin {
   display: inline-block;
   width: 30px;
@@ -167,7 +168,8 @@ h1{font-size:26px}
   font-size: 36px;
 }
 .mario-collection { margin-top: 18px; }
-.mario-collection h2, .mario-sticker-card h3 { margin: 0; }
+.mario-collection h2, .mario-sticker-card h4 { margin: 0; }
+.sticker-collection-heading { margin: 16px 0 8px; }
 .mario-collection-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
 .mario-sticker-card {
   padding: 10px;
