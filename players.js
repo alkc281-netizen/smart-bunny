@@ -5,7 +5,15 @@ const albumStickers = {
   books: ['📚', 'Книжный герой', 'За тренировку в трёх разных темах или играх.'],
   detective: ['🔍', 'Сыщик ошибок', 'За верный ответ с первой попытки в работе над ошибками.'],
   rocket: ['🚀', 'Ракета прогресса', 'За новый личный рекорд в одной теме или игре.'],
+  coin: ['🪙', 'Монетка', 'Первая монетка за тренировку.'],
+  mushroom: ['🍄', 'Супергриб', '10 заданий по двум пройденным темам русского.'],
+  star: ['⭐', 'Звезда', 'Три верных ответа в работе над ошибками. Исправления тоже считаются.'],
+  koopa: ['🐢', 'Купа', '5 заданий на сравнение чисел и 5 на сложение.'],
+  mario: ['🍄', 'Марио', '5 заданий по математике и 5 по русскому.'],
 };
+const marioStickerArt = {mario:'hero', mushroom:'mushroom', koopa:'koopa'};
+const dailyMissionButton = playerButton($('game-menu'), '🪙 Миссия дня', openDailyMission);
+dailyMissionButton.hidden = true;
 const playerAvatars = ['🌸', '⭐', '🐰', '🦊'];
 let activePlayer = null;
 let playerList = [];
@@ -76,8 +84,12 @@ async function flushPlayerUpdates() {
         result.preferences = activePlayer.preferences;
         const previous = Object.keys(activePlayer.stickers);
         activePlayer = result;
-        if (phase === 'player-album' && data.kind !== 'preference') renderPlayerAlbum();
-        if (phase === 'finished') {
+        if (phase === 'player-album' && data.kind !== 'preference') {
+          renderPlayerAlbum();
+          if (data.kind === 'redeem') message(Object.hasOwn(result.stickers,data.sticker)
+            ? 'Наклейка в альбоме. Теперь её можно приклеить!' : 'Пока не хватает монет.');
+        }
+        if (phase === 'finished' && data.kind === 'round') {
           const unlocked = Object.keys(result.stickers).filter(key => !previous.includes(key));
           $('round-album').textContent = unlocked.length ? '✨ Новая наклейка! Открыть альбом' : '📒 Мой альбом';
         }
@@ -98,6 +110,7 @@ function refreshPlayerNav() {
   setVisible('player-nav', playerApiReady && !game);
   $('choose-player').textContent = activePlayer ? activePlayer.avatar + ' ' + activePlayer.name : '👤 Выбрать игрока';
   setVisible('open-album', Boolean(activePlayer));
+  dailyMissionButton.hidden = !activePlayer?.rewards;
 }
 
 const playerBasePanels = panels;
@@ -208,7 +221,111 @@ function openPlayerAlbum() {
   selectedSticker = null;
   renderPlayerAlbum();
   startMusic();
-  flushPlayerUpdates();
+  if (playerOutbox.length) flushPlayerUpdates();
+  else refreshRewardProfile('player-album',renderPlayerAlbum);
+}
+
+function refreshRewardProfile(screen, render) {
+  const player = activePlayer;
+  const version = playerScreenVersion;
+  if (!player || playerOutbox.length || writingPlayer) return;
+  playerRequest('/' + player.id).then(profile => {
+    if (phase === screen && playerScreenVersion === version && activePlayer === player && !writingPlayer && !playerOutbox.length) {
+      activePlayer = profile;
+      render();
+    }
+  }).catch(() => {});
+}
+
+function stickerArt(parent, key) {
+  const icon = playerElement('span',albumStickers[key][0],parent);
+  icon.className = 'sticker-art';
+  icon.setAttribute('aria-hidden','true');
+  if (key==='coin') {
+    icon.textContent='';
+    icon.classList.add('mario-coin');
+  }
+  if (marioStickerArt[key]) {
+    const image = document.createElement('img');
+    image.alt = '';
+    image.onload = () => icon.replaceChildren(image);
+    image.src = 'assets/sprites/mario/drawn/' + marioStickerArt[key] + '.png';
+  }
+}
+
+function rewardTopics() {
+  const known = russianStudiedByClass[russianClass] || new Set(activePlayer.topics);
+  return russianMixedTopics().filter(topic => known.has(topic));
+}
+
+function missionAvailable(key) {
+  if (key === 'star') return russianMixedTopics(true).length > 0;
+  if (key === 'mushroom') return rewardTopics().length >= 2;
+  if (key === 'mario') return rewardTopics().length > 0;
+  return true;
+}
+
+function renderMarioCollection(parent) {
+  const collection=playerElement('section','',parent);
+  collection.className='mario-collection';
+  playerElement('h2','Коллекция Марио',collection);
+  playerElement('p','🪙 Монеты: '+activePlayer.coins,collection);
+  playerElement('p','За обычную тренировку — 1 монета. За миссию дня — 2 монеты.',collection);
+  playerButton(collection,'Миссия дня',openDailyMission);
+  const grid=playerElement('div','',collection);
+  grid.className='mario-collection-grid';
+  for (const key of Object.keys(activePlayer.rewards.prices)) {
+    const [,title,rule]=albumStickers[key];
+    const card=playerElement('div','',grid);
+    card.className='mario-sticker-card';
+    stickerArt(card,key);
+    playerElement('h3',title,card);
+    if (Object.hasOwn(activePlayer.stickers,key)) {
+      playerElement('p','В коллекции',card);
+      continue;
+    }
+    playerElement('p',key==='star'?rule+' '+activePlayer.reviewWins+'/3':rule,card);
+    if (missionAvailable(key)) {
+      playerButton(card,key==='star'?'Работа над ошибками':'Начать миссию',()=>{
+        if (key==='star') beginRussianMixed(true);
+        else startRewardMission(key);
+      });
+    } else if (key!=='star') {
+      playerElement('p','Сначала отметь пройденные темы или заверши обычные тренировки по русскому.',card);
+      playerButton(card,'Подготовить темы русского',openRussianClasses);
+    }
+    const cost=activePlayer.rewards.prices[key];
+    const buy=playerButton(card,'Обменять за 🪙 '+cost,()=>{
+      for (const button of grid.querySelectorAll('[data-redeem]')) button.disabled=true;
+      enqueuePlayerUpdate({kind:'redeem',sticker:key});
+    });
+    buy.dataset.redeem=key;
+    buy.disabled=activePlayer.coins<cost || playerOutbox.some(item=>item.player===activePlayer.id && item.data.kind==='redeem');
+  }
+}
+
+function showDailyMission() {
+  const panel=phase==='player-daily' ? $('player-panel')
+    : playerScreen('🪙 Миссия дня','', 'player-daily');
+  panel.replaceChildren();
+  const {day,mission}=activePlayer.rewards;
+  if (activePlayer.dailyDone===day) {
+    playerElement('p','Миссия выполнена. Завтра появится новое задание.',panel);
+    playerButton(panel,'Открыть альбом',openPlayerAlbum);
+    return;
+  }
+  const key=missionAvailable(mission) ? mission : 'koopa';
+  stickerArt(panel,key);
+  playerElement('h2',albumStickers[key][1],panel);
+  playerElement('p',albumStickers[key][2],panel);
+  playerElement('p','Награда за миссию дня: 2 монеты.',panel);
+  playerButton(panel,'Начать миссию',()=>startRewardMission(key,day)).className='wide';
+}
+
+function openDailyMission() {
+  if (!activePlayer?.rewards) return;
+  showDailyMission();
+  refreshRewardProfile('player-daily',showDailyMission);
 }
 
 function renderPlayerAlbum() {
@@ -242,14 +359,14 @@ function renderPlayerAlbum() {
   if (selectedSticker) page.classList.add('album-ready');
   page.setAttribute('aria-label', 'Страница альбома' + (labeled.length ? '. Наклейки: ' + labeled.join(', ') : ''));
   for (const [key, point] of placed) {
-    const [icon, title] = albumStickers[key];
+    const [, title] = albumStickers[key];
     const sticker = playerElement('span', '', page);
     sticker.className = 'album-sticker';
     sticker.dataset.kind = key;
     sticker.setAttribute('aria-hidden', 'true');
     sticker.style.setProperty('--x', point.x + '%');
     sticker.style.setProperty('--y', point.y + '%');
-    playerElement('span', icon, sticker);
+    stickerArt(sticker,key);
     playerElement('span', title, sticker);
   }
   const unplaced = Object.keys(activePlayer.stickers).filter(key => activePlayer.stickers[key] === null);
@@ -257,19 +374,22 @@ function renderPlayerAlbum() {
     const tray = playerElement('div', '', panel);
     tray.className = 'album-tray';
     for (const key of unplaced) {
-      const [icon, title, reason] = albumStickers[key];
-      const button = playerButton(tray, icon + ' ' + title, () => {
+      const [, title, reason] = albumStickers[key];
+      const button = playerButton(tray, '', () => {
         selectedSticker = selectedSticker === key ? null : key;
         renderPlayerAlbum();
       });
       button.dataset.sticker = key;
       button.setAttribute('aria-pressed', String(selectedSticker === key));
+      stickerArt(button,key);
+      button.append(document.createTextNode(title));
       playerElement('span', reason, button);
     }
     message(selectedSticker ? 'Теперь коснись страницы в любом месте.' : 'Выбери новую наклейку.');
   } else if (!placed.length) {
     message('Заверши тренировку, чтобы получить первую наклейку.');
   }
+  if (activePlayer.rewards) renderMarioCollection(panel);
   if (restoreFocus) {
     const target = focused.dataset?.sticker && panel.querySelector('[aria-pressed="true"]');
     (target || page).focus();
@@ -283,6 +403,126 @@ function playerRoundId() {
     '8' + value.slice(17, 20), value.slice(20)].join('-');
 }
 
+let rewardRound;
+names.mission='Миссия Марио';
+gameMusic.mission=gameMusic.compare;
+
+function rewardMath(count) {
+  return Array.from({length:count},(_,i)=>{
+    const topic=i%2 ? 'add' : 'compare';
+    const explanation=topic==='add' ? 'Сложи оба числа.' : 'Широкая сторона знака обращена к большему числу.';
+    return {...makeMathQuestion(topic),topic,label:names[topic],explanation};
+  });
+}
+
+function rewardRussian(topics,count) {
+  const order=Array.from({length:count},(_,i)=>topics[i%topics.length]);
+  const items=new Map(topics.map(key=>[key,pickRussianDeck(key,russianTopics[key].items,order.filter(topic=>topic===key).length)]));
+  return order.map(topic=>{
+    const [question,correct,wrong,example]=items.get(topic).shift();
+    const {name,rule}=russianTopics[topic];
+    return {question,correct,choices:shuffledRussian([correct,wrong]),topic,label:name,
+      explanation:[example,rule].filter(Boolean).join('\n\n')};
+  });
+}
+
+function startRewardMission(key,daily=null) {
+  if (!activePlayer?.rewards || !missionAvailable(key)) return;
+  let deck;
+  if (key==='koopa') deck=rewardMath(10);
+  else {
+    const topics=shuffledRussian(rewardTopics()).slice(0,2);
+    if (key==='mushroom') deck=rewardRussian(topics,10);
+    else {
+      const math=rewardMath(5);
+      deck=rewardRussian(topics,5).flatMap((item,i)=>[math[i],item]);
+    }
+  }
+  rewardRound={key,daily,deck,corrected:0};
+  begin('mission');
+}
+
+function renderRewardQuestion() {
+  const item=rewardRound.deck[round];
+  phase='answer';
+  $('hint').textContent=item.label + (attempt===2 ? ' · Вторая попытка' : '');
+  message(item.question);
+  $('message').classList.toggle('russian-question',item.question.length>100||item.question.includes('\n'));
+  setVisible('russian-detail',false);
+  const answers=$('answers');
+  answers.replaceChildren();
+  for (const choice of item.choices) playerButton(answers,choice,()=>choose(choice));
+  setVisible('answers',true);
+  setAudioLevel();
+}
+
+function chooseRewardAnswer(value) {
+  if (phase!=='answer') return;
+  phase='feedback';
+  setVisible('answers',false);
+  const item=rewardRound.deck[round];
+  if (value===item.correct) {
+    if (attempt===1) score++;
+    else rewardRound.corrected++;
+    $('score').textContent='⭐ '+score;
+    mood('happy');
+    sound('coin');
+    message(attempt===1?'Правильно!':'Ты исправил ошибку!');
+    wait(1000,nextTask);
+    return;
+  }
+  mood('sad');
+  sound('wrong');
+  message('Правильный ответ: '+item.correct);
+  $('russian-detail').className='hint russian-rule';
+  $('russian-detail').textContent=item.explanation;
+  setVisible('russian-detail',true);
+  const current=rewardRound, task=round;
+  const answers=$('answers');
+  answers.replaceChildren();
+  playerButton(answers,'Продолжить',()=>{
+    if (game!=='mission' || rewardRound!==current || round!==task || phase!=='feedback') return;
+    phase='transition';
+    if (attempt===2) nextTask();
+    else {
+      attempt=2;
+      sound('retry');
+      renderRewardQuestion();
+    }
+  }).className='wide';
+  setVisible('answers',true);
+}
+
+window.bunnyMissions={
+  count:()=>rewardRound.deck.length,
+  task() {
+    cancelTask();
+    mood();
+    attempt=1;
+    stats();
+    panels();
+    $('heading').textContent=albumStickers[rewardRound.key][1];
+    renderRewardQuestion();
+  },
+  answer:chooseRewardAnswer,
+  finish() {
+    cancelTask();
+    phase='finished';
+    mood('party');
+    panels();
+    setVisible('finished',true);
+    $('progress-fill').style.width='100%';
+    $('counter').textContent='Миссия завершена';
+    $('heading').textContent='🏆 Миссия выполнена!';
+    $('hint').textContent=albumStickers[rewardRound.key][1];
+    message('Верно сразу: '+score+' · Исправлено: '+rewardRound.corrected);
+    victorySound();
+  },
+};
+
+const playerBaseReplay=$('replay').onclick;
+$('replay').onclick=()=>game==='mission' ? startRewardMission(rewardRound.key) : playerBaseReplay();
+
 const playerBaseFinish = finish;
 finish = function () {
   if (phase === 'finished') return;
@@ -291,9 +531,15 @@ finish = function () {
   $('round-album').textContent = '📒 Мой альбом';
   if (!activePlayer) return;
   const total = roundQuestionCount();
+  if (game === 'mission') {
+    enqueuePlayerUpdate({kind:'round',id:playerRoundId(),score,total,review:false,
+      topics:[...new Set(rewardRound.deck.map(item=>item.topic))],corrected:rewardRound.corrected,
+      mission:rewardRound.key,daily:rewardRound.daily});
+    return;
+  }
   const topics = game === 'russian' ? Object.keys(russianRoundStats) : [game];
   enqueuePlayerUpdate({kind: 'round', id: playerRoundId(), score, total, topics,
-    review: game === 'russian' && russianMode === 'mistakes'});
+    review: game === 'russian' && russianMode === 'mistakes',corrected:game==='russian' ? russianCorrected : 0});
 };
 
 // Keep an album or profile picker visible when returning from music settings.
