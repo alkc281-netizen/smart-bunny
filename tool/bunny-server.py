@@ -6,6 +6,7 @@ import math
 import sqlite3
 import unicodedata
 from contextlib import closing
+from datetime import datetime, timedelta, timezone
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -18,10 +19,30 @@ PREFERENCES = {
     "bunny-russian-class", "bunny-russian-count", "bunny-russian-grade-1",
     "bunny-russian-mistakes", "bunny-russian-studied-2", "bunny-russian-studied-4",
 }
+REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10}
+DAILY_MISSIONS = ("koopa", "mushroom", "mario")
+
+
+def daily_mission():
+    today = datetime.now(timezone(timedelta(hours=3))).date()
+    return today.isoformat(), DAILY_MISSIONS[today.toordinal() % len(DAILY_MISSIONS)]
+
+
+def reward_defaults(profile):
+    profile.setdefault("coins", 0)
+    profile.setdefault("reviewWins", 0)
+    profile.setdefault("dailyDone", "")
+    return profile
+
+
+def player_view(player_id, name, avatar, profile):
+    day, mission = daily_mission()
+    return dict(id=player_id, name=name, avatar=avatar, **profile,
+                rewards=dict(prices=REWARD_PRICES, day=day, mission=mission))
 
 
 def initial_profile():
-    return {"preferences": {}, "rounds": 0, "correct": 0, "topics": [], "best": {}, "stickers": {}}
+    return reward_defaults({"preferences": {}, "rounds": 0, "correct": 0, "topics": [], "best": {}, "stickers": {}})
 
 
 def award(profile, sticker):
@@ -31,11 +52,16 @@ def award(profile, sticker):
 
 def apply_round(profile, data):
     score, total, topics, review = (data.get(key) for key in ("score", "total", "topics", "review"))
+    corrected = data.get("corrected", 0)
+    mission = data.get("mission")
+    daily = data.get("daily")
     if (type(score) is not int or total not in (10, 50, 100) or not 0 <= score <= total
             or not isinstance(topics, list) or not 1 <= len(topics) <= 64
             or not all(isinstance(topic, str) and topic.isascii() and topic.isalnum()
                        and 1 <= len(topic) <= 40 for topic in topics)
-            or type(review) is not bool):
+            or type(review) is not bool or type(corrected) is not int or not 0 <= corrected <= total - score
+            or (mission is not None and (not isinstance(mission, str) or mission not in DAILY_MISSIONS or total != 10 or review))
+            or (daily is not None and (mission is None or not isinstance(daily, str) or len(daily) != 10))):
         raise ValueError("Некорректный результат тренировки.")
     profile["rounds"] += 1
     profile["correct"] += score
@@ -43,8 +69,23 @@ def apply_round(profile, data):
     award(profile, "start")
     if len(profile["topics"]) >= 3:
         award(profile, "books")
+    if mission:
+        award(profile, mission)
+        today, offered = daily_mission()
+        if daily == today and mission in (offered, "koopa") and profile["dailyDone"] != today:
+            profile["dailyDone"] = today
+            profile["coins"] += 2
+            award(profile, "coin")
+        return
+
+    profile["coins"] += 1
+    award(profile, "coin")
     if review and score > 0:
         award(profile, "detective")
+    if review:
+        profile["reviewWins"] = min(3, profile["reviewWins"] + score + corrected)
+        if profile["reviewWins"] >= 3:
+            award(profile, "star")
     if len(topics) == 1:
         topic = topics[0]
         percentage = score * 100 // total
@@ -131,7 +172,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             player_id = uuid4().hex
             profile = initial_profile()
             db.execute("INSERT INTO players VALUES (?, ?, ?, ?)", (player_id, name, avatar, json.dumps(profile)))
-            return 201, dict(id=player_id, name=name, avatar=avatar, **profile)
+            return 201, player_view(player_id, name, avatar, profile)
 
         parts = path.split("/")
         if len(parts) != 4 or parts[1:3] != ["api", "players"]:
@@ -143,11 +184,11 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if row is None:
             return 404, {"error": "Игрок не найден."}
         name, avatar, saved = row
-        profile = json.loads(saved)
+        profile = reward_defaults(json.loads(saved))
         if data is not None:
             self.update(db, player_id, profile, data)
             db.execute("UPDATE players SET progress=? WHERE id=?", (json.dumps(profile), player_id))
-        return 200, dict(id=player_id, name=name, avatar=avatar, **profile)
+        return 200, player_view(player_id, name, avatar, profile)
 
     @staticmethod
     def update(db, player_id, profile, data):
@@ -172,6 +213,14 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Выберите полученную наклейку и место на странице.")
             if profile["stickers"][sticker] is None:
                 profile["stickers"][sticker] = {"x": round(x, 2), "y": round(y, 2)}
+        elif kind == "redeem":
+            sticker = data.get("sticker")
+            if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
+                raise ValueError("Выберите наклейку из коллекции.")
+            cost = REWARD_PRICES[sticker]
+            if sticker not in profile["stickers"] and profile["coins"] >= cost:
+                profile["coins"] -= cost
+                award(profile, sticker)
         else:
             raise ValueError("Неизвестное действие.")
 
