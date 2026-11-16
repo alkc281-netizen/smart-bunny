@@ -136,6 +136,50 @@ h1{font-size:26px}
 .album-sticker[data-kind=rocket] { background: #d8f4e0; }
 .album-tray { margin-top: 10px; }
 .album-tray button span { display: block; margin-top: 3px; font-size: 12px; }
+.sticker-art img { width: 100%; height: 100%; object-fit: contain; }
+.sticker-art.mario-coin {
+  display: inline-block;
+  width: 30px;
+  height: 38px;
+  border: 4px solid #d48b0b;
+  border-radius: 50%;
+  background: linear-gradient(110deg,#fff6a8,#ffc531 58%,#e9a00d);
+  box-shadow: inset 0 0 0 2px #ffed78, 2px 2px 0 #9d631a;
+  position: relative;
+}
+.mario-coin::after {
+  content: '';
+  position: absolute;
+  top: 22%;
+  left: 35%;
+  width: 28%;
+  height: 56%;
+  border-radius: 3px;
+  background: #a76a10;
+  box-shadow: 2px 0 #ffed78;
+}
+.album-sticker .sticker-art img { max-height: 34px; }
+.album-tray button .sticker-art, .mario-sticker-card .sticker-art, #player-panel > .sticker-art {
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 5px;
+  font-size: 36px;
+}
+.mario-collection { margin-top: 18px; }
+.mario-collection h2, .mario-sticker-card h3 { margin: 0; }
+.mario-collection-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.mario-sticker-card {
+  padding: 10px;
+  border: 2px solid var(--edge);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mario-sticker-card p { margin: 0 0 auto; }
+.mario-sticker-card button, #player-panel > button { min-height: 44px; }
+@media (max-width: 360px) { .mario-collection-grid { grid-template-columns: 1fr; } }
 
 .math-lengths {
   display: grid;
