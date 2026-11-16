@@ -322,3 +322,48 @@ h1{font-size:26px}
     overflow-wrap: anywhere;
   }
 }
+
+.nes-controls {
+  margin-top: 8px;
+  text-align: center;
+}
+.nes-controls > button { min-height: 44px; padding-inline: 12px; }
+#nes-setup {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 10px;
+  overflow-wrap: anywhere;
+}
+#nes-setup label { font-weight: 600; }
+#nes-rom { max-width: 100%; }
+#nes-setup a { color: var(--text); font-size: 12px; }
+.console.mario .rabbit-zone[data-nes=true] {
+  display: grid;
+  place-items: center;
+  height: auto;
+  padding: 6px;
+  background: #18213b;
+}
+.console.mario [data-nes=true] .mario-stage-tools,
+.console.mario [data-nes=true] .mario-track,
+.console.mario [data-nes=true] .mario-stars,
+.console.mario [data-nes=true] .mario-secret,
+.console.mario [data-nes=true].rabbit-zone::after { display: none; }
+.nes-screen { width: min(100%, 320px); color: #f0f5ff; }
+.nes-screen canvas {
+  display: block;
+  width: 100%;
+  max-height: min(34dvh, 275px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #14192b;
+}
+.nes-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 4px 5px;
+  font-size: 12px;
+}

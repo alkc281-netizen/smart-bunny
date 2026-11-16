@@ -175,6 +175,7 @@ function applyTheme(selected) {
  }
  $('app').classList.toggle('modern', theme === 'modern');
  $('app').classList.toggle('mario', theme === 'mario');
+ window.bunnyReplay?.setTheme(theme === 'mario');
  $('rabbit').setAttribute('aria-label', theme === 'mario' ? 'Прыжок Марио' : 'Прыгнуть');
 }
 for (const button of themeButtons) {
@@ -212,6 +213,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!
 
 function updateMarioCourse(completed,total) {
  const progress=total>0?Math.min(1,completed/total):0;
+ window.bunnyReplay?.setProgress(completed,total);
  const stage=$('mario-stage');
  $('mario-track').style.setProperty?.('--course-position',(progress*100)+'%');
  stage.setAttribute('data-area',progress<1/3?'meadow':progress<2/3?'hills':'castle');
