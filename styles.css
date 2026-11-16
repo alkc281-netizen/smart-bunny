@@ -33,3 +33,50 @@ h1{font-size:26px}
   .menu-icon{font-size:1.42em;line-height:1;vertical-align:-.1em}
   h1 .menu-icon{font-size:1.5em}
 }
+
+@media (min-width: 601px) and (max-width: 1366px) and (any-pointer: coarse) {
+  body {
+    display: block;
+    padding: 0;
+  }
+
+  .console, .console.modern {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    padding: max(20px, env(safe-area-inset-top))
+      max(24px, env(safe-area-inset-right))
+      max(20px, env(safe-area-inset-bottom))
+      max(24px, env(safe-area-inset-left));
+  }
+
+  .display {
+    flex: 1;
+    min-height: 0;
+    gap: 14px;
+    padding: clamp(20px, 4vw, 48px);
+  }
+
+  .rabbit-zone { flex-shrink: 0; }
+  h1 { font-size: 30px; font-weight: 600; }
+  .hint, .stats, .track-label, .settings label, .russian-grade-option { font-size: 17px; }
+  .message, .russian-question, .russian-rule { font-size: 22px; }
+  .russian-question, .russian-rule {
+    max-width: 65ch;
+    margin-inline: auto;
+  }
+  .game-grid, .answers, .russian-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .console button {
+    min-height: 52px;
+    font-size: 18px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+  .menu-icon { font-size: 1.42em; line-height: 1; vertical-align: -.1em; }
+}
