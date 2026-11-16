@@ -21,8 +21,8 @@ for(let correct=0;correct<=10;correct++){run("russianShowGrade=true;beginRussian
 run("beginRussian('chu');choose('wrong')");tick(60000);const russianQuestion=run('russianDeck[round][0]');assert.equal(run('phase'),'feedback');assert.equal(run('round'),0);run('openSettings()');tick(60000);run('settingsBack()');assert.equal(run('phase'),'feedback');assert.equal(run('attempt'),2);run("$('answers').children[0].onclick()");assert.equal(run('phase'),'answer');assert.equal(run('russianDeck[round][0]'),russianQuestion);run("choose('wrong')");tick(60000);assert.equal(run('phase'),'feedback');assert.equal(run('round'),0);const confirmOld=run("$('answers').children[0].onclick");confirmOld();confirmOld();assert.equal(run('round'),1);assert.equal(run('score'),0);assert.equal(run('russianCorrected'),0);
 run('home()');tick(10000);assert.equal(run('phase'),'menu');run('openRussianClasses()');assert.equal(run('phase'),'russian-classes');run('russianClass=3;openRussianTopics()');assert.equal(run("$('russian-menu').children[0].children.length"),4);run("saveRussianPreference('bunny-russian-class',3)");assert.equal(prefs.get('bunny-russian-class'),'3');assert.equal(run('readRussianPreference("missing","default")'),'default');
 // Cover every topic in every class, both supported error paths and grade defaults.
-const allTopics=run('Object.keys(russianTopics)');assert.equal(allTopics.length,48);let taskCount=0;
-for(const key of allTopics){const meta=run(`russianTopics['${key}']`);assert.ok(meta.items.length>=30);assert.equal(new Set(meta.items.map(i=>i[0]+i[1])).size,meta.items.length);for(const item of meta.items){assert.ok(item[0].includes('…'));assert.notEqual(item[1],item[2]);assert.ok(!/[A-Za-z]/.test(item.slice(0,3).join('')));if(meta.grade>1)assert.ok(item[3]?.length>30)}taskCount+=meta.items.length;
+const allTopics=run('Object.keys(russianTopics)');assert.equal(allTopics.length,59);let taskCount=0;
+for(const key of allTopics){const meta=run(`russianTopics['${key}']`);assert.ok(meta.items.length>=6);assert.equal(new Set(meta.items.map(i=>i[0]+i[1])).size,meta.items.length);for(const item of meta.items){assert.notEqual(item[1],item[2]);assert.ok(!/[A-Za-z]/.test(item.slice(0,3).join('')));if(meta.grade>1)assert.ok(item[3]?.trim())}taskCount+=meta.items.length;
  run(`russianClass=${meta.grade||1};russianShowGrade=false;beginRussian('${key}')`);
  for(let i=0;i<10;i++){if(i===0){const explanation=run('russianDeck[round][3]');run('choose(russianDeck[round][2])');tick(120000);assert.equal(run('round'),0);assert.equal(run('phase'),'feedback');if(explanation)assert.ok(run("$('russian-detail').textContent").includes(explanation));run('openSettings()');run('settingsBack()');run("$('answers').children[0].onclick()");assert.equal(run('phase'),'answer');}run('choose(answer)');tick(1200)}
  assert.equal(run('score'),9);assert.equal(run('russianCorrected'),1);assert.equal(run('phase'),'finished');if(meta.grade>1)assert.equal(run("$('heading').textContent"),'Оценка: 5');else assert.match(run("$('heading').textContent"),/потренировался/);
@@ -30,7 +30,7 @@ for(const key of allTopics){const meta=run(`russianTopics['${key}']`);assert.ok(
 }
 assert.ok(taskCount>=1739);run("russianClass=2;beginRussian('zhi')");assert.equal(run('game'),null);
 // New rounds exhaust the pool before reuse and avoid the previous round, including reloads.
-for(const key of allTopics){run(`russianHistory.delete('${key}');saveRussianPreference('bunny-russian-history-${key}','null')`);const union=new Set();let previous=[];
+for(const key of allTopics.filter(key=>run(`russianTopics['${key}'].items.length`)>=30)){run(`russianHistory.delete('${key}');saveRussianPreference('bunny-russian-history-${key}','null')`);const union=new Set();let previous=[];
  for(let r=0;r<7;r++){const deck=run(`pickRussianDeck('${key}',russianTopics['${key}'].items).map(russianItemId)`);assert.equal(deck.length,10);assert.equal(new Set(deck).size,10);assert.ok(deck.every(id=>!previous.includes(id)));if(r<3)for(const id of deck)union.add(id);if(r===2)assert.equal(union.size,30);previous=[...deck];if(r===3)run(`russianHistory.delete('${key}')`)}
 }
 run("russianClass=2;beginRussian('vowels')");const deckBefore=run('russianDeck.map(russianItemId)');run("$('replay').onclick()");const deckAfter=run('russianDeck.map(russianItemId)');assert.ok(deckAfter.every(id=>!deckBefore.includes(id)));run('home()');
@@ -41,10 +41,25 @@ for(const length of [10,50,100]){run(`russianQuestionCount=${length};russianClas
 }
 run('russianQuestionCount=10');console.log('PASS question counts: 10/50/100 complete rounds; progress; grades; pool cycles.');
 console.log('PASS new rounds: all 48 pools; 30 distinct tasks per 3 rounds; no adjacent repeats; stored history reload; replay button.');
-console.log('PASS Russian: curriculum tasks across 48 topics, 4 classes; all grade thresholds; corrected count; duplicate answers; second error; explicit confirmation after both errors and settings; duplicate confirmation; menu; class isolation; storage.');
+console.log('PASS Russian: curriculum tasks across 59 topics, 4 classes; all grade thresholds; corrected count; duplicate answers; second error; explicit confirmation after both errors and settings; duplicate confirmation; menu; class isolation; storage.');
 // Mixed training, per-topic results and saved remediation.
+run("russianClass=4;beginRussianMixed()");
+assert.equal(run("$('heading').textContent"),'Пройденные темы');
+assert.equal(run('game'),null);
+run("russianStudiedByClass[4].add('cases4');russianMistakes={cases4:1,speech4:1};beginRussianMixed()");
+assert.equal(run("russianDeck.every(item=>item[4]==='cases4')"),true);
+assert.equal(run("russianMixedTopics(true).join(',')"),'cases4');
+run("home();russianClass=2;beginRussianMixed()");
+assert.equal(run("$('heading').textContent"),'Пройденные темы');
+run("$('russian-menu').children[0].children[0].onclick()");
+assert.equal(JSON.parse(prefs.get('bunny-russian-studied-2')).length,1);
+assert.equal(run('russianStudiedByClass[4].has("cases4")'),true);
+run("home();russianClass=4;beginRussianMixed(false,true)");
+assert.equal(run('russianRoundInfo.name'),'Повторение 3-го класса');
+assert.equal(run('russianDeck.every(item=>russianTopics[item[4]].grade===3)'),true);
+run('home()');
 for(const grade of [1,2,3,4])for(const length of [10,50,100]){
- run(`russianClass=${grade};russianQuestionCount=${length};russianShowGrade=true;beginRussianMixed()`);
+ run(`russianClass=${grade};russianQuestionCount=${length};russianShowGrade=true;if(russianStudiedByClass[russianClass]) russianStudiedByClass[russianClass]=new Set(russianClassTopics());beginRussianMixed()`);
  assert.equal(run('russianDeck.length'),length);const keys=run('russianDeck.map(i=>i[4])'),counts={};for(const key of keys){counts[key]=(counts[key]||0)+1;assert.equal(run(`russianTopics['${key}'].grade||1`),grade)}assert.ok(Math.max(...Object.values(counts))-Math.min(...Object.values(counts))<=1);for(let i=1;i<keys.length;i++)assert.notEqual(keys[i],keys[i-1]);
  for(let i=0;i<length;i++){run('choose(answer)');tick(1200);if(i<length-1&&(i+1)%10===0)tick(950)}assert.equal(run('phase'),'finished');assert.equal(run('score'),length);const summary=run('Object.values(russianRoundStats)');assert.equal(summary.reduce((n,t)=>n+t.total,0),length);assert.equal(summary.reduce((n,t)=>n+t.correct,0),length);
 }

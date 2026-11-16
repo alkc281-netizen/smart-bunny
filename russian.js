@@ -2598,26 +2598,64 @@ function russianButton(parent,text,action){const b=document.createElement('butto
 function russianScreen(title,hint){home();setVisible('game-menu',false);setVisible('russian-menu',true);$('heading').textContent=title;$('hint').textContent=hint;$('russian-menu').replaceChildren();message('');const box=document.createElement('div');box.className='russian-options';$('russian-menu').append(box);return box}
 function openRussianClasses(){const box=russianScreen('📚 Русский язык','Выбери класс');phase='russian-classes';for(let c=1;c<=4;c++){const b=russianButton(box,c+' класс',()=>{russianClass=c;saveRussianPreference('bunny-russian-class',c);openRussianTopics()});b.setAttribute('aria-pressed',String(c===russianClass))}message('Выбран: '+russianClass+' класс')}
 function russianClassTopics(){return Object.keys(russianTopics).filter(k=>(russianTopics[k].grade||1)===russianClass)}
+const russianStudiedByClass = {};
+for (const grade of [2, 4]) {
+ russianStudiedByClass[grade] = new Set();
+ try {
+  const saved = JSON.parse(readRussianPreference('bunny-russian-studied-' + grade, '[]'));
+  if (Array.isArray(saved)) {
+   russianStudiedByClass[grade] = new Set(saved.filter(key => russianTopics[key]?.grade === grade));
+  }
+ } catch {}
+}
+
+function russianMixedTopics(review = false) {
+ const studied = russianStudiedByClass[russianClass];
+ return russianClassTopics().filter(key => (!studied || studied.has(key)) && (!review || russianMistakes[key] > 0));
+}
+
+function openRussianStudiedTopics() {
+ const grade = russianClass;
+ const studied = russianStudiedByClass[grade];
+ const box = russianScreen('Пройденные темы', 'Отметь темы, которые уже разбирали на уроках');
+ phase = 'russian-topics';
+ const hint = () => message('Выбрано тем: ' + studied.size);
+ for (const key of russianClassTopics()) {
+  const button = russianButton(box, russianTopics[key].name, () => {
+   if (studied.has(key)) studied.delete(key);
+   else studied.add(key);
+   saveRussianPreference('bunny-russian-studied-' + grade, JSON.stringify([...studied]));
+   button.setAttribute('aria-pressed', String(studied.has(key)));
+   hint();
+  });
+  button.setAttribute('aria-pressed', String(studied.has(key)));
+ }
+ russianButton(box, 'Готово', openRussianTopics).className = 'wide';
+ hint();
+}
+
 function russianCountControls(){const area=$('russian-menu');const label=document.createElement('p');label.className='hint';label.textContent='Количество вопросов';area.append(label);const lengths=document.createElement('div');lengths.className='russian-options';for(const count of [10,50,100]){const b=russianButton(lengths,count+' вопросов',()=>{russianQuestionCount=count;saveRussianPreference('bunny-russian-count',count);openRussianTopics()});b.setAttribute('aria-pressed',String(count===russianQuestionCount))}area.append(lengths);
  if(russianClass===1){const label=document.createElement('label');label.className='russian-grade-option';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=russianShowGrade;toggle.onchange=()=>{russianShowGrade=toggle.checked;saveRussianPreference('bunny-russian-grade-1',toggle.checked)};label.append(toggle,document.createTextNode(' Показывать числовую оценку'));area.append(label)}}
 function openRussianTopics(){const keys=russianClassTopics(),box=russianScreen('📚 '+russianClass+' класс','Выбери тренировку');phase='russian-topics';
- russianButton(box,'По темам',openRussianGroups);russianButton(box,'Смешанная тренировка',()=>beginRussianMixed(false));const weak=keys.filter(k=>russianMistakes[k]>0);const review=russianButton(box,'Работа над ошибками'+(weak.length?' · '+weak.length+' тем':''),()=>beginRussianMixed(true));review.disabled=!weak.length;russianButton(box,'← Выбрать класс',openRussianClasses);
+ russianButton(box,'По темам',openRussianGroups);russianButton(box,'Смешанная тренировка',()=>beginRussianMixed(false));const weak=russianMixedTopics(true);const review=russianButton(box,'Работа над ошибками'+(weak.length?' · '+weak.length+' тем':''),()=>beginRussianMixed(true));review.disabled=!weak.length;russianButton(box,'← Выбрать класс',openRussianClasses);
+ if(russianClass===4)russianButton(box,'Повторение 3-го класса',()=>beginRussianMixed(false,true)).className='wide';
+ if(russianStudiedByClass[russianClass])russianButton(box,'Пройденные темы · '+russianMixedTopics().length,openRussianStudiedTopics).className='wide';
  russianCountControls();message(keys.length+' тем · '+keys.reduce((n,k)=>n+russianTopics[k].items.length,0)+' заданий. '+(weak.length?'Есть правила для повторения.':'Ошибки пока не записаны.'))}
 function openRussianGroups(){const box=russianScreen('📚 '+russianClass+' класс','Выбери направление');phase='russian-topics';const groups=[...new Set(russianClassTopics().map(k=>russianTopics[k].group))];for(const group of groups)russianButton(box,group,()=>openRussianGroup(group));russianButton(box,'← Виды тренировок',openRussianTopics)}
 function openRussianGroup(group){const box=russianScreen(group,russianClass+' класс · '+russianQuestionCount+' вопросов');phase='russian-topics';for(const key of russianClassTopics().filter(k=>russianTopics[k].group===group))russianButton(box,russianTopics[key].name+' · '+russianTopics[key].items.length,()=>beginRussian(key));russianButton(box,'← Направления',openRussianGroups);message('В длинном раунде небольшой набор повторяется только после прохождения всех примеров темы.')}
 function launchRussianRound(info,deck,mode,topic){russianRoundInfo=info;russianDeck=deck;russianMode=mode;russianTopic=topic;russianCorrected=0;russianRoundStats={};begin('russian')}
 function beginRussian(topic){const selected=russianTopics[topic];if(!selected||(selected.grade||1)!==russianClass)return;launchRussianRound(selected,pickRussianDeck(topic,selected.items,russianQuestionCount).map(item=>[item[0],item[1],item[2],item[3]||'',topic]),'topic',topic)}
-function beginRussianMixed(review=false){const keys=russianClassTopics().filter(k=>!review||russianMistakes[k]>0);if(!keys.length)return;const order=[];let last=null;while(order.length<russianQuestionCount){let cycle=shuffledRussian(keys);if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];for(const k of cycle){if(order.length===russianQuestionCount)break;order.push(k);last=k}}
- const queues={};for(const k of keys){const count=order.filter(x=>x===k).length;if(count)queues[k]=pickRussianDeck(k,russianTopics[k].items,count).map(item=>[item[0],item[1],item[2],item[3]||'',k])}const deck=order.map(k=>queues[k].shift());launchRussianRound({name:review?'Работа над ошибками':'Смешанная тренировка',rule:'Повтори темы, которые вызвали трудности.'},deck,review?'mistakes':'mixed',null)}
+function beginRussianMixed(review=false,repeatThird=false){const keys=repeatThird?Object.keys(russianTopics).filter(k=>russianTopics[k].grade===3):russianMixedTopics(review);if(!keys.length){if(!review&&russianStudiedByClass[russianClass])openRussianStudiedTopics();return;}const order=[];let last=null;while(order.length<russianQuestionCount){let cycle=shuffledRussian(keys);if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];for(const k of cycle){if(order.length===russianQuestionCount)break;order.push(k);last=k}}
+ const queues={};for(const k of keys){const count=order.filter(x=>x===k).length;if(count)queues[k]=pickRussianDeck(k,russianTopics[k].items,count).map(item=>[item[0],item[1],item[2],item[3]||'',k])}const deck=order.map(k=>queues[k].shift());launchRussianRound({name:repeatThird?'Повторение 3-го класса':review?'Работа над ошибками':'Смешанная тренировка',rule:'Повтори темы, которые вызвали трудности.'},deck,repeatThird?'repeat-third':review?'mistakes':'mixed',null)}
 function activeRussianTopic(){return russianTopics[russianDeck[round]?.[4]||russianTopic]||russianRoundInfo}
 function recordRussianAnswer(correct){const key=russianDeck[round][4]||russianTopic;const stat=russianRoundStats[key]||(russianRoundStats[key]={total:0,correct:0,corrected:0});if(attempt===1){stat.total++;if(correct)stat.correct++;else russianMistakes[key]=(russianMistakes[key]||0)+1;if(correct&&russianMode==='mistakes')russianMistakes[key]=Math.max(0,(russianMistakes[key]||0)-1);saveRussianPreference('bunny-russian-mistakes',JSON.stringify(russianMistakes))}else if(correct)stat.corrected++}
 function russianTask(){cancelTask();mood();attempt=1;stats();panels();$('heading').textContent=russianRoundInfo.name;renderRussianQuestion()}
-function renderRussianQuestion(){setVisible('russian-detail',false);phase='answer';$('hint').textContent=russianClass+' класс · '+(russianMode==='topic'?'':activeRussianTopic().name+' · ')+(attempt===1?'Выбери правильный ответ':'Вторая попытка, без балла');const [question,correct,wrong]=russianDeck[round];answer=correct;message(question);$('message').classList.toggle('russian-question',question.length>100||question.includes('\n'));$('answers').replaceChildren();for(const choice of shuffledRussian([correct,wrong]))russianButton($('answers'),choice,()=>choose(choice));setVisible('answers',true);setAudioLevel()}
+function renderRussianQuestion(){setVisible('russian-detail',false);phase='answer';$('hint').textContent=(russianMode==='repeat-third'?3:russianClass)+' класс · '+(russianMode==='topic'?'':activeRussianTopic().name+' · ')+(attempt===1?'Выбери правильный ответ':'Вторая попытка, без балла');const [question,correct,wrong]=russianDeck[round];answer=correct;message(question);$('message').classList.toggle('russian-question',question.length>100||question.includes('\n'));$('answers').replaceChildren();for(const choice of shuffledRussian([correct,wrong]))russianButton($('answers'),choice,()=>choose(choice));setVisible('answers',true);setAudioLevel()}
 function russianChoose(value){if(phase!=='answer')return;phase='feedback';setVisible('answers',false);const [question,correct,,explanation]=russianDeck[round],full=question.includes('___')?question.replace('___',correct).replace(/ …$/,''):question.replace('…',correct);
  recordRussianAnswer(value===correct);if(value===correct){if(attempt===1)score++;else russianCorrected++;$('score').textContent='⭐ '+score;mood('happy');sound('coin');message(attempt===1?'Верно! +1 балл':'Верно! Ты исправил ошибку.');wait(1200,nextTask)}
  else{mood('sad');sound('wrong');message(full);$('hint').textContent='Разберём правило';$('russian-detail').className='hint russian-rule';$('russian-detail').textContent=(explanation?explanation+'\n\n':'')+activeRussianTopic().rule;setVisible('russian-detail',true);if(attempt===1){attempt=2;russianAwaitContinue(()=>{mood();sound('retry');renderRussianQuestion()})}else russianAwaitContinue(nextTask)}
 }
-function russianFinish(){cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';$('score').textContent='⭐ '+score;const numeric=russianClass>1||russianShowGrade;$('heading').textContent=numeric?'Оценка: '+russianGrade(score,russianDeck.length):'🐰 Ты потренировался!';$('hint').textContent=russianRoundInfo.name;message(numeric?'Верно с первой попытки: '+score+' из '+russianDeck.length:(score?'⭐'.repeat(Math.round(score/russianDeck.length*10))+' '+score+' из '+russianDeck.length:'Давай потренируемся ещё!'));$('russian-detail').className='hint russian-rule';$('russian-detail').textContent='Верно сразу: '+score+' из '+russianDeck.length+'. Исправлено после подсказки: '+russianCorrected+'. '+(score/russianDeck.length>=.7?'Хорошая работа!':(russianMode==='topic'?'Давай повторим правило: '+russianRoundInfo.rule:'Посмотри, какие темы стоит повторить ниже.'));setVisible('russian-detail',true);const topicBack=document.createElement('div');topicBack.dataset.russianBack='true';for(const [key,stat] of Object.entries(russianRoundStats)){$('russian-detail').textContent+='\n'+russianTopics[key].name+': '+stat.correct+' из '+stat.total+'; исправлено: '+stat.corrected;if(stat.correct<stat.total){const train=russianButton(topicBack,'Повторить: '+russianTopics[key].name,()=>beginRussian(key));train.className='wide'}}const back=russianButton(topicBack,'← К тренировкам',openRussianTopics);back.className='wide';$('finished').querySelector('[data-russian-back]')?.remove();$('finished').append(topicBack);victorySound()}
+function russianFinish(){cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';$('score').textContent='⭐ '+score;const numeric=russianClass>1||russianShowGrade;$('heading').textContent=numeric?'Оценка: '+russianGrade(score,russianDeck.length):'🐰 Ты потренировался!';$('hint').textContent=russianRoundInfo.name;message(numeric?'Верно с первой попытки: '+score+' из '+russianDeck.length:(score?'⭐'.repeat(Math.round(score/russianDeck.length*10))+' '+score+' из '+russianDeck.length:'Давай потренируемся ещё!'));$('russian-detail').className='hint russian-rule';$('russian-detail').textContent='Верно сразу: '+score+' из '+russianDeck.length+'. Исправлено после подсказки: '+russianCorrected+'. '+(score/russianDeck.length>=.7?'Хорошая работа!':(russianMode==='topic'?'Давай повторим правило: '+russianRoundInfo.rule:'Посмотри, какие темы стоит повторить ниже.'));setVisible('russian-detail',true);const topicBack=document.createElement('div');topicBack.dataset.russianBack='true';for(const [key,stat] of Object.entries(russianRoundStats)){$('russian-detail').textContent+='\n'+russianTopics[key].name+': '+stat.correct+' из '+stat.total+'; исправлено: '+stat.corrected;if(stat.correct<stat.total&&russianMode!=='repeat-third'){const train=russianButton(topicBack,'Повторить: '+russianTopics[key].name,()=>beginRussian(key));train.className='wide'}}const back=russianButton(topicBack,'← К тренировкам',openRussianTopics);back.className='wide';$('finished').querySelector('[data-russian-back]')?.remove();$('finished').append(topicBack);victorySound()}
 // Remove the Russian-only result navigation when another screen or mathematics starts.
 const baseRussianPanels=panels;
 panels=function(){baseRussianPanels();$('message').classList.toggle('russian-question',false);if(game!=='russian'||!['settings','finished'].includes(phase))$('finished').querySelector('[data-russian-back]')?.remove()};
@@ -2637,4 +2675,4 @@ function pickRussianDeck(topic,items,count=10){
  const updated={seen:[...seen],last:recent};russianHistory.set(topic,updated);saveRussianPreference('bunny-russian-history-'+topic,JSON.stringify(updated));return deck;
 }
 
-$('replay').onclick=()=>game!=='russian'?begin(game):russianMode==='topic'?beginRussian(russianTopic):(russianMode==='mistakes'&&!russianClassTopics().some(k=>russianMistakes[k]>0)?openRussianTopics():beginRussianMixed(russianMode==='mistakes'));
+$('replay').onclick=()=>game!=='russian'?begin(game):russianMode==='topic'?beginRussian(russianTopic):(russianMode==='mistakes'&&!russianMixedTopics(true).length?openRussianTopics():beginRussianMixed(russianMode==='mistakes',russianMode==='repeat-third'));
