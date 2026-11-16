@@ -149,6 +149,32 @@
       "sha256": "28089a4e8c7dc8df7d3db6b7b6045a3e1b23bc4c7702b84dad97218e0ccb6dea",
       "validation": "PCM readback OK; non-silent; no digital clipping; music-state loop verified",
       "coreaudio_decode": "OK"
+    },
+    {
+      "file": "ending.wav",
+      "duration_seconds": 12.81229,
+      "bytes": 1130156,
+      "channels": 1,
+      "sample_rate": 44100,
+      "pcm_bits": 16,
+      "peak_pcm": 15581,
+      "clipped_samples": 0,
+      "sha256": "a4fd25175b29b9b483c5a0160418e2009f261d3911b36d6a504174e94d6cee63",
+      "nsf_track": 10,
+      "loop_start_sample": 283246,
+      "loop_end_sample_exclusive": 565022,
+      "loop_start_seconds": 6.42281179138322,
+      "loop_end_seconds": 12.812290249433106,
+      "loop_length_seconds": 6.3894784580498865,
+      "state_repeat_frames": [
+        385,
+        769,
+        1153
+      ],
+      "state_repeat_verified": true,
+      "boundary_alignment_samples": 3,
+      "loop_boundary_jump_pcm": 12,
+      "validation": "PCM readback OK; non-silent; no digital clipping; music-state loop verified"
     }
   ]
 }

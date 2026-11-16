@@ -207,13 +207,17 @@ function openPlayerAlbum() {
   if (!activePlayer) { openPlayerPicker(); return; }
   selectedSticker = null;
   renderPlayerAlbum();
+  startMusic();
   flushPlayerUpdates();
 }
 
 function renderPlayerAlbum() {
   const focused = document.activeElement;
   const restoreFocus = focused?.id === 'album-page' || focused?.dataset?.sticker;
-  const panel = playerScreen('📒 Мой альбом', activePlayer.avatar + ' ' + activePlayer.name, 'player-album');
+  const panel = phase === 'player-album' ? $('player-panel')
+    : playerScreen('📒 Мой альбом', activePlayer.avatar + ' ' + activePlayer.name, 'player-album');
+  panel.replaceChildren();
+  message('');
   const progress = playerElement('p', 'Раундов завершено: ' + activePlayer.rounds + ' · Верных ответов: ' + activePlayer.correct, panel);
   progress.className = 'album-progress';
   const placed = Object.entries(activePlayer.stickers).filter(([, point]) => point !== null);
@@ -228,7 +232,9 @@ function renderPlayerAlbum() {
     selectedSticker = null;
     activePlayer.stickers[sticker] = {x, y};
     renderPlayerAlbum();
-    message('Наклейка приклеена!');
+    const complete = Object.keys(albumStickers).every(key => activePlayer.stickers[key]);
+    message(complete ? 'Все наклейки собраны!' : 'Наклейка приклеена!');
+    albumRewardSound(complete ? 'albumClear' : 'bonus');
     enqueuePlayerUpdate({kind: 'sticker', sticker, x, y});
     $('album-page').focus();
   });
@@ -297,7 +303,7 @@ $('open-settings').onclick = () => {
   playerBaseOpenSettings();
   if (playerPanelVisible) settingsSnapshot.visible.push(['player-panel', true]);
 };
-$('choose-player').onclick = openPlayerPicker;
+$('choose-player').onclick = () => { openPlayerPicker(); sound('playerIntro'); };
 $('open-album').onclick = openPlayerAlbum;
 $('round-album').onclick = openPlayerAlbum;
 window.addEventListener('online', flushPlayerUpdates);
