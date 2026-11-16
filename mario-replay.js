@@ -173,12 +173,29 @@
     else schedulePlayback();
   }
 
+  function setSetupOpen(open) {
+    setup.hidden=!open;
+    toggle.setAttribute('aria-expanded',String(open));
+  }
+
+  function applyProgress() {
+    if (!verified) return;
+    if (currentCompleted===0) {
+      if (frame!==verified.start || target!==verified.start || frameRequest) resetSession();
+      return;
+    }
+    if (currentTotal<=0) return;
+    target=currentCompleted>=currentTotal ? verified.end
+      : verified.start+Math.floor((verified.flag-1-verified.start)*currentCompleted/currentTotal);
+    updateCaption();
+    schedulePlayback();
+  }
+
   toggle.onclick=()=>{
     if (chosen) {
       chosen=false;
       toggle.textContent='📺 Настоящий уровень';
-      setup.hidden=true;
-      toggle.setAttribute('aria-expanded','false');
+      setSetupOpen(false);
       updateVisibility();
       return;
     }
@@ -188,19 +205,48 @@
       updateVisibility();
       return;
     }
-    setup.hidden=!setup.hidden;
-    toggle.setAttribute('aria-expanded',String(!setup.hidden));
+    if (!setup.hidden || location.protocol==='file:') {
+      setSetupOpen(setup.hidden);
+      return;
+    }
+    return loadHomeRom();
   };
 
-  romInput.onchange=async()=>{
-    const file=romInput.files?.[0];
-    romInput.value='';
-    if (!file) return;
+  async function readHomeRom() {
+    const abort=new AbortController();
+    const timeout=setTimeout(()=>abort.abort(),5000);
+    try {
+      const response=await fetch(assets+'smb-world.nes',{signal:abort.signal,redirect:'error'});
+      if (!response.ok) throw Error();
+      const buffer=await response.arrayBuffer();
+      if (buffer.byteLength!==40976) throw Error();
+      return buffer;
+    } catch {
+      throw Error('Файл на домашнем сервере недоступен. Выберите файл на этом устройстве.');
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function loadHomeRom() {
+    toggle.disabled=true;
+    toggle.textContent='Загружаем уровень…';
+    try {
+      await loadRom(readHomeRom);
+    } finally {
+      toggle.disabled=false;
+      if (!chosen) {
+        toggle.textContent='📺 Настоящий уровень';
+        setSetupOpen(true);
+      }
+    }
+  }
+
+  async function loadRom(readRom) {
     const version=++loadVersion;
     status.textContent='Проверяем маршрут от старта до флага…';
     try {
-      if (file.size>131072) throw Error('Выберите файл Super Mario Bros. для NES.');
-      const rom=new Uint8Array(await file.arrayBuffer());
+      const rom=new Uint8Array(await readRom());
       validateRomHeader(rom);
       const engine=await loadReplayEngine();
       const buttons=route.flatMap(([length,mask])=>Array(length).fill(mask));
@@ -208,15 +254,25 @@
       if (!result||version!==loadVersion) return;
       chosen=true;
       verified=result;
-      currentCompleted=currentTotal=0;
       resetSession();
+      applyProgress();
+      status.textContent='';
       toggle.textContent='← К рисунку';
-      setup.hidden=true;
-      toggle.setAttribute('aria-expanded','false');
+      setSetupOpen(false);
       updateVisibility();
     } catch (error) {
       if (version===loadVersion) status.textContent=error.message||'Не удалось запустить уровень.';
     }
+  }
+
+  romInput.onchange=()=>{
+    const file=romInput.files?.[0];
+    romInput.value='';
+    if (!file) return;
+    return loadRom(()=>{
+      if (file.size>131072) throw Error('Выберите файл Super Mario Bros. для NES.');
+      return file.arrayBuffer();
+    });
   };
 
   document.addEventListener('visibilitychange',()=>{
@@ -232,16 +288,7 @@
     setProgress(completed,total) {
       currentCompleted=completed;
       currentTotal=total;
-      if(!verified)return;
-      if(completed===0){
-        if(frame!==verified.start || target!==verified.start || frameRequest)resetSession();
-        return;
-      }
-      if(total<=0)return;
-      target=completed>=total ? verified.end
-        : verified.start+Math.floor((verified.flag-1-verified.start)*completed/total);
-      updateCaption();
-      schedulePlayback();
+      applyProgress();
     },
   };
 })();
