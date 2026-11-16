@@ -14,7 +14,41 @@ run("choose('xxx')");tick(1800);tick(1500);assert.equal(run('attempt'),2);run('o
 for(let i=1;i<50;i++){tick(1500);run('choose(answer)');tick(1000);if(i<49&&((i+1)%10===0))tick(950)}
 assert.equal(run('phase'),'finished');assert.equal(run('score'),49);assert.equal(run('round'),50);run('openSettings();settingsBack()');assert.equal(run('phase'),'finished');assert.equal(run('round'),50);
 run("begin('memory')");for(let i=0;i<50;i++){tick(1500);run('choose(answer);choose(answer)');tick(1000);if(i<49&&((i+1)%10===0))tick(950)}assert.equal(run('score'),50);assert.equal(run('phase'),'finished');
-for(const mode of ['compare','pattern','add','multiply','divide']){run(`begin('${mode}')`);for(let i=0;i<10;i++){run('choose(answer)');tick(1000)}assert.equal(run('score'),10);assert.equal(run('phase'),'finished')}
+run('home()');
+run("$('game-menu').children[3].onclick()");
+assert.equal(run('phase'),'math-length');
+assert.equal(run("$('heading').textContent"),'➕ Сложение');
+assert.equal(run("$('math-lengths').children.map(button=>button.textContent).join(', ')"),'10 заданий, 50 заданий, 100 заданий');
+run("openSettings();settingsBack();$('math-lengths').children[2].onclick()");
+assert.equal(run('roundQuestionCount()'),100);
+assert.equal(run("$('counter').textContent"),'Задание 1 / 100');
+for(const mode of ['compare','pattern','add','multiply','divide']){
+ for(const count of [10,50,100]){
+  run(`begin('${mode}',${count})`);
+  for(let i=0;i<count;i++){
+   run('choose(answer);choose(answer)');
+   tick(1000);
+   if(i<count-1&&(i+1)%10===0)tick(950);
+  }
+  assert.equal(run('score'),count);
+  assert.equal(run('phase'),'finished');
+  assert.match(run("$('message').textContent"),new RegExp(count+' из '+count));
+  run("$('replay').onclick()");
+  assert.equal(run('roundQuestionCount()'),count);
+ }
+}
+for(const [roundIndex,duration] of [[0,1500],[10,1250],[20,1000],[30,750],[40,500],[49,500]]){
+ run(`begin('memory');round=${roundIndex};showMemory()`);
+ const original=run('sequence');
+ tick(duration-1);assert.equal(run('phase'),'show');
+ tick(1);assert.equal(run('phase'),'answer');
+ run("choose('wrong')");tick(1800);
+ assert.equal(run('sequence'),original);
+ tick(duration-1);assert.equal(run('phase'),'show');
+ tick(1);assert.equal(run('phase'),'answer');
+}
+run('home()');
+console.log('PASS math: 10/50/100 per mode and replay, progressive 1500–500 ms display and same duration on retry.');
 // Russian content, retry accounting and grading boundaries.
 for(const topic of ['capital','zhi','cha','chu']){assert.equal(run(`russianTopics['${topic}'].items.length`),30);run(`russianClass=1;beginRussian('${topic}')`);for(let i=0;i<10;i++){run('choose(answer);choose(answer)');tick(1200)}assert.equal(run('score'),10);assert.equal(run('russianCorrected'),0);assert.equal(run('phase'),'finished');assert.match(run("$('heading').textContent"),/потренировался/)}
 for(let correct=0;correct<=10;correct++){run("russianShowGrade=true;beginRussian('zhi')");for(let i=0;i<10;i++){if(i<correct){run('choose(answer)');tick(1200)}else{run("choose('wrong')");tick(60000);assert.equal(run('phase'),'feedback');assert.equal(run('attempt'),2);run("$('answers').children[0].onclick()");run('choose(answer)');tick(1200)}}assert.equal(run('score'),correct);assert.equal(run('russianCorrected'),10-correct);assert.equal(run("$('heading').textContent"),'Оценка: '+(correct>=9?5:correct>=7?4:correct>=5?3:2))}

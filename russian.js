@@ -2691,4 +2691,4 @@ function pickRussianDeck(topic,items,count=10){
  const updated={seen:[...seen],last:recent};russianHistory.set(topic,updated);saveRussianPreference('bunny-russian-history-'+topic,JSON.stringify(updated));return deck;
 }
 
-$('replay').onclick=()=>game!=='russian'?begin(game):russianMode==='topic'?beginRussian(russianTopic):(russianMode==='mistakes'&&!russianMixedTopics(true).length?openRussianTopics():beginRussianMixed(russianMode==='mistakes',russianMode==='repeat-third'));
+$('replay').onclick=()=>game!=='russian'?begin(game,mathRoundLength):russianMode==='topic'?beginRussian(russianTopic):(russianMode==='mistakes'&&!russianMixedTopics(true).length?openRussianTopics():beginRussianMixed(russianMode==='mistakes',russianMode==='repeat-third'));

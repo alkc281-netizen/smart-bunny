@@ -136,3 +136,11 @@ h1{font-size:26px}
 .album-sticker[data-kind=rocket] { background: #d8f4e0; }
 .album-tray { margin-top: 10px; }
 .album-tray button span { display: block; margin-top: 3px; font-size: 12px; }
+
+.math-lengths {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.math-lengths button, #math-back { min-height: 44px; }

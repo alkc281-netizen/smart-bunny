@@ -290,7 +290,7 @@ finish = function () {
   setVisible('round-album', Boolean(activePlayer));
   $('round-album').textContent = '📒 Мой альбом';
   if (!activePlayer) return;
-  const total = game === 'russian' ? russianDeck.length : game === 'memory' ? 50 : 10;
+  const total = roundQuestionCount();
   const topics = game === 'russian' ? Object.keys(russianRoundStats) : [game];
   enqueuePlayerUpdate({kind: 'round', id: playerRoundId(), score, total, topics,
     review: game === 'russian' && russianMode === 'mistakes'});
