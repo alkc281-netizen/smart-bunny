@@ -19,7 +19,9 @@ PREFERENCES = {
     "bunny-russian-class", "bunny-russian-count", "bunny-russian-grade-1",
     "bunny-russian-mistakes", "bunny-russian-studied-2", "bunny-russian-studied-4",
 }
-REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10}
+REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10,
+                 "chip": 7, "dale": 7, "darkwing": 12}
+MISSION_REWARDS = ("koopa", "mushroom", "mario", "chip", "dale", "darkwing")
 DAILY_MISSIONS = ("koopa", "mushroom", "mario")
 
 
@@ -60,7 +62,7 @@ def apply_round(profile, data):
             or not all(isinstance(topic, str) and topic.isascii() and topic.isalnum()
                        and 1 <= len(topic) <= 40 for topic in topics)
             or type(review) is not bool or type(corrected) is not int or not 0 <= corrected <= total - score
-            or (mission is not None and (not isinstance(mission, str) or mission not in DAILY_MISSIONS or total != 10 or review))
+            or (mission is not None and (not isinstance(mission, str) or mission not in MISSION_REWARDS or total != 10 or review))
             or (daily is not None and (mission is None or not isinstance(daily, str) or len(daily) != 10))):
         raise ValueError("Некорректный результат тренировки.")
     profile["rounds"] += 1
