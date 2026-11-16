@@ -42,7 +42,7 @@ try {
 } catch {}
 
 async function playerRequest(path, data) {
-  const response = await fetch('/api/players' + path, {
+  const response = await fetch('/api/players' + path + '?rewards=characters', {
     cache: 'no-store',
     signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(8000) : undefined,
     ...(data ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)} : {}),

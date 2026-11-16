@@ -37,10 +37,17 @@ def reward_defaults(profile):
     return profile
 
 
-def player_view(player_id, name, avatar, profile):
+def player_view(player_id, name, avatar, profile, characters=False):
     day, mission = daily_mission()
-    return dict(id=player_id, name=name, avatar=avatar, **profile,
-                rewards=dict(prices=REWARD_PRICES, day=day, mission=mission))
+    prices = dict(REWARD_PRICES)
+    visible = dict(profile)
+    if not characters:
+        # Older open tabs know only the original collections.
+        new_stickers = {"chip", "dale", "darkwing"}
+        prices = {key: cost for key, cost in prices.items() if key not in new_stickers}
+        visible["stickers"] = {key: value for key, value in profile["stickers"].items() if key not in new_stickers}
+    return dict(id=player_id, name=name, avatar=avatar, **visible,
+                rewards=dict(prices=prices, day=day, mission=mission))
 
 
 def initial_profile():
@@ -133,6 +140,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def handle_api(self):
+        self.character_rewards = urlsplit(self.path).query == "rewards=characters"
         host = self.headers.get("Host", "")
         origin = self.headers.get("Origin")
         if host not in self.allowed_hosts or (origin and origin != "http://" + host):
@@ -174,7 +182,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             player_id = uuid4().hex
             profile = initial_profile()
             db.execute("INSERT INTO players VALUES (?, ?, ?, ?)", (player_id, name, avatar, json.dumps(profile)))
-            return 201, player_view(player_id, name, avatar, profile)
+            return 201, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False))
 
         parts = path.split("/")
         if len(parts) != 4 or parts[1:3] != ["api", "players"]:
@@ -190,7 +198,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if data is not None:
             self.update(db, player_id, profile, data)
             db.execute("UPDATE players SET progress=? WHERE id=?", (json.dumps(profile), player_id))
-        return 200, player_view(player_id, name, avatar, profile)
+        return 200, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False))
 
     @staticmethod
     def update(db, player_id, profile, data):
