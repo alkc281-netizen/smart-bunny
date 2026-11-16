@@ -80,3 +80,59 @@ h1{font-size:26px}
   }
   .menu-icon { font-size: 1.42em; line-height: 1; vertical-align: -.1em; }
 }
+
+.player-nav { flex-wrap: wrap; }
+.player-nav button { min-width: min(120px, 100%); overflow-wrap: anywhere; }
+.player-choices, .player-create, .album-tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.player-choices button, .album-tray button, .player-create button { padding-inline: 12px; min-height: 44px; }
+.player-choices button[aria-pressed=true], .album-tray button[aria-pressed=true] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.player-create { margin-top: 14px; align-items: end; }
+.player-create label { display: grid; gap: 4px; text-align: left; }
+.player-create input, .player-create select {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 6px;
+  font: inherit;
+  color: var(--text);
+  background: var(--button);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+}
+.album-progress { margin: 0 0 8px; }
+#album-page {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: clamp(240px, 42vw, 390px);
+  border: 2px solid var(--edge);
+  background: repeating-linear-gradient(var(--panel) 0 27px, var(--shell) 28px 29px);
+  overflow: hidden;
+}
+#album-page.album-ready { outline: 3px dashed var(--accent); outline-offset: 2px; }
+.album-sticker {
+  position: absolute;
+  left: clamp(49px, var(--x), calc(100% - 49px));
+  top: clamp(49px, var(--y), calc(100% - 49px));
+  transform: translate(-50%, -50%) rotate(-6deg);
+  display: grid;
+  place-content: center;
+  width: 87px;
+  height: 87px;
+  border: 3px solid #fff;
+  border-radius: 23px;
+  background: #fbe1ee;
+  color: #42263b;
+  box-shadow: 0 2px 5px #0003;
+  text-align: center;
+  font: 600 12px/1.15 system-ui, sans-serif;
+  pointer-events: none;
+}
+.album-sticker span:first-child { font-size: 32px; }
+.album-sticker[data-kind=books] { background: #e7ebff; }
+.album-sticker[data-kind=detective] { background: #ffeec2; }
+.album-sticker[data-kind=rocket] { background: #d8f4e0; }
+.album-tray { margin-top: 10px; }
+.album-tray button span { display: block; margin-top: 3px; font-size: 12px; }

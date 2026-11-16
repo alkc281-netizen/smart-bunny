@@ -2581,34 +2581,49 @@ const russianExtraItems={
 for(const [topic,items] of Object.entries(russianExtraItems))russianTopics[topic].items.push(...items);
 Object.assign(russianTopics,russianCurriculum);
 for(const [key,t] of Object.entries(russianTopics))if(!t.group)t.group=['capital'].includes(key)?'Звуки и письмо':['prefix'].includes(key)?'Устройство языка':'Правописание';
-function readRussianPreference(key,fallback){try{return localStorage.getItem(key)??fallback}catch{return fallback}}
-function saveRussianPreference(key,value){try{localStorage.setItem(key,String(value))}catch{/* Games remain available when storage is blocked. */}}
-let russianClass=Number(readRussianPreference('bunny-russian-class','1'));
-if(![1,2,3,4].includes(russianClass))russianClass=1;
-let russianShowGrade=readRussianPreference('bunny-russian-grade-1','false')==='true';
-let russianQuestionCount=Number(readRussianPreference('bunny-russian-count','10'));
-if(![10,50,100].includes(russianQuestionCount))russianQuestionCount=10;
+function readRussianPreference(key,fallback){
+ if(typeof readPlayerPreference==='function')return readPlayerPreference(key,fallback);
+ try{return localStorage.getItem(key)??fallback}catch{return fallback}
+}
+function saveRussianPreference(key,value){
+ if(typeof savePlayerPreference==='function'){savePlayerPreference(key,String(value));return}
+ try{localStorage.setItem(key,String(value))}catch{/* Games remain available when storage is blocked. */}
+}
+let russianClass,russianShowGrade,russianQuestionCount;
 let russianTopic=null,russianDeck=[],russianCorrected=0,russianMode='topic',russianRoundInfo=null;
-let russianRoundStats={};
-let russianMistakes={};
-try{const saved=JSON.parse(readRussianPreference('bunny-russian-mistakes','{}'));if(saved&&typeof saved==='object'&&!Array.isArray(saved))for(const [key,value] of Object.entries(saved))if(russianTopics[key]&&Number.isFinite(value)&&value>0)russianMistakes[key]=Math.min(1000,Math.floor(value))}catch{}
+let russianRoundStats={},russianMistakes={};
+const russianStudiedByClass = {};
+function loadRussianProgress(){
+ russianClass=Number(readRussianPreference('bunny-russian-class','1'));
+ if(![1,2,3,4].includes(russianClass))russianClass=1;
+ russianShowGrade=readRussianPreference('bunny-russian-grade-1','false')==='true';
+ russianQuestionCount=Number(readRussianPreference('bunny-russian-count','10'));
+ if(![10,50,100].includes(russianQuestionCount))russianQuestionCount=10;
+ russianMistakes={};
+ try {
+  const saved=JSON.parse(readRussianPreference('bunny-russian-mistakes','{}'));
+  if(saved&&typeof saved==='object'&&!Array.isArray(saved)) {
+   for(const [key,value] of Object.entries(saved)) {
+    if(Object.hasOwn(russianTopics,key)&&Number.isFinite(value)&&value>0)russianMistakes[key]=Math.min(1000,Math.floor(value));
+   }
+  }
+ } catch {}
+ for (const grade of [2, 4]) {
+  russianStudiedByClass[grade] = new Set();
+  try {
+   const saved = JSON.parse(readRussianPreference('bunny-russian-studied-' + grade, '[]'));
+   if (Array.isArray(saved)) russianStudiedByClass[grade] = new Set(saved.filter(key => russianTopics[key]?.grade === grade));
+  } catch {}
+ }
+ russianHistory.clear();
+}
+
 function shuffledRussian(items){const result=[...items];for(let i=result.length-1;i>0;i--){const j=rand(0,i);[result[i],result[j]]=[result[j],result[i]]}return result}
 function russianGrade(correct,total=10){const percent=correct/total*100;return percent>=90?5:percent>=70?4:percent>=50?3:2}
 function russianButton(parent,text,action){const b=document.createElement('button');b.textContent=text;b.onclick=action;parent.append(b);return b}
 function russianScreen(title,hint){home();setVisible('game-menu',false);setVisible('russian-menu',true);$('heading').textContent=title;$('hint').textContent=hint;$('russian-menu').replaceChildren();message('');const box=document.createElement('div');box.className='russian-options';$('russian-menu').append(box);return box}
 function openRussianClasses(){const box=russianScreen('📚 Русский язык','Выбери класс');phase='russian-classes';for(let c=1;c<=4;c++){const b=russianButton(box,c+' класс',()=>{russianClass=c;saveRussianPreference('bunny-russian-class',c);openRussianTopics()});b.setAttribute('aria-pressed',String(c===russianClass))}message('Выбран: '+russianClass+' класс')}
 function russianClassTopics(){return Object.keys(russianTopics).filter(k=>(russianTopics[k].grade||1)===russianClass)}
-const russianStudiedByClass = {};
-for (const grade of [2, 4]) {
- russianStudiedByClass[grade] = new Set();
- try {
-  const saved = JSON.parse(readRussianPreference('bunny-russian-studied-' + grade, '[]'));
-  if (Array.isArray(saved)) {
-   russianStudiedByClass[grade] = new Set(saved.filter(key => russianTopics[key]?.grade === grade));
-  }
- } catch {}
-}
-
 function russianMixedTopics(review = false) {
  const studied = russianStudiedByClass[russianClass];
  return russianClassTopics().filter(key => (!studied || studied.has(key)) && (!review || russianMistakes[key] > 0));
@@ -2666,6 +2681,7 @@ function russianAwaitContinue(next){const deck=russianDeck,taskRound=round;let c
 
 // Track a cycle through the whole topic; never repeat the immediately previous round.
 const russianHistory=new Map();
+loadRussianProgress();
 function russianItemId(item){return JSON.stringify(item.slice(0,3))}
 function pickRussianDeck(topic,items,count=10){
  let history=russianHistory.get(topic);
