@@ -1,8 +1,23 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Умный зайчик</title><link rel="stylesheet" href="styles.css?v=mario-all-stars"></head><body>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Умный зайчик</title><link rel="stylesheet" href="styles.css?v=mario-course"></head><body>
 <main class="console" id="app">
  <div class="theme-bar"><button data-theme="original" class="selected">🌸 Оригинальный</button><button data-theme="modern">⚡ Современный</button><button data-theme="mario" id="mario-theme" hidden>🍄 Марио</button></div>
- <div class="rabbit-zone"><div class="rabbit" id="rabbit"><div class="ear left"></div><div class="ear right"></div><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="smile"></i></div></div><span class="mario-prop mario-mushroom" aria-hidden="true"></span><span class="mario-prop mario-koopa" aria-hidden="true"></span></div>
+ <div class="rabbit-zone" id="mario-stage">
+  <div class="mario-stage-tools">
+   <span class="mario-area" id="mario-area">Поляна</span>
+   <div class="mario-friends" role="group" aria-label="Персонажи Марио">
+    <button type="button" id="mario-mushroom" aria-label="Супергриб"><span></span></button>
+    <button type="button" id="mario-koopa" aria-label="Купа"><span></span></button>
+    <button type="button" id="mario-goomba" aria-label="Гумба"><span></span></button>
+   </div>
+  </div>
+  <div class="mario-track" id="mario-track">
+   <div class="rabbit" id="rabbit"><div class="ear left"></div><div class="ear right"></div><div class="head"><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="smile"></i></div><span class="mario-art" id="mario-art" aria-hidden="true"></span></div>
+   <span class="mario-flag" aria-hidden="true"></span>
+  </div>
+  <span class="mario-stars" aria-hidden="true">✦　✧　✦</span>
+  <span class="mario-secret" id="mario-secret" role="status"></span>
+ </div>
  <section class="display" aria-live="polite"><div class="stats" id="stats" hidden><span id="counter"></span><span id="score"></span></div><div class="progress" id="progress" hidden><div id="progress-fill"></div></div><h1 id="heading">🐰 Умный зайчик</h1><p class="hint" id="hint">Выбери игру!</p><div class="digits" id="digits" hidden></div><p class="message" id="message">Готов играть?</p><div class="game-grid" id="game-menu"></div><div id="math-menu" hidden><div class="math-lengths" id="math-lengths" role="group" aria-label="Количество заданий"></div><button type="button" id="math-back" class="wide">← К играм</button></div><div id="russian-menu" hidden></div><div id="player-panel" hidden></div><p id="russian-detail" class="hint" hidden></p><div class="answers" id="answers" hidden></div><div class="keypad" id="keypad" hidden></div><div id="finished" hidden><button id="replay" class="wide">🎮 Играть ещё</button><button id="round-album" class="wide" hidden>📒 Мой альбом</button></div>
  <div id="settings" class="settings" hidden><label><input type="checkbox" id="auto-music" checked> Автоматический выбор музыки</label><label>Мелодия<select id="song"></select></label><label>🎵 Музыка <output id="music-value">35%</output><input type="range" id="music-volume" min="0" max="100" value="35"></label><label>🔊 Эффекты <output id="fx-value">65%</output><input type="range" id="fx-volume" min="0" max="100" value="65"></label><label><input type="checkbox" id="enable-music" checked> Фоновая музыка</label><label><input type="checkbox" id="enable-victory" checked> Победная фанфара</label><button id="preview" class="wide">▶ Прослушать музыку</button><button id="test-victory" class="wide">🏆 Проверить фанфару</button><button id="settings-back" class="wide">← Назад</button></div>
  </section><nav class="toolbar player-nav" id="player-nav" aria-label="Профиль игрока" hidden><button id="choose-player">👤 Выбрать игрока</button><button id="open-album" hidden>📒 Мой альбом</button></nav><nav class="toolbar"><button id="home">⌂ Меню</button><button id="open-settings">🎵 Музыка</button><button id="mute">🔊 Вкл.</button></nav><p class="track-label" id="track-label">Готов к игре</p>
-</main><script src="app.js?v=mario-all-stars" defer></script><script src="russian-curriculum.js" defer></script><script src="russian.js?v=math-rounds" defer></script><script src="players.js?v=math-rounds" defer></script></body></html>
+</main><script src="app.js?v=mario-course" defer></script><script src="russian-curriculum.js" defer></script><script src="russian.js?v=math-rounds" defer></script><script src="players.js?v=math-rounds" defer></script></body></html>

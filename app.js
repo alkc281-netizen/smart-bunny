@@ -117,7 +117,7 @@ function stopEffects(includeVictory=false){
  setAudioLevel();
 }
 function victorySound(){stopMusic();stopEffects();if(![...players.values()].includes('win'))sound('win')}
-function home(){settingsSnapshot=null;cancelTask();stopMusic();stopEffects();game=null;phase='menu';mood();panels();setVisible('game-menu',true);setVisible('stats',false);setVisible('progress',false);$('heading').textContent='🐰 Умный зайчик';$('hint').textContent='Выбери игру!';message('Готов играть?');$('track-label').textContent='Готов к игре'}
+function home(){settingsSnapshot=null;cancelTask();updateMarioCourse(0,0);stopMusic();stopEffects();game=null;phase='menu';mood();panels();setVisible('game-menu',true);setVisible('stats',false);setVisible('progress',false);$('heading').textContent='🐰 Умный зайчик';$('hint').textContent='Выбери игру!';message('Готов играть?');$('track-label').textContent='Готов к игре'}
 function roundQuestionCount(){
  if(game==='memory')return memoryQuestionCount;
  if(game==='russian')return russianDeck.length;
@@ -142,7 +142,7 @@ function chooseMathLength(mode){
  }
 }
 function stats(){const total=roundQuestionCount();$('counter').textContent='Задание '+Math.min(round+1,total)+' / '+total;$('score').textContent='⭐ '+score;$('progress-fill').style.width=(round/total*100)+'%'}
-function begin(which,count=mathRoundLengths[0]){if(which!=='memory'&&which!=='russian')mathRoundLength=mathRoundLengths.includes(count)?count:mathRoundLengths[0];warmAudio();settingsSnapshot=null;cancelTask();stopEffects();game=which;round=0;score=0;phase='start';panels();setVisible('stats',true);setVisible('progress',true);$('heading').textContent=names[game];if(autoMusic)selectedMusic=gameMusic[game];$('song').value=String(selectedMusic);startMusic();newTask()}
+function begin(which,count=mathRoundLengths[0]){if(which!=='memory'&&which!=='russian')mathRoundLength=mathRoundLengths.includes(count)?count:mathRoundLengths[0];warmAudio();settingsSnapshot=null;cancelTask();stopEffects();game=which;round=0;score=0;updateMarioCourse(0,roundQuestionCount());phase='start';panels();setVisible('stats',true);setVisible('progress',true);$('heading').textContent=names[game];if(autoMusic)selectedMusic=gameMusic[game];$('song').value=String(selectedMusic);startMusic();newTask()}
 function newTask(){if(game==='russian'){russianTask();return}cancelTask();mood();attempt=1;entry='';stats();panels();setVisible('stats',true);setVisible('progress',true);if(game==='memory'){sequence=String(rand(0,9))+rand(0,9)+rand(0,9);answer=sequence;showMemory();return}
 let a,b,c,choices=[];if(game==='compare'){a=rand(1,99);b=rand(1,99);while(a===b)b=rand(1,99);answer=a>b?'>':'<';message(`${a} ? ${b}`);choices=['<','>','=']}
 if(game==='pattern'){a=rand(1,12);b=rand(2,9);c=a+3*b;message(`${a} · ${a+b} · ${a+2*b} · ?`)}
@@ -155,8 +155,8 @@ function memoryDisplayTime(){return Math.max(500,1500-Math.floor(round/10)*250)}
 function showMemory(){cancelTask();phase='show';panels();setVisible('digits',true);$('digits').textContent=sequence;$('hint').textContent=attempt===1?'Первая попытка':'Вторая попытка';message('Запомни три цифры!');setAudioLevel();wait(memoryDisplayTime(),()=>{phase='answer';entry='';setVisible('digits',false);setVisible('keypad',true);message('Введи цифры по порядку');setAudioLevel()})}
 function key(v){if(game!=='memory'||phase!=='answer')return;sound('tap');if(v==='⌫')entry=entry.slice(0,-1);else if(v==='✕')entry='';else if(entry.length<3)entry+=v;message('Ответ: '+entry.padEnd(3,'_'));if(entry.length===3)choose(entry)}
 function choose(value){if(game==='russian'){russianChoose(value);return}if(phase!=='answer')return;phase='feedback';setVisible('keypad',false);setVisible('answers',false);if(String(value)===String(answer)){if(attempt===1)score++;$('score').textContent='⭐ '+score;mood('happy');sound('coin');message(attempt===1?'🪙 Правильно! +1 балл':'🐰 Молодец! Правильно!');wait(1000,nextTask)}else if(game==='memory'&&attempt===1){attempt=2;mood('sad');sound('wrong');setVisible('digits',true);$('digits').textContent=sequence;message('Правильный порядок: '+sequence);wait(1800,()=>{mood();sound('retry');showMemory()})}else{mood('sad');sound('wrong');message('Правильный ответ: '+answer);wait(1200,nextTask)}}
-function nextTask(){round++;const total=roundQuestionCount();if(round>=total){finish();return}if(round%10===0){mood('happy');sound('bonus');message(`⭐ ${round} заданий пройдено!`);wait(950,newTask)}else newTask()}
-function finish(){if(game==='russian'){russianFinish();return}cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';$('score').textContent='⭐ '+score;$('heading').textContent='🏆 Победа!';$('hint').textContent=names[game];message(`⭐ Баллов: ${score} из ${roundQuestionCount()}`);victorySound()}
+function nextTask(){round++;const total=roundQuestionCount();if(round>=total){finish();return}updateMarioCourse(round,total);if(round%10===0){mood('happy');sound('bonus');message(`⭐ ${round} заданий пройдено!`);wait(950,newTask)}else newTask()}
+function finish(){const total=roundQuestionCount();updateMarioCourse(total,total);if(game==='russian'){russianFinish();return}cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';$('score').textContent='⭐ '+score;$('heading').textContent='🏆 Победа!';$('hint').textContent=names[game];message(`⭐ Баллов: ${score} из ${roundQuestionCount()}`);victorySound()}
 function openSettings(){if(phase==='settings')return;
  const ids=['game-menu','math-menu','answers','keypad','digits','settings','finished','stats','progress','russian-menu','russian-detail'];
  settingsSnapshot={phase,visible:ids.map(id=>[id,!$(id).hidden]),heading:$('heading').textContent,hint:$('hint').textContent,message:$('message').textContent,messageClass:$('message').className,pending:pendingTask?{fn:pendingTask.fn,remaining:Math.max(0,pendingTask.deadline-performance.now())}:null};
@@ -183,12 +183,12 @@ for (const button of themeButtons) {
 }
 
 if (typeof Image !== 'undefined') {
- const sprites = ['mario', 'jump', 'win', 'mushroom', 'koopa', 'goomba'];
+ const sprites = ['hero', 'mushroom', 'koopa', 'shell', 'goomba'];
  Promise.all(sprites.map(name => new Promise((resolve, reject) => {
   const image = new Image();
   image.onload = resolve;
   image.onerror = reject;
-  image.src = 'assets/sprites/mario/all-stars/' + name + '.png';
+  image.src = 'assets/sprites/mario/drawn/' + name + '.png';
  }))).then(() => setVisible('mario-theme', true)).catch(() => {
   // The Nintendo graphics are installed only on the home server.
  });
@@ -206,9 +206,80 @@ $('mute').onclick=()=>{mute=!mute;$('mute').textContent=mute?'🔇 Выкл.':'�
 home();
 
 $('rabbit').setAttribute('role','button');$('rabbit').tabIndex=0;$('rabbit').setAttribute('aria-label','Прыгнуть');
-function jump(){if([...players.values()].includes('win'))return;mood();void $('rabbit').offsetWidth;mood('happy');sound('jump')}
+function jump(){if($('app').classList.contains?.('mario')){marioAction('hero');return}if([...players.values()].includes('win'))return;mood();void $('rabbit').offsetWidth;mood('happy');sound('jump')}
 $('rabbit').onclick=jump;$('rabbit').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jump()}};
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#keypad')&&!['test-victory','mute','choose-player','album-page'].includes(b.id))sound('tap')});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#keypad')&&!['test-victory','mute','choose-player','album-page','mario-mushroom','mario-koopa','mario-goomba'].includes(b.id))sound('tap')});
+
+function updateMarioCourse(completed,total) {
+ const progress=total>0?Math.min(1,completed/total):0;
+ const stage=$('mario-stage');
+ $('mario-track').style.setProperty?.('--course-position',(progress*100)+'%');
+ stage.setAttribute('data-area',progress<1/3?'meadow':progress<2/3?'hills':'castle');
+ stage.setAttribute('data-arrived',String(total>0&&completed>=total));
+ $('mario-area').textContent=total>0&&completed>=total?'Финиш!':progress<1/3?'Поляна':progress<2/3?'Холмы':'Замок';
+}
+
+const marioMoves = {
+ hero: [{transform:'translateY(0)'},{transform:'translateY(-25px) rotate(-8deg)'},{transform:'translateY(0)'}],
+ mushroom: [{transform:'scale(1)'},{transform:'translateY(-9px) scale(1.19)'},{transform:'scale(1)'}],
+ koopa: [{transform:'rotate(0)'},{transform:'rotate(14deg)'},{transform:'rotate(0)'}],
+ goomba: [{transform:'scale(1)'},{transform:'scale(1.22,.56)'},{transform:'scale(.96,1.09)'},{transform:'scale(1)'}]
+};
+const marioAnimations = new WeakMap();
+let marioTaps = [];
+let marioSecretTimer;
+let marioShellTimer;
+function animateMario(element,frames,duration) {
+ if (typeof element.animate!=='function'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ marioAnimations.get(element)?.cancel();
+ marioAnimations.set(element,element.animate(frames,{duration,easing:'ease-in-out'}));
+}
+function showMarioSecret(text) {
+ clearTimeout(marioSecretTimer);
+ const stage=$('mario-stage');
+ stage.setAttribute('data-surprise','true');
+ $('mario-secret').textContent=text;
+ marioSecretTimer=setTimeout(()=>{
+  stage.setAttribute('data-surprise','false');
+  $('mario-secret').textContent='';
+ },2500);
+}
+function marioAction(character) {
+ const now=performance.now();
+ marioTaps=marioTaps.filter(tap=>now-tap.time<=4800).slice(-2);
+ marioTaps.push({character,time:now});
+ const sequence=marioTaps.map(tap=>tap.character).join('/');
+ if(sequence==='hero/hero/hero'&&now-marioTaps[0].time<=1600) {
+  marioTaps=[];
+  animateMario($('mario-art'),[
+   {transform:'translateY(0) rotate(0deg)'},
+   {transform:'translateY(-27px) rotate(180deg)'},
+   {transform:'translateY(0) rotate(360deg)'}
+  ],600);
+  showMarioSecret('⭐ Звёздный прыжок!');
+  sound('bonus');
+  return;
+ }
+ if(sequence==='mushroom/koopa/hero') {
+  marioTaps=[];
+  const stage=$('mario-stage');
+  const night=stage.getAttribute('data-night')!=='true';
+  stage.setAttribute('data-night',String(night));
+  showMarioSecret(night?'🌙 Секретная звёздная ночь!':'☀️ Снова рассвет!');
+  sound('bonus');
+  return;
+ }
+ const actor=character==='hero'?$('mario-art'):$('mario-'+character).firstElementChild;
+ if(character==='koopa'){
+  const koopa=$('mario-koopa');
+  clearTimeout(marioShellTimer);
+  koopa.setAttribute('data-shell','true');
+  marioShellTimer=setTimeout(()=>koopa.setAttribute('data-shell','false'),750);
+ }
+ animateMario(actor,marioMoves[character],430);
+ sound(character==='hero'?'jump':character==='mushroom'?'retry':'tap');
+}
+for(const character of ['mushroom','koopa','goomba'])$('mario-'+character).onclick=()=>marioAction(character);
 
 function formatMenuIcon(element) {
   const match = element.textContent.match(/^(\p{Extended_Pictographic}\uFE0F?)\s+(.+)$/u);

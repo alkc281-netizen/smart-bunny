@@ -145,78 +145,175 @@ h1{font-size:26px}
 }
 .math-lengths button, #math-back { min-height: 44px; }
 
-.mario-prop { display: none; }
+.mario-stage-tools, .mario-art, .mario-flag, .mario-stars, .mario-secret { display: none; }
+.mario-track { display: contents; }
 .console.mario {
-  --shell: #dfeeff;
-  --edge: #5e75a7;
-  --panel: #fff9e9;
-  --text: #22324e;
-  --button: #fff4d9;
-  --accent: #a83617;
+  --shell: #e5f1ff;
+  --edge: #839dbe;
+  --panel: #fffaf0;
+  --text: #253450;
+  --button: #fff5e4;
+  --accent: #a63831;
 }
 .console.mario .theme-bar button.selected { background: var(--accent); color: #fff; }
 .console.mario .rabbit-zone {
   position: relative;
   isolation: isolate;
-  min-height: 132px;
-  padding-bottom: 14px;
-  margin: 10px 0 5px;
-  border: 1px solid #a5c5de;
-  border-radius: 13px;
+  min-height: 164px;
+  margin: 10px 0 6px;
+  border: 1px solid #9ebdd5;
+  border-radius: 16px;
   background:
-    radial-gradient(ellipse 42% 68% at 90% 115%, #aacdac 99%, transparent),
-    radial-gradient(ellipse 51% 57% at 17% 115%, #c7df9e 99%, transparent),
-    linear-gradient(#a3d3f5, #e8f5f5);
+    radial-gradient(ellipse 48% 57% at 85% 117%, #a5c99b 99%, transparent),
+    radial-gradient(ellipse 57% 58% at 12% 113%, #c7df9e 99%, transparent),
+    linear-gradient(#a3d3f5, #eef9f6);
+}
+.console.mario .rabbit-zone[data-area=hills] {
+  background:
+    radial-gradient(ellipse 51% 66% at 14% 113%, #95bed3 99%, transparent),
+    radial-gradient(ellipse 53% 63% at 83% 111%, #b2d6bb 99%, transparent),
+    linear-gradient(#a4cef0, #f1f9ee);
+}
+.console.mario .rabbit-zone[data-area=castle] {
+  background:
+    radial-gradient(ellipse 52% 49% at 73% 113%, #c6b4ce 99%, transparent),
+    radial-gradient(ellipse 47% 44% at 11% 109%, #edccbb 99%, transparent),
+    linear-gradient(#c5b3df, #fff0d8);
+}
+.console.mario .rabbit-zone[data-night=true] {
+  background:
+    radial-gradient(ellipse 53% 58% at 15% 115%, #397179 99%, transparent),
+    radial-gradient(ellipse 49% 47% at 87% 109%, #506683 99%, transparent),
+    linear-gradient(#303d71, #6a739e);
 }
 .console.mario .rabbit-zone::after {
   position: absolute;
   inset: auto 0 0;
-  height: 14px;
-  border-radius: 0 0 12px 12px;
+  height: 16px;
+  border-radius: 0 0 15px 15px;
   content: '';
-  background: linear-gradient(#759e55 0 4px, #c18b63 4px);
+  background: linear-gradient(#6a904e 0 4px, #ac765d 4px 12px, #865c50 12px);
+  pointer-events: none;
+}
+.console.mario .mario-stage-tools {
+  position: absolute;
+  inset: 5px 10px auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 5px;
+}
+.mario-area {
+  padding: 4px 8px;
+  background: #f5fbff;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+.mario-friends { display: flex; gap: 4px; }
+.console.mario .mario-friends button {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: #fff9efb5;
+  border: 1px solid #a8bfd2;
+  border-radius: 12px;
+  touch-action: manipulation;
+}
+.mario-friends span, .console.mario .mario-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: center / contain no-repeat;
+}
+#mario-mushroom span { background-image: url('assets/sprites/mario/drawn/mushroom.png'); }
+#mario-koopa span { background-image: url('assets/sprites/mario/drawn/koopa.png'); }
+#mario-koopa[data-shell=true] span { background-image: url('assets/sprites/mario/drawn/shell.png'); }
+#mario-goomba span { background-image: url('assets/sprites/mario/drawn/goomba.png'); }
+.console.mario .mario-track {
+  position: absolute;
+  inset: 51px 36px 15px 36px;
+  display: block;
   pointer-events: none;
 }
 .console.mario .rabbit {
-  z-index: 1;
-  width: 60px;
-  height: 90px;
-  background: url('assets/sprites/mario/all-stars/mario.png') center bottom / auto 100% no-repeat;
-  image-rendering: pixelated;
-}
-.console.mario .rabbit.happy {
-  background-image: url('assets/sprites/mario/all-stars/jump.png');
-}
-.console.mario .rabbit.party {
-  background-image: url('assets/sprites/mario/all-stars/win.png');
-}
-.console.mario .rabbit > * { display: none; }
-.console.mario .mario-prop {
-  display: block;
   position: absolute;
-  bottom: 14px;
-  width: 32px;
-  aspect-ratio: 1;
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: contain;
-  image-rendering: pixelated;
+  z-index: 2;
+  left: var(--course-position, 0%);
+  bottom: 0;
+  width: 74px;
+  height: 74px;
+  transform: translateX(-50%);
+  animation: none;
+  transition: left .45s ease-out;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.console.mario .rabbit > :not(.mario-art) { display: none; }
+.console.mario .mario-art { background-image: url('assets/sprites/mario/drawn/hero.png'); }
+.console.mario .rabbit.happy .mario-art { animation: hop .4s ease-in-out; }
+.console.mario .rabbit.sad .mario-art { animation: shake .35s ease-in-out; }
+.console.mario .rabbit.party .mario-art { animation: hop .5s ease-in-out 2; }
+.console.mario .mario-flag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 4px;
+  height: 78px;
+  background: #405379;
+  border-radius: 3px 3px 0 0;
+}
+.mario-flag::before {
+  content: '';
+  display: block;
+  width: 25px;
+  height: 16px;
+  margin-top: 7px;
+  background: #e64d4d;
+  clip-path: polygon(0 0,100% 50%,0 100%);
+}
+.mario-flag::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: -25px 0 0 -2px;
+  border-radius: 50%;
+  background: #ffd56b;
+}
+[data-arrived=true] .mario-flag::before { background: #438e64; }
+.console.mario [data-surprise=true] .mario-stars,
+.console.mario [data-night=true] .mario-stars {
+  position: absolute;
+  left: 25%;
+  top: 38%;
+  display: block;
+  color: #fff4c5;
+  text-shadow: 0 1px 5px #64533999;
   pointer-events: none;
 }
-.console.mario .mario-mushroom {
-  left: 23%;
-  background-image: url('assets/sprites/mario/all-stars/mushroom.png');
-}
-.console.mario .mario-koopa {
-  right: 23%;
-  aspect-ratio: 16 / 23;
-  background-image: url('assets/sprites/mario/all-stars/koopa.png');
-}
-.console.mario .rabbit.sad ~ .mario-koopa {
-  background-image: url('assets/sprites/mario/all-stars/goomba.png');
+.console.mario .mario-secret:not(:empty) {
+  position: absolute;
+  z-index: 3;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  width: max-content;
+  max-width: 80%;
+  padding: 4px 9px;
+  background: #fff8d9;
+  border-radius: 7px;
+  font-weight: 650;
+  font-size: 12px;
+  pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .console.mario .rabbit { animation: none; }
+  .console.mario .rabbit { transition: none; }
+  .console.mario .rabbit .mario-art { animation: none; }
 }
 @media (max-width: 380px) {
   .theme-bar:has(#mario-theme:not([hidden])) button {
