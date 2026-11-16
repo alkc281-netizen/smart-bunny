@@ -183,13 +183,12 @@ for (const button of themeButtons) {
 }
 
 if (typeof Image !== 'undefined') {
- const sprites = ['MarioStanding', 'MarioJumping', 'MagicMushroom', '1upMushroom',
-  'LittleGoomba', 'KoopaTroopaGreen', 'KoopaTroopaShellGreen', 'BrickBlockBrown'];
+ const sprites = ['mario', 'jump', 'win', 'mushroom', 'koopa', 'goomba'];
  Promise.all(sprites.map(name => new Promise((resolve, reject) => {
   const image = new Image();
   image.onload = resolve;
   image.onerror = reject;
-  image.src = 'assets/sprites/mario/' + name + '.png';
+  image.src = 'assets/sprites/mario/all-stars/' + name + '.png';
  }))).then(() => setVisible('mario-theme', true)).catch(() => {
   // The Nintendo graphics are installed only on the home server.
  });

@@ -158,38 +158,44 @@ h1{font-size:26px}
 .console.mario .rabbit-zone {
   position: relative;
   isolation: isolate;
-  min-height: 112px;
-  padding-bottom: 22px;
-  border-radius: 12px 12px 0 0;
-  margin-top: 8px;
-  background: linear-gradient(#8dbeff, #c5e7ff);
+  min-height: 132px;
+  padding-bottom: 14px;
+  margin: 10px 0 5px;
+  border: 1px solid #a5c5de;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse 42% 68% at 90% 115%, #aacdac 99%, transparent),
+    radial-gradient(ellipse 51% 57% at 17% 115%, #c7df9e 99%, transparent),
+    linear-gradient(#a3d3f5, #e8f5f5);
 }
 .console.mario .rabbit-zone::after {
   position: absolute;
   inset: auto 0 0;
-  height: 22px;
+  height: 14px;
+  border-radius: 0 0 12px 12px;
   content: '';
-  background: url('assets/sprites/mario/BrickBlockBrown.png') left bottom / 22px 22px repeat-x;
-  image-rendering: pixelated;
+  background: linear-gradient(#759e55 0 4px, #c18b63 4px);
   pointer-events: none;
 }
 .console.mario .rabbit {
   z-index: 1;
-  width: 64px;
-  height: 64px;
-  background: url('assets/sprites/mario/MarioStanding.png') center bottom / auto 100% no-repeat;
+  width: 60px;
+  height: 90px;
+  background: url('assets/sprites/mario/all-stars/mario.png') center bottom / auto 100% no-repeat;
   image-rendering: pixelated;
 }
-.console.mario .rabbit.happy, .console.mario .rabbit.party {
-  background-image: url('assets/sprites/mario/MarioJumping.png');
-  z-index: 2;
+.console.mario .rabbit.happy {
+  background-image: url('assets/sprites/mario/all-stars/jump.png');
+}
+.console.mario .rabbit.party {
+  background-image: url('assets/sprites/mario/all-stars/win.png');
 }
 .console.mario .rabbit > * { display: none; }
 .console.mario .mario-prop {
   display: block;
   position: absolute;
-  bottom: 22px;
-  width: clamp(23px, 8vw, 42px);
+  bottom: 14px;
+  width: 32px;
   aspect-ratio: 1;
   background-repeat: no-repeat;
   background-position: center bottom;
@@ -197,18 +203,17 @@ h1{font-size:26px}
   image-rendering: pixelated;
   pointer-events: none;
 }
-.mario-mushroom { left: 7%; background-image: url('assets/sprites/mario/MagicMushroom.png'); }
-.mario-one-up { left: 23%; background-image: url('assets/sprites/mario/1upMushroom.png'); }
-.mario-goomba { right: 23%; background-image: url('assets/sprites/mario/LittleGoomba.png'); }
-.console.mario .mario-koopa {
-  right: 7%;
-  aspect-ratio: 2 / 3;
-  background-image: url('assets/sprites/mario/KoopaTroopaGreen.png');
+.console.mario .mario-mushroom {
+  left: 23%;
+  background-image: url('assets/sprites/mario/all-stars/mushroom.png');
 }
-.console.mario .rabbit.happy ~ .mario-koopa,
-.console.mario .rabbit.party ~ .mario-koopa {
-  background-image: url('assets/sprites/mario/KoopaTroopaShellGreen.png');
-  background-size: 100% auto;
+.console.mario .mario-koopa {
+  right: 23%;
+  aspect-ratio: 16 / 23;
+  background-image: url('assets/sprites/mario/all-stars/koopa.png');
+}
+.console.mario .rabbit.sad ~ .mario-koopa {
+  background-image: url('assets/sprites/mario/all-stars/goomba.png');
 }
 @media (prefers-reduced-motion: reduce) {
   .console.mario .rabbit { animation: none; }
