@@ -328,6 +328,21 @@ h1{font-size:26px}
   text-align: center;
 }
 .nes-controls > button { min-height: 44px; padding-inline: 12px; }
+.nes-level-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 6px 6px 0;
+}
+.nes-level-picker select {
+  min-height: 44px;
+  padding-inline: 6px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+}
 #nes-setup {
   display: grid;
   justify-items: center;
@@ -337,7 +352,6 @@ h1{font-size:26px}
 }
 #nes-setup label { font-weight: 600; }
 #nes-rom { max-width: 100%; }
-#nes-setup a { color: var(--text); font-size: 12px; }
 .console.mario .rabbit-zone[data-nes=true] {
   display: grid;
   place-items: center;

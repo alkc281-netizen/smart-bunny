@@ -39,6 +39,7 @@ function musicAllowed(){
  return (phase==='settings'&&musicPreview)||screen==='player-album'||Boolean(game&&!['menu','finished'].includes(screen));
 }
 function setAudioLevel(){
+ window.bunnyReplay?.setEffectsVolume?.(mute?0:fxVolume);
  if(!musicBus||!audioCtx)return;
  const duck=(game==='memory'&&phase==='show')||[...players.values()].includes('albumClear');
  musicBus.gain.setTargetAtTime(!mute&&enableMusic?musicVolume*(duck ? .15 : 1):0,audioCtx.currentTime,.035);
@@ -198,7 +199,7 @@ $('home').onclick=home;$('math-back').onclick=home;$('replay').onclick=()=>game=
 $('auto-music').onchange=e=>{autoMusic=e.target.checked;$('song').disabled=autoMusic;if(autoMusic&&(game||musicScreen()==='player-album')){if(game)selectedMusic=gameMusic[game];$('song').value=String(selectedMusic);startMusic(phase==='settings')}};
 $('song').onchange=e=>{selectedMusic=Number(e.target.value);if(musicWanted||musicNodes.length||phase==='settings')startMusic(phase==='settings')};
 $('music-volume').oninput=e=>{musicVolume=Number(e.target.value)/100;$('music-value').textContent=e.target.value+'%';setAudioLevel()};
-$('fx-volume').oninput=e=>{fxVolume=Number(e.target.value)/100;for(const a of players.keys())a.volume=fxVolume;$('fx-value').textContent=e.target.value+'%'};
+$('fx-volume').oninput=e=>{fxVolume=Number(e.target.value)/100;for(const a of players.keys())a.volume=fxVolume;$('fx-value').textContent=e.target.value+'%';setAudioLevel()};
 $('enable-music').onchange=e=>{enableMusic=e.target.checked;if(enableMusic)startMusic(phase==='settings');else stopMusic();setAudioLevel()};
 $('enable-victory').onchange=e=>{enableVictory=e.target.checked};
 $('preview').onclick=()=>{if(autoMusic){autoMusic=false;$('auto-music').checked=false;$('song').disabled=false}enableMusic=true;$('enable-music').checked=true;startMusic(true)};
