@@ -34,7 +34,7 @@ h1{font-size:26px}
   h1 .menu-icon{font-size:1.5em}
 }
 
-@media (min-width: 601px) and (max-width: 1366px) and (any-pointer: coarse) {
+@media (min-width: 601px) and (any-pointer: coarse) {
   body {
     display: block;
     padding: 0;
