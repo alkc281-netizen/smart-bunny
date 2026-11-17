@@ -81,7 +81,7 @@ async function playerRequest(path, data) {
 function readPlayerPreference(key, fallback) {
   try {
     if (!activePlayer) return localStorage.getItem(key) ?? fallback;
-    if (key.startsWith('bunny-russian-history-')) {
+    if (key.startsWith('bunny-russian-history-') || key.startsWith('bunny-school-history-')) {
       return localStorage.getItem(activePlayer.id + ':' + key) ?? fallback;
     }
     return activePlayer.preferences[key] ?? fallback;
@@ -95,8 +95,10 @@ function playerSchoolClasses() {
 }
 
 function savePlayerPreference(key, value) {
-  if (key === 'bunny-russian-class' && !playerSchoolClasses().includes(Number(value))) return;
-  if (!activePlayer || key.startsWith('bunny-russian-history-')) {
+  const bookClass = key.startsWith('bunny-school-') && key.endsWith('-class');
+  if ((key === 'bunny-russian-class' || bookClass) && !playerSchoolClasses().includes(Number(value))) return;
+  if (bookClass && ![2,4].includes(Number(value))) return;
+  if (!activePlayer || (key.startsWith('bunny-russian-history-') || key.startsWith('bunny-school-history-'))) {
     try { localStorage.setItem(activePlayer ? activePlayer.id + ':' + key : key, value); } catch {}
     return;
   }
@@ -209,8 +211,13 @@ function chooseActivePlayer(player) {
   if (player) {
     // Discard superseded class choices from a tab opened before the parent changed the range.
     const classes = Array.isArray(player.schoolClasses) && player.schoolClasses.length ? player.schoolClasses : [1, 2, 3, 4];
-    playerOutbox = playerOutbox.filter(item => item.player !== player.id || item.data.kind !== 'preference' ||
-      item.data.key !== 'bunny-russian-class' || classes.includes(Number(item.data.value)));
+    playerOutbox = playerOutbox.filter(item => {
+      const {data} = item;
+      if (item.player !== player.id || data.kind !== 'preference') return true;
+      const bookClass = data.key.startsWith('bunny-school-') && data.key.endsWith('-class');
+      return (data.key !== 'bunny-russian-class' && !bookClass) ||
+        (classes.includes(Number(data.value)) && (!bookClass || [2,4].includes(Number(data.value))));
+    });
     storePlayerOutbox();
     for (const item of playerOutbox) {
       if (item.player === player.id && item.data.kind === 'preference') {
@@ -224,6 +231,7 @@ function chooseActivePlayer(player) {
   activePlayer = player;
   $('app').classList.toggle('auth-required', !player);
   loadRussianProgress();
+  window.bunnySchool?.load();
   home();
   flushPlayerUpdates();
 }
@@ -852,9 +860,9 @@ finish = function () {
       mission:rewardRound.key,daily:rewardRound.daily});
     return;
   }
-  const topics = game === 'russian' ? Object.keys(russianRoundStats) : [game];
+  const topics = game === 'russian' ? Object.keys(russianRoundStats) : game === 'school' ? window.bunnySchool.topics() : [game];
   enqueuePlayerUpdate({kind: 'round', id: playerRoundId(), score, total, topics,
-    review: game === 'russian' && russianMode === 'mistakes',corrected:game==='russian' ? russianCorrected : 0});
+    review: game === 'school' ? window.bunnySchool.review() : game === 'russian' && russianMode === 'mistakes',corrected:game==='russian' ? russianCorrected : game==='school' ? window.bunnySchool.corrected() : 0});
 };
 
 // Keep an album or profile picker visible when returning from music settings.

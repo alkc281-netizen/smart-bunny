@@ -9,13 +9,16 @@ vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),ctx);
 const run=s=>vm.runInContext(s,ctx);function tick(ms){const end=now+ms;for(;;){const next=[...timers].sort((a,b)=>a[1].at-b[1].at)[0];if(!next||next[1].at>end)break;now=next[1].at;timers.delete(next[0]);next[1].fn()}now=end}
 vm.runInContext(fs.readFileSync(__dirname+'/russian-curriculum.js','utf8'),ctx);
 vm.runInContext(fs.readFileSync(__dirname+'/russian.js','utf8'),ctx);
+run("function openMathMenu(){home();phase='math-modes';setVisible('game-menu',false);setVisible('math-modes',true)}");
 run("begin('memory')");tick(500);const seq=run('sequence');run('openSettings()');tick(5000);run('settingsBack()');assert.equal(run('sequence'),seq);assert.equal(run('phase'),'show');tick(999);assert.equal(run('phase'),'show');tick(1);assert.equal(run('phase'),'answer');
 run("choose('xxx')");tick(1800);tick(1500);assert.equal(run('attempt'),2);run('openSettings();settingsBack()');assert.equal(run('attempt'),2);assert.equal(run('sequence'),seq);run('choose(answer)');tick(1000);assert.equal(run('score'),0);assert.equal(run('round'),1);
 for(let i=1;i<50;i++){tick(1500);run('choose(answer)');tick(1000);if(i<49&&((i+1)%10===0))tick(950)}
 assert.equal(run('phase'),'finished');assert.equal(run('score'),49);assert.equal(run('round'),50);run('openSettings();settingsBack()');assert.equal(run('phase'),'finished');assert.equal(run('round'),50);
 run("begin('memory')");for(let i=0;i<50;i++){tick(1500);run('choose(answer);choose(answer)');tick(1000);if(i<49&&((i+1)%10===0))tick(950)}assert.equal(run('score'),50);assert.equal(run('phase'),'finished');
 run('home()');
-run("$('game-menu').children[3].onclick()");
+run("$('game-menu').children[0].onclick()");
+assert.equal(run('phase'),'math-modes');
+run("$('math-games').children[3].onclick()");
 assert.equal(run('phase'),'math-length');
 assert.equal(run("$('heading').textContent"),'➕ Сложение');
 assert.equal(run("$('math-lengths').children.map(button=>button.textContent).join(', ')"),'10 заданий, 50 заданий, 100 заданий');

@@ -82,6 +82,12 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
         assert request(child, "players/old-child", dict(kind="preference", key="bunny-russian-class", value="2"))[0] == 200
         assert request(child, "players/old-child", dict(kind="preference", key="bunny-russian-class", value="3"))[0] == 400
         assert request(child, "players/old-child", dict(kind="preference", key="schoolClasses", value="[1,2,3,4]"))[0] == 400
+        for subject in ("math", "english", "world"):
+            key = f"bunny-school-{subject}-class"
+            assert request(child, "players/old-child", dict(kind="preference", key=key, value="2"))[0] == 200
+            assert request(child, "players/old-child", dict(kind="preference", key=key, value="4"))[0] == 400
+            assert request(child, "players/old-child", dict(kind="preference", key=key, value="1"))[0] == 400
+            assert request(child, "players/old-child", dict(kind="preference", key=f"bunny-school-{subject}-studied2", value='["example"]'))[0] == 200
         assert request(child, "players/old-parent")[0] == 403
         assert request(child, "players/old-parent", dict(kind="redeem", sticker="mario"))[0] == 403
         assert request(child, "auth/accounts", dict(name="Other", avatar="🦊", login="other", password="Other-test-123"))[0] == 403
