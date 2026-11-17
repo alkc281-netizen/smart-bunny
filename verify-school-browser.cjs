@@ -88,7 +88,12 @@ with sqlite3.connect(database) as db:
       await evaluate('openSettings();settingsBack()');
       assert.equal(await evaluate("$('school-menu').hidden"),false);
     }
-    console.log('PASS subject navigation and no overflow',width,height);
+    await evaluate(`(() => { openSchoolClasses('world');
+      const sample = schoolTopics.world2nature.items.find(item => item[0].includes('платка'));
+      launchSchoolRound([[...sample, 'world2nature']], 'topic', 'world2nature'); })()`);
+    assert.equal(await evaluate("document.documentElement.scrollWidth>innerWidth"),false);
+    assert.ok(await evaluate("Array.from($('answers').children).every(button=>button.style.gridColumn==='1 / -1')"));
+    console.log('PASS subject navigation and long answer layout',width,height);
   }
   await evaluate("openSchoolClasses('english');openSchoolStudied();$('school-menu').children[0].children[0].click();$('school-menu').children[0].children[1].click();openSchoolTopics()");
   await until(()=>evaluate('!writingPlayer'));

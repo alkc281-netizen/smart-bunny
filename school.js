@@ -74,12 +74,14 @@ function pickSchoolItems(key,count){
  let history={};try{history=JSON.parse(schoolRead('bunny-school-history-'+key,'{}'))||{}}catch{}
  const valid=new Set(ids),seen=new Set(Array.isArray(history.seen)?history.seen.filter(id=>valid.has(id)):[]);
  const recent=Array.isArray(history.last)?history.last.filter(id=>valid.has(id)).slice(-10):[],deck=[];
+ const usedInRound = new Set();
  while(deck.length<count){
-  let available=items.filter((_,i)=>!seen.has(ids[i]));
-  if(!available.length){seen.clear();available=[...items]}
+  if (usedInRound.size === items.length) usedInRound.clear();
+  let available=items.filter((_,i)=>!seen.has(ids[i])&&!usedInRound.has(ids[i]));
+  if(!available.length){seen.clear();available=items.filter((_,i)=>!usedInRound.has(ids[i]))}
   const fresh=available.filter(item=>!recent.includes(JSON.stringify(item.slice(0,2))));
   const next=shuffledRussian(fresh.length?fresh:available)[0],id=JSON.stringify(next.slice(0,2));
-  deck.push([...next,key]);seen.add(id);recent.push(id);if(recent.length>10)recent.shift();
+  deck.push([...next,key]);seen.add(id);usedInRound.add(id);recent.push(id);if(recent.length>10)recent.shift();
  }
  schoolSave('bunny-school-history-'+key,JSON.stringify({seen:[...seen],last:recent}));return deck;
 }
@@ -87,8 +89,19 @@ function beginSchoolTopic(key){if(!schoolClassTopics().includes(key))return;laun
 function beginSchoolMixed(review=false){
  const keys=schoolClassTopics().filter(key=>schoolStudied.has(key)&&(!review||schoolMistakes[key]>0));
  if(!keys.length){openSchoolStudied();return;}
- const order=[];let last=null;
- while(order.length<schoolCount){let cycle=shuffledRussian(keys);if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];for(const key of cycle){if(order.length===schoolCount)break;order.push(key);last=key}}
+ const order=[];
+ let remaining=new Map(),last=null;
+ while(order.length<schoolCount){
+  if(!remaining.size)remaining=new Map(keys.map(key=>[key,schoolTopics[key].items.length]));
+  const cycle=shuffledRussian([...remaining.keys()]);
+  if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];
+  for(const key of cycle){
+   if(order.length===schoolCount)break;
+   order.push(key);last=key;
+   const left=remaining.get(key)-1;
+   if(left>0)remaining.set(key,left);else remaining.delete(key);
+  }
+ }
  const queues={};for(const key of keys){const count=order.filter(k=>k===key).length;if(count)queues[key]=pickSchoolItems(key,count)}
  launchSchoolRound(order.map(key=>queues[key].shift()),review?'mistakes':'mixed',null);
 }
@@ -102,7 +115,13 @@ function renderSchoolQuestion(){
  phase='answer';answer=correct;$('heading').textContent=schoolMode==='topic'?topic.name:schoolMode==='mistakes'?'Работа над ошибками':'Смешанная тренировка';
  $('hint').textContent=schoolSubjects[schoolSubject][1]+' · '+schoolClass+' класс · '+topic.name+(attempt===2?' · Вторая попытка':'');
  message(prompt);$('message').classList.toggle('russian-question',true);setVisible('russian-detail',false);
- $('answers').replaceChildren();for(const choice of shuffledRussian(choices))playerButton($('answers'),choice,()=>choose(choice));setVisible('answers',true);setAudioLevel();
+ $('answers').replaceChildren();
+ const longChoices=choices.some(choice=>choice.length>34);
+ for(const choice of shuffledRussian(choices)){
+  const button=playerButton($('answers'),choice,()=>choose(choice));
+  if(longChoices)button.style.gridColumn='1 / -1';
+ }
+ setVisible('answers',true);setAudioLevel();
 }
 function schoolTask(){cancelTask();mood();attempt=1;stats();panels();setVisible('stats',true);setVisible('progress',true);renderSchoolQuestion()}
 function schoolChoose(value){

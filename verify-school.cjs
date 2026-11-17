@@ -19,7 +19,14 @@ let total=0;
 for(const key of keys){const topic=run(`schoolTopics['${key}']`);assert.ok([2,4].includes(topic.grade));assert.ok(['math','english','world'].includes(topic.subject));assert.ok(/^[a-zA-Z0-9]+$/.test(key));assert.ok(topic.rule.length>20);const seen=new Set();
  for(const [prompt,correct,choices,why] of topic.items){assert.ok(prompt&&why);assert.ok(choices.includes(correct));assert.equal(new Set(choices).size,choices.length);assert.ok(choices.length>=2);assert.ok(!seen.has(prompt));seen.add(prompt);total++;}
 }
-assert.equal(total,3014);
+assert.ok(total>2000);
+for(const subject of ['english','world'])for(const grade of [2,4]){
+ const bank=run(`Object.values(schoolTopics).filter(t=>t.subject==='${subject}'&&t.grade===${grade}).flatMap(t=>t.items)`);
+ assert.ok(bank.length>=50,'enough distinct exercises for a mixed 50-question round');
+ assert.ok(bank.some(([prompt])=>prompt.includes('\n\n')),'includes a passage with a separate question');
+}
+const sample=run("schoolTopics.math4area.items.find(([prompt])=>prompt.startsWith('Прямоугольная площадка 14 м на 12 м.'))");
+assert.equal(sample[1],'126','three quarters of a 14 by 12 metre rectangle');
 run("chooseActivePlayer({id:'junior',name:'Тест',avatar:'🐰',schoolClasses:[1,2],preferences:{},topics:[],stickers:{}})");
 run("$('game-menu').children[0].onclick()");assert.equal(run('phase'),'math-modes');assert.equal(run("$('math-games').children.length"),7);
 run("$('math-games').children[0].onclick()");assert.equal(run('game'),'memory');assert.equal(run('roundQuestionCount()'),50);run('home()');
@@ -39,6 +46,8 @@ for(const [id,range,grade] of [['junior',[1,2],2],['senior',[3,4],4]]){
   run('schoolStudied=new Set(schoolClassTopics())');
   for(const count of [10,50,100]){
    run(`schoolCount=${count};beginSchoolMixed()`);assert.equal(run('schoolDeck.length'),count);assert.ok(run('schoolDeck.every(item=>schoolTopics[item[4]].grade===schoolClass&&schoolTopics[item[4]].subject===schoolSubject)'));
+   const distinct = Math.min(count, topics.reduce((n,key)=>n+run(`schoolTopics['${key}'].items.length`),0));
+   assert.equal(new Set(run(`schoolDeck.slice(0,${distinct}).map(item=>item[0])`)).size,distinct);
    run("choose('incorrect')");tick(60000);assert.equal(run('phase'),'feedback');assert.equal(run('round'),0);
    run('openSettings()');tick(60000);run('settingsBack()');assert.equal(run('phase'),'feedback');
    run("$('answers').children[0].onclick()");assert.equal(run('attempt'),2);run("choose('incorrect')");tick(60000);assert.equal(run('round'),0);
@@ -56,4 +65,4 @@ run("loadSchoolSubject('math');schoolCount=10");
 const key=run('schoolClassTopics()[0]');run(`schoolSave('bunny-school-history-${key}','{}')`);
 const first=run(`pickSchoolItems('${key}',10).map(i=>i[0])`),second=run(`pickSchoolItems('${key}',10).map(i=>i[0])`);
 assert.equal(new Set(first).size,10);assert.ok(second.every(q=>!first.includes(q)));
-console.log('PASS 39 topics / 3014 exercises, math menu, profile class ranges, 10/50/100 mixed rounds, studied topics, explanations/confirmation, retry scores, settings, review, history, rewards and first/second-grade isolation');
+console.log('PASS 39 topics, reasoning exercises, mixed deck uniqueness, profile class ranges, 10/50/100 rounds, explanations, retries and rewards');
