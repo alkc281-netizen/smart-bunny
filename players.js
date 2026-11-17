@@ -33,6 +33,8 @@ let activePlayer = null;
 let playerList = [];
 let selectedSticker = null;
 let playerApiReady = false;
+let parentSession = false;
+let authConfigured = false;
 let writingPlayer = false;
 let playerScreenVersion = 0;
 let playerOutbox = [];
@@ -41,18 +43,38 @@ try {
   if (Array.isArray(saved)) playerOutbox = saved;
 } catch {}
 
-async function playerRequest(path, data) {
-  const response = await fetch('/api/players' + path + '?rewards=characters', {
+async function apiRequest(path, data) {
+  const response = await fetch('/api/' + path + '?rewards=characters', {
     cache: 'no-store',
+    credentials: 'same-origin',
     signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(8000) : undefined,
     ...(data ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)} : {}),
   });
   if (!response.headers.get('content-type')?.includes('application/json')) {
-    throw Error('Профили доступны по домашнему адресу игры.');
+    throw Error('Вход доступен по домашнему адресу игры.');
   }
   const result = await response.json();
-  if (!response.ok) throw Error(result.error || 'Не удалось сохранить прогресс.');
+  if (!response.ok) {
+    const error = Error(result.error || 'Не удалось сохранить прогресс.');
+    error.status = response.status;
+    throw error;
+  }
   return result;
+}
+
+async function playerRequest(path, data) {
+  const owner = activePlayer?.id;
+  try { return await apiRequest('players' + path, data); }
+  catch (error) {
+    if (owner && activePlayer?.id === owner &&
+        (error.status === 401 || (error.status === 403 && path === '/' + owner))) {
+      parentSession = false;
+      chooseActivePlayer(null);
+      openPlayerPicker();
+      message('Войди в свой профиль, чтобы сохранить результаты.');
+    }
+    throw error;
+  }
 }
 
 function readPlayerPreference(key, fallback) {
@@ -88,10 +110,12 @@ async function flushPlayerUpdates() {
   if (writingPlayer) return;
   writingPlayer = true;
   try {
-    while (playerOutbox.length) {
-      const {player, data} = playerOutbox[0];
+    while (activePlayer) {
+      const index = playerOutbox.findIndex(item => item.player === activePlayer.id);
+      if (index < 0) break;
+      const {player, data} = playerOutbox[index];
       const result = await playerRequest('/' + player, data);
-      playerOutbox.shift();
+      playerOutbox.splice(index, 1);
       storePlayerOutbox();
       if (activePlayer?.id === player) {
         // Preserve any newer preference changes still waiting to be saved.
@@ -109,7 +133,8 @@ async function flushPlayerUpdates() {
         }
       }
     }
-  } catch {
+  } catch (error) {
+    if (error.status === 401) return;
     if (phase === 'player-album' || phase === 'player-select') {
       message('Сервер недоступен. Изменения ожидают отправки.');
     } else if (phase === 'finished' && activePlayer) {
@@ -125,6 +150,8 @@ function refreshPlayerNav() {
   $('choose-player').textContent = activePlayer ? activePlayer.avatar + ' ' + activePlayer.name : '👤 Выбрать игрока';
   setVisible('open-album', Boolean(activePlayer));
   dailyMissionButton.hidden = !activePlayer?.rewards;
+  $('logout-player').hidden = !activePlayer;
+  $('parent-settings').hidden = !activePlayer || !parentSession;
 }
 
 const playerBasePanels = panels;
@@ -171,63 +198,182 @@ function chooseActivePlayer(player) {
     }
   }
   activePlayer = player;
-  try { localStorage.setItem('bunny-active-player', player?.id || ''); } catch {}
+  $('app').classList.toggle('auth-required', !player);
   loadRussianProgress();
   home();
   flushPlayerUpdates();
 }
 
+function authField(form, title, type, autocomplete) {
+  const label = playerElement('label', title, form);
+  const input = playerElement('input', '', label);
+  input.type = type;
+  input.required = true;
+  input.autocomplete = autocomplete;
+  if (type === 'password') { input.minLength = 8; input.maxLength = 128; }
+  return input;
+}
+
+function authLoginField(form) {
+  const input = authField(form, 'Логин', 'text', 'username');
+  input.minLength = 3;
+  input.maxLength = 32;
+  input.autocapitalize = 'none';
+  input.spellcheck = false;
+  return input;
+}
+
+function rememberField(form) {
+  const label = playerElement('label', '', form);
+  label.className = 'auth-remember';
+  const input = playerElement('input', '', label);
+  input.type = 'checkbox';
+  label.append(document.createTextNode(' Запомнить вход на этом устройстве'));
+  return input;
+}
+
+async function loadPlayerSession() {
+  const status = await apiRequest('auth/status');
+  authConfigured = status.configured;
+  parentSession = status.parent;
+  playerList = await playerRequest('');
+  playerApiReady = true;
+  chooseActivePlayer(status.player);
+  if (!status.player) {
+    if (authConfigured) openPlayerPicker();
+    else openParentSetup();
+  }
+}
+
 function openPlayerPicker() {
-  const panel = playerScreen('Кто играет?', 'Выбери свой профиль', 'player-select');
+  if (!authConfigured) { openParentSetup(); return; }
+  const panel = playerScreen('Вход в игру', 'Выбери аватар или введи свой логин', 'player-select');
+  const version = playerScreenVersion;
   const choices = playerElement('div', '', panel);
   choices.className = 'player-choices';
-  const version = playerScreenVersion;
-  function showChoices() {
-    choices.replaceChildren();
-    for (const player of playerList) {
-      const button = playerButton(choices, player.avatar + ' ' + player.name, async () => {
-        if (button.disabled) return;
-        button.disabled = true;
-        try {
-          const profile = await playerRequest('/' + player.id);
-          if (version === playerScreenVersion) chooseActivePlayer(profile);
-        } catch (error) {
-          if (version === playerScreenVersion) message(error.message);
-        } finally { button.disabled = false; }
-      });
-      button.setAttribute('aria-pressed', String(player.id === activePlayer?.id));
-    }
-    playerButton(choices, 'Играть гостем', () => chooseActivePlayer(null));
-  }
-  showChoices();
-  playerRequest('').then(list => {
-    playerList = list;
-    if (version === playerScreenVersion) showChoices();
-  }).catch(error => { if (version === playerScreenVersion) message(error.message); });
-
   const form = playerElement('form', '', panel);
-  form.className = 'player-create';
-  const nameLabel = playerElement('label', 'Имя или прозвище', form);
-  const name = playerElement('input', '', nameLabel);
-  name.maxLength = 20;
-  name.required = true;
-  const avatarLabel = playerElement('label', 'Аватар', form);
-  const avatar = playerElement('select', '', avatarLabel);
-  for (const symbol of playerAvatars) playerElement('option', symbol, avatar).value = symbol;
-  const submit = playerElement('button', 'Создать игрока', form);
+  form.className = 'auth-form';
+  const login = authLoginField(form);
+  const password = authField(form, 'Пароль', 'password', 'current-password');
+  const remember = rememberField(form);
+  for (const player of playerList.filter(item => item.ready)) {
+    playerButton(choices, player.avatar + ' ' + player.name, () => {
+      login.value = player.login;
+      password.value = '';
+      password.focus();
+    });
+  }
+  const submit = playerElement('button', 'Войти', form);
   submit.type = 'submit';
   form.onsubmit = async event => {
     event.preventDefault();
     if (submit.disabled) return;
+    if (writingPlayer) { message('Подожди завершения сохранения.'); return; }
     submit.disabled = true;
     try {
-      const profile = await playerRequest('', {name: name.value, avatar: avatar.value});
-      playerList.push({id: profile.id, name: profile.name, avatar: profile.avatar});
-      if (version === playerScreenVersion) chooseActivePlayer(profile);
+      await apiRequest('auth/login', {login: login.value, password: password.value, remember: remember.checked});
+      password.value = '';
+      if (version === playerScreenVersion) await loadPlayerSession();
     } catch (error) {
       if (version === playerScreenVersion) message(error.message);
     } finally { submit.disabled = false; }
   };
+  if (activePlayer) playerButton(panel, 'Назад к игре', home);
+  playerElement('p', 'Если забыл пароль, попроси родителя восстановить доступ.', panel).className = 'hint';
+}
+
+function accountForm(panel, setup) {
+  const form = playerElement('form', '', panel);
+  form.className = 'auth-form';
+  let code;
+  if (setup) {
+    code = authField(form, 'Код первоначальной настройки', 'password', 'one-time-code');
+    code.minLength = 1;
+    playerElement('p', 'Код хранится на Lenovo. Его вводит родитель один раз.', form).className = 'hint';
+  }
+  const label = playerElement('label', setup ? 'Профиль родителя' : 'Профиль игрока', form);
+  const select = playerElement('select', '', label);
+  select.required = true;
+  if (setup) {
+    const placeholder = playerElement('option', 'Выбери профиль', select);
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+  }
+  for (const player of playerList) {
+    const option = playerElement('option', player.avatar + ' ' + player.name + (player.ready ? ' · ' + player.login : ' · настроить вход'), select);
+    option.value = player.id;
+  }
+  playerElement('option', 'Создать новый профиль', select).value = 'new';
+  if (!setup) select.value = 'new';
+  const newProfile = playerElement('div', '', form);
+  const name = authField(newProfile, 'Имя или прозвище', 'text', 'off');
+  name.maxLength = 20;
+  const avatarLabel = playerElement('label', 'Аватар', newProfile);
+  const avatar = playerElement('select', '', avatarLabel);
+  for (const symbol of playerAvatars) playerElement('option', symbol, avatar).value = symbol;
+  const login = authLoginField(form);
+  const password = authField(form, 'Новый пароль — от 8 символов', 'password', 'new-password');
+  const confirm = authField(form, 'Повтори пароль', 'password', 'new-password');
+  function selectionChanged() {
+    const isNew = select.value === 'new';
+    newProfile.hidden = !isNew;
+    name.required = isNew;
+    const selected = playerList.find(player => player.id === select.value);
+    login.value = selected?.login || '';
+    password.value = confirm.value = '';
+  }
+  select.onchange = selectionChanged;
+  selectionChanged();
+  const remember = setup ? rememberField(form) : null;
+  const submit = playerElement('button', setup ? 'Настроить родительский доступ' : 'Сохранить логин и пароль', form);
+  submit.type = 'submit';
+  form.onsubmit = async event => {
+    event.preventDefault();
+    if (submit.disabled) return;
+    if (password.value !== confirm.value) { message('Пароли не совпадают.'); return; }
+    submit.disabled = true;
+    try {
+      const data = {login: login.value, password: password.value};
+      if (select.value === 'new') Object.assign(data, {name: name.value, avatar: avatar.value});
+      else data.player = select.value;
+      if (setup) Object.assign(data, {code: code.value, remember: remember.checked});
+      await apiRequest(setup ? 'auth/setup' : 'auth/accounts', data);
+      password.value = confirm.value = '';
+      if (code) code.value = '';
+      await loadPlayerSession();
+      if (!setup && parentSession) {
+        openParentSettings();
+        message('Доступ сохранён. Игрок может войти со своим паролем.');
+      }
+    } catch (error) { message(error.message); }
+    finally { submit.disabled = false; }
+  };
+}
+
+function openParentSetup() {
+  const panel = playerScreen('Первый вход', 'Родителю нужно настроить личные логины и пароли', 'player-select');
+  accountForm(panel, true);
+}
+
+function openParentSettings() {
+  if (!parentSession || !activePlayer) { openPlayerPicker(); return; }
+  const panel = playerScreen('Родительский кабинет', 'Назначь логин и пароль существующему профилю или создай новый', 'player-select');
+  accountForm(panel, false);
+  playerButton(panel, 'Назад к игре', home);
+}
+
+async function logoutPlayer() {
+  const button = $('logout-player');
+  if (writingPlayer) { message('Подожди завершения сохранения.'); return; }
+  button.disabled = true;
+  try {
+    await apiRequest('auth/logout', {});
+    parentSession = false;
+    chooseActivePlayer(null);
+    openPlayerPicker();
+  } catch (error) { message(error.message); }
+  finally { button.disabled = false; }
 }
 
 function openPlayerAlbum() {
@@ -594,14 +740,10 @@ $('choose-player').onclick = () => { openPlayerPicker(); sound('playerIntro'); }
 $('open-album').onclick = openPlayerAlbum;
 $('round-album').onclick = openPlayerAlbum;
 window.addEventListener('online', flushPlayerUpdates);
-playerRequest('').then(async list => {
-  playerList = list;
-  playerApiReady = true;
-  let remembered;
-  try { remembered = localStorage.getItem('bunny-active-player'); } catch {}
-  if (!list.some(player => player.id === remembered)) { refreshPlayerNav(); return; }
-  const version = playerScreenVersion;
-  const profile = await playerRequest('/' + remembered);
-  if (version === playerScreenVersion && phase === 'menu') chooseActivePlayer(profile);
-  else refreshPlayerNav();
-}).catch(() => { refreshPlayerNav(); });
+$('logout-player').onclick = logoutPlayer;
+$('parent-settings').onclick = openParentSettings;
+loadPlayerSession().catch(() => {
+  const panel = playerScreen('Вход в игру', 'Открой игру по домашнему адресу Lenovo', 'player-select');
+  message('Не удалось связаться с сервером входа.');
+  playerButton(panel, 'Повторить', () => location.reload());
+});

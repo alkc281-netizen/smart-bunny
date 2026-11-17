@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """Serve the home game and store private player progress outside its web root."""
 import argparse
+import hashlib
+import hmac
 import json
 import math
+import os
+import secrets
 import sqlite3
+import time
 import unicodedata
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import CookieError, SimpleCookie
 from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
@@ -23,6 +29,50 @@ REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10,
                  "chip": 7, "dale": 7, "darkwing": 12}
 MISSION_REWARDS = ("koopa", "mushroom", "mario", "chip", "dale", "darkwing")
 DAILY_MISSIONS = ("koopa", "mushroom", "mario")
+PASSWORD_ROUNDS = 600000
+
+
+def normalize_login(value):
+    if not isinstance(value, str):
+        raise ValueError("Введите логин.")
+    login = unicodedata.normalize("NFKC", value).strip().casefold()
+    if not 3 <= len(login) <= 32 or not all(c.isalnum() or c in "._-" for c in login):
+        raise ValueError("Логин — от 3 до 32 букв, цифр, точек, дефисов или подчёркиваний.")
+    return login
+
+
+def validate_password(value):
+    if not isinstance(value, str) or not 8 <= len(value) <= 128:
+        raise ValueError("Пароль — от 8 до 128 символов.")
+    return value
+
+
+def password_digest(password, salt):
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), PASSWORD_ROUNDS).hex()
+
+
+def token_digest(value):
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def initialize_database(database):
+    with closing(sqlite3.connect(database)) as db, db:
+        db.execute("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
+        db.execute("CREATE TABLE IF NOT EXISTS rounds (player TEXT, id TEXT, PRIMARY KEY(player,id))")
+        db.execute("CREATE TABLE IF NOT EXISTS accounts (player TEXT PRIMARY KEY, login TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, digest TEXT NOT NULL, parent INTEGER NOT NULL DEFAULT 0)")
+        db.execute("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, player TEXT NOT NULL, expires REAL NOT NULL)")
+        db.execute("CREATE TABLE IF NOT EXISTS auth_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        db.execute("CREATE TABLE IF NOT EXISTS login_attempts (scope TEXT PRIMARY KEY, failures INTEGER, updated REAL, blocked REAL)")
+        if not db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone():
+            setup_file = database.with_suffix(".setup-code")
+            if setup_file.exists():
+                code = setup_file.read_text().strip()
+            else:
+                code = secrets.token_urlsafe(24)
+                descriptor = os.open(setup_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(descriptor, "w") as output:
+                    output.write(code + "\n")
+            db.execute("INSERT OR REPLACE INTO auth_settings VALUES ('setup',?)", (token_digest(code),))
 
 
 def daily_mission():
@@ -135,11 +185,14 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Cache-Control", "no-store")
+        if getattr(self, "auth_cookie", None):
+            self.send_header("Set-Cookie", self.auth_cookie)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
     def handle_api(self):
+        self.auth_cookie = None
         self.character_rewards = urlsplit(self.path).query == "rewards=characters"
         host = self.headers.get("Host", "")
         origin = self.headers.get("Origin")
@@ -156,6 +209,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 if not isinstance(data, dict):
                     raise ValueError("Неверный формат запроса.")
             with closing(sqlite3.connect(self.database, timeout=5)) as db, db:
+                if data is not None:
+                    db.execute("BEGIN IMMEDIATE")
                 status, result = self.route(db, urlsplit(self.path).path, data)
             self.respond(status, result)
         except (ValueError, UnicodeError) as error:
@@ -163,33 +218,162 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         except sqlite3.Error:
             self.respond(503, {"error": "Прогресс временно недоступен. Попробуйте ещё раз."})
 
+    def session_token(self):
+        try:
+            cookies = SimpleCookie(self.headers.get("Cookie", ""))
+            return cookies["bunny_session"].value if "bunny_session" in cookies else ""
+        except CookieError:
+            return ""
+
+    def account(self, db):
+        token = self.session_token()
+        return db.execute(
+            "SELECT a.player,a.login,a.parent FROM sessions s JOIN accounts a ON a.player=s.player "
+            "WHERE s.token=? AND s.expires>?", (token_digest(token), time.time())
+        ).fetchone() if token else None
+
+    def sign_in(self, db, player_id, remember):
+        db.execute("DELETE FROM sessions WHERE token=? OR expires<=?", (token_digest(self.session_token()), time.time()))
+        token = secrets.token_urlsafe(32)
+        duration = 30 * 86400 if remember else 12 * 3600
+        db.execute("INSERT INTO sessions VALUES (?,?,?)", (token_digest(token), player_id, time.time() + duration))
+        self.auth_cookie = "bunny_session=" + token + "; HttpOnly; SameSite=Strict; Path=/"
+        if remember:
+            self.auth_cookie += "; Max-Age=" + str(duration)
+
+    def auth_status(self, db):
+        account = self.account(db)
+        profile = None
+        if account:
+            name, avatar, saved = db.execute("SELECT name,avatar,progress FROM players WHERE id=?", (account[0],)).fetchone()
+            profile = player_view(account[0], name, avatar, reward_defaults(json.loads(saved)), self.character_rewards)
+        return dict(configured=bool(db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone()),
+                    player=profile, parent=bool(account and account[2]), login=account[1] if account else None)
+
+    def auth_scope(self, action, login=""):
+        return action + ":" + self.client_address[0] + ":" + login
+
+    def blocked(self, db, scope):
+        row = db.execute("SELECT blocked FROM login_attempts WHERE scope=?", (scope,)).fetchone()
+        return bool(row and row[0] > time.time())
+
+    def failed_login(self, db, scope):
+        now = time.time()
+        db.execute("DELETE FROM login_attempts WHERE updated<?", (now - 86400,))
+        previous = db.execute("SELECT failures,updated FROM login_attempts WHERE scope=?", (scope,)).fetchone()
+        failures = previous[0] + 1 if previous and previous[1] > now - 600 else 1
+        db.execute("INSERT OR REPLACE INTO login_attempts VALUES (?,?,?,?)",
+                   (scope, failures, now, now + 300 if failures >= 5 else 0))
+
+    @staticmethod
+    def account_list(db):
+        return [dict(id=p, name=n, avatar=a, login=login, ready=bool(login))
+                for p, n, a, login in db.execute(
+                    "SELECT p.id,p.name,p.avatar,a.login FROM players p LEFT JOIN accounts a ON a.player=p.id ORDER BY p.rowid")]
+
+    @staticmethod
+    def create_player(db, data):
+        name, avatar = data.get("name"), data.get("avatar")
+        if not isinstance(name, str) or not isinstance(avatar, str) or avatar not in AVATARS:
+            raise ValueError("Выберите аватар и введите имя.")
+        name = " ".join(unicodedata.normalize("NFC", name).split())
+        if not 1 <= len(name) <= 20 or any(unicodedata.category(c).startswith("C") for c in name):
+            raise ValueError("Введите имя длиной от 1 до 20 символов.")
+        if db.execute("SELECT count(*) FROM players").fetchone()[0] >= 12:
+            raise ValueError("В игре уже 12 профилей.")
+        if any(other.casefold() == name.casefold() for (other,) in db.execute("SELECT name FROM players")):
+            raise ValueError("Такое имя уже есть. Выберите его в списке.")
+        player_id = uuid4().hex
+        db.execute("INSERT INTO players VALUES (?,?,?,?)", (player_id, name, avatar, json.dumps(initial_profile())))
+        return player_id
+
+    def save_account(self, db, data, parent=False):
+        login = normalize_login(data.get("login"))
+        password = validate_password(data.get("password"))
+        player = data.get("player")
+        if player is not None and (not isinstance(player, str) or not db.execute("SELECT 1 FROM players WHERE id=?", (player,)).fetchone()):
+            raise ValueError("Выберите существующий профиль.")
+        other = db.execute("SELECT player FROM accounts WHERE login=?", (login,)).fetchone()
+        if other and other[0] != player:
+            raise ValueError("Этот логин уже занят.")
+        if player is None:
+            player = self.create_player(db, data)
+        salt = secrets.token_hex(16)
+        digest = password_digest(password, salt)
+        existing = db.execute("SELECT parent FROM accounts WHERE player=?", (player,)).fetchone()
+        db.execute("INSERT OR REPLACE INTO accounts VALUES (?,?,?,?,?)",
+                   (player, login, salt, digest, int(parent or bool(existing and existing[0]))))
+        db.execute("DELETE FROM sessions WHERE player=?", (player,))
+        return player
+
+    def route_auth(self, db, path, data):
+        if path == "/api/auth/status" and data is None:
+            return 200, self.auth_status(db)
+        if data is None:
+            return 405, {"error": "Используйте форму входа."}
+        if path == "/api/auth/logout":
+            db.execute("DELETE FROM sessions WHERE token=?", (token_digest(self.session_token()),))
+            self.auth_cookie = "bunny_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0"
+            return 200, {"ok": True}
+        if path == "/api/auth/login":
+            login = normalize_login(data.get("login"))
+            password = validate_password(data.get("password"))
+            scope = self.auth_scope("login", login)
+            if self.blocked(db, scope) or self.blocked(db, self.auth_scope("login")):
+                return 429, {"error": "Слишком много попыток. Попробуйте через 5 минут."}
+            row = db.execute("SELECT player,salt,digest FROM accounts WHERE login=?", (login,)).fetchone()
+            digest = password_digest(password, row[1] if row else "00" * 16)
+            if not row or not hmac.compare_digest(row[2], digest):
+                self.failed_login(db, scope)
+                self.failed_login(db, self.auth_scope("login"))
+                return 401, {"error": "Неверный логин или пароль."}
+            db.execute("DELETE FROM login_attempts WHERE scope IN (?,?)", (scope, self.auth_scope("login")))
+            self.sign_in(db, row[0], data.get("remember") is True)
+            # The new cookie is sent with the response and is not in the request yet.
+            return 200, {"ok": True}
+        if path == "/api/auth/setup":
+            if db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone():
+                return 409, {"error": "Родительский доступ уже настроен. Войдите с паролем."}
+            scope = self.auth_scope("setup")
+            if self.blocked(db, scope):
+                return 429, {"error": "Слишком много попыток. Попробуйте через 5 минут."}
+            row = db.execute("SELECT value FROM auth_settings WHERE key='setup'").fetchone()
+            code = data.get("code")
+            if not row or not isinstance(code, str) or not hmac.compare_digest(row[0], token_digest(code.strip())):
+                self.failed_login(db, scope)
+                return 403, {"error": "Неверный код первоначальной настройки."}
+            player = self.save_account(db, data, parent=True)
+            db.execute("DELETE FROM auth_settings WHERE key='setup'")
+            self.sign_in(db, player, data.get("remember") is True)
+            return 200, {"ok": True}
+        if path == "/api/auth/accounts":
+            account = self.account(db)
+            if not account or not account[2]:
+                return 403, {"error": "Войдите в родительский профиль."}
+            self.save_account(db, data)
+            return 200, {"ok": True}
+        return 404, {"error": "Страница не найдена."}
+
     def route(self, db, path, data):
+        if path.startswith("/api/auth/"):
+            return self.route_auth(db, path, data)
         if path == "/api/players":
             if data is None:
-                return 200, [dict(id=i, name=n, avatar=a) for i, n, a in db.execute(
-                    "SELECT id,name,avatar FROM players ORDER BY rowid")]
-            name, avatar = data.get("name"), data.get("avatar")
-            if not isinstance(name, str) or not isinstance(avatar, str) or avatar not in AVATARS:
-                raise ValueError("Выберите аватар и введите имя.")
-            name = " ".join(unicodedata.normalize("NFC", name).split())
-            if not 1 <= len(name) <= 20 or any(unicodedata.category(c).startswith("C") for c in name):
-                raise ValueError("Введите имя длиной от 1 до 20 символов.")
-            db.execute("BEGIN IMMEDIATE")
-            if db.execute("SELECT count(*) FROM players").fetchone()[0] >= 12:
-                raise ValueError("В игре уже 12 профилей.")
-            if any(other.casefold() == name.casefold() for (other,) in db.execute("SELECT name FROM players")):
-                raise ValueError("Такое имя уже есть. Выберите его в списке.")
-            player_id = uuid4().hex
-            profile = initial_profile()
-            db.execute("INSERT INTO players VALUES (?, ?, ?, ?)", (player_id, name, avatar, json.dumps(profile)))
-            return 201, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False))
+                accounts = self.account_list(db)
+                current = self.account(db)
+                setup = not db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone()
+                return 200, accounts if setup or (current and current[2]) else [item for item in accounts if item["ready"]]
+            return 403, {"error": "Создавайте игроков в родительском кабинете."}
 
         parts = path.split("/")
         if len(parts) != 4 or parts[1:3] != ["api", "players"]:
             return 404, {"error": "Страница не найдена."}
         player_id = parts[3]
-        if data is not None:
-            db.execute("BEGIN IMMEDIATE")
+        account = self.account(db)
+        if not account:
+            return 401, {"error": "Войдите в свой профиль."}
+        if account[0] != player_id:
+            return 403, {"error": "Этот прогресс принадлежит другому игроку."}
         row = db.execute("SELECT name,avatar,progress FROM players WHERE id=?", (player_id,)).fetchone()
         if row is None:
             return 404, {"error": "Игрок не найден."}
@@ -246,9 +430,7 @@ def main():
     if options.database.resolve().is_relative_to(options.directory.resolve()):
         parser.error("The database must be outside the web directory.")
     options.database.parent.mkdir(parents=True, exist_ok=True)
-    with closing(sqlite3.connect(options.database)) as db, db:
-        db.execute("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
-        db.execute("CREATE TABLE IF NOT EXISTS rounds (player TEXT, id TEXT, PRIMARY KEY(player,id))")
+    initialize_database(options.database)
     allowed_hosts = {f"{host}:{options.port}" for host in ["127.0.0.1", "localhost", *options.host]}
     handler = partial(BunnyHandler, database=options.database, directory=options.directory, allowed_hosts=allowed_hosts)
     with ThreadingHTTPServer((options.bind, options.port), handler) as server:
