@@ -32,6 +32,7 @@ const playerAvatars = ['🌸', '⭐', '🐰', '🦊'];
 let activePlayer = null;
 let playerList = [];
 let selectedSticker = null;
+let albumDrag = null;
 let playerApiReady = false;
 let parentSession = false;
 let authConfigured = false;
@@ -120,9 +121,15 @@ async function flushPlayerUpdates() {
       if (activePlayer?.id === player) {
         // Preserve any newer preference changes still waiting to be saved.
         result.preferences = activePlayer.preferences;
+        // An earlier response must not undo a newer move waiting in the outbox.
+        for (const item of playerOutbox) {
+          if (item.player === player && item.data.kind === 'sticker' && Object.hasOwn(result.stickers, item.data.sticker)) {
+            result.stickers[item.data.sticker] = {x: item.data.x, y: item.data.y};
+          }
+        }
         const previous = Object.keys(activePlayer.stickers);
         activePlayer = result;
-        if (phase === 'player-album' && data.kind !== 'preference') {
+        if (phase === 'player-album' && !albumDrag && !['preference', 'sticker'].includes(data.kind)) {
           renderPlayerAlbum();
           if (data.kind === 'redeem') message(Object.hasOwn(result.stickers,data.sticker)
             ? 'Наклейка в альбоме. Теперь её можно приклеить!' : 'Пока не хватает монет.');
@@ -190,10 +197,15 @@ function playerButton(parent, text, action) {
 }
 
 function chooseActivePlayer(player) {
+  albumDrag = null;
+  selectedSticker = null;
   if (player) {
     for (const item of playerOutbox) {
       if (item.player === player.id && item.data.kind === 'preference') {
         player.preferences[item.data.key] = item.data.value;
+      }
+      if (item.player === player.id && item.data.kind === 'sticker' && Object.hasOwn(player.stickers, item.data.sticker)) {
+        player.stickers[item.data.sticker] = {x: item.data.x, y: item.data.y};
       }
     }
   }
@@ -390,7 +402,7 @@ function refreshRewardProfile(screen, render) {
   const version = playerScreenVersion;
   if (!player || playerOutbox.length || writingPlayer) return;
   playerRequest('/' + player.id).then(profile => {
-    if (phase === screen && playerScreenVersion === version && activePlayer === player && !writingPlayer && !playerOutbox.length) {
+    if (phase === screen && playerScreenVersion === version && activePlayer === player && !writingPlayer && !playerOutbox.length && !albumDrag) {
       activePlayer = profile;
       render();
     }
@@ -514,7 +526,109 @@ function openDailyMission() {
   refreshRewardProfile('player-daily',showDailyMission);
 }
 
+function selectAlbumSticker(key) {
+  selectedSticker = key;
+  const page = $('album-page');
+  page.classList.toggle('album-ready', Boolean(key));
+  for (const button of $('player-panel').querySelectorAll('[data-sticker]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.sticker === key));
+  }
+  message(key ? 'Теперь нажми на новое место в альбоме.' : 'Перетащи наклейку или нажми на неё, затем на новое место.');
+}
+
+function saveAlbumPosition(key, point) {
+  const fresh = activePlayer.stickers[key] === null;
+  activePlayer.stickers[key] = point;
+  selectAlbumSticker(null);
+  if (fresh) {
+    renderPlayerAlbum();
+    const complete = Object.keys(albumStickers).every(key => activePlayer.stickers[key]);
+    message(complete ? 'Все наклейки собраны!' : 'Наклейка приклеена!');
+    albumRewardSound(complete ? 'albumClear' : 'bonus');
+  } else {
+    message('Наклейка перемещена.');
+  }
+  enqueuePlayerUpdate({kind: 'sticker', sticker: key, ...point});
+}
+
+function albumPoint(page, x, y) {
+  const bounds = page.getBoundingClientRect();
+  const percent = (value, start, size) => Math.min(100, Math.max(0, 100 * (value - start) / size));
+  return {x: percent(x, bounds.left, bounds.width), y: percent(y, bounds.top, bounds.height)};
+}
+
+function paintAlbumPosition(sticker, point) {
+  sticker.style.setProperty('--x', point.x + '%');
+  sticker.style.setProperty('--y', point.y + '%');
+}
+
+function movableAlbumSticker(sticker, page, key) {
+  let gesture = null;
+  let suppressClick = false;
+  sticker.onclick = event => {
+    event.stopPropagation();
+    if (suppressClick) { suppressClick = false; return; }
+    selectAlbumSticker(selectedSticker === key ? null : key);
+  };
+  sticker.onpointerdown = event => {
+    if (!event.isPrimary || event.button !== 0 || albumDrag) return;
+    const bounds = page.getBoundingClientRect();
+    const rect = sticker.getBoundingClientRect();
+    const origin = activePlayer.stickers[key];
+    gesture = {pointer: event.pointerId, player: activePlayer.id, version: playerScreenVersion,
+      x: event.clientX, y: event.clientY, centerX: (rect.left + rect.right) / 2,
+      centerY: (rect.top + rect.bottom) / 2, bounds, origin, point: origin, moved: false};
+    suppressClick = false;
+    albumDrag = gesture;
+    sticker.setPointerCapture(event.pointerId);
+  };
+  const current = event => gesture && gesture === albumDrag && gesture.pointer === event.pointerId &&
+    gesture.player === activePlayer?.id && gesture.version === playerScreenVersion && phase === 'player-album';
+  sticker.onpointermove = event => {
+    if (!current(event)) return;
+    const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+    if (!gesture.moved && Math.hypot(dx, dy) < 6) return;
+    if (!gesture.moved) {
+      gesture.moved = true;
+      selectAlbumSticker(key);
+      sticker.classList.add('album-dragging');
+    }
+    event.preventDefault();
+    const {bounds} = gesture;
+    const clamp = (value, start, size) => Math.min(start + size - 49, Math.max(start + 49, value));
+    gesture.point = albumPoint(page, clamp(gesture.centerX + dx, bounds.left, bounds.width),
+      clamp(gesture.centerY + dy, bounds.top, bounds.height));
+    paintAlbumPosition(sticker, gesture.point);
+  };
+  const end = (event, cancelled) => {
+    if (!gesture || gesture.pointer !== event.pointerId) return;
+    const saved = gesture;
+    const valid = current(event);
+    gesture = null;
+    if (albumDrag === saved) albumDrag = null;
+    sticker.classList.remove('album-dragging');
+    if (sticker.hasPointerCapture(event.pointerId)) sticker.releasePointerCapture(event.pointerId);
+    suppressClick = saved.moved || cancelled;
+    if (!valid || cancelled) { paintAlbumPosition(sticker, saved.origin); return; }
+    if (saved.moved) saveAlbumPosition(key, saved.point);
+  };
+  sticker.onpointerup = event => end(event, false);
+  sticker.onpointercancel = sticker.onlostpointercapture = event => end(event, true);
+  sticker.onkeydown = event => {
+    const delta = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    const point = activePlayer.stickers[key];
+    const step = event.shiftKey ? 10 : 2;
+    const moved = {x: Math.max(0, Math.min(100, point.x + delta[0] * step)),
+      y: Math.max(0, Math.min(100, point.y + delta[1] * step))};
+    paintAlbumPosition(sticker, moved);
+    saveAlbumPosition(key, moved);
+  };
+}
+
 function renderPlayerAlbum() {
+  albumDrag = null;
   const focused = document.activeElement;
   const restoreFocus = focused?.id === 'album-page' || focused?.dataset?.sticker;
   const panel = phase === 'player-album' ? $('player-panel')
@@ -525,35 +639,37 @@ function renderPlayerAlbum() {
   progress.className = 'album-progress';
   const placed = Object.entries(activePlayer.stickers).filter(([, point]) => point !== null);
   const labeled = placed.map(([key]) => albumStickers[key][1]);
-  const page = playerButton(panel, placed.length ? '' : 'Здесь появятся наклейки', event => {
-    if (!selectedSticker) { message('Сначала выбери наклейку под страницей.'); return; }
-    const bounds = page.getBoundingClientRect();
-    const percent = (value, start, size) => Math.min(100, Math.max(0, 100 * (value - start) / size));
-    const x = event.detail ? percent(event.clientX, bounds.left, bounds.width) : 45;
-    const y = event.detail ? percent(event.clientY, bounds.top, bounds.height) : 78;
-    const sticker = selectedSticker;
-    selectedSticker = null;
-    activePlayer.stickers[sticker] = {x, y};
-    renderPlayerAlbum();
-    const complete = Object.keys(albumStickers).every(key => activePlayer.stickers[key]);
-    message(complete ? 'Все наклейки собраны!' : 'Наклейка приклеена!');
-    albumRewardSound(complete ? 'albumClear' : 'bonus');
-    enqueuePlayerUpdate({kind: 'sticker', sticker, x, y});
+  const page = playerElement('div', placed.length ? '' : 'Здесь появятся наклейки', panel);
+  page.tabIndex = 0;
+  page.setAttribute('role', 'group');
+  page.onclick = event => {
+    if (!selectedSticker) { selectAlbumSticker(null); return; }
+    const point = event.detail ? albumPoint(page, event.clientX, event.clientY) : {x: 45, y: 78};
+    const existing = page.querySelector('[data-sticker="' + selectedSticker + '"]');
+    if (existing) paintAlbumPosition(existing, point);
+    saveAlbumPosition(selectedSticker, point);
     $('album-page').focus();
-  });
+  };
+  page.onkeydown = event => {
+    if (event.target !== page || !['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    page.onclick({detail: 0});
+  };
   page.id = 'album-page';
   if (selectedSticker) page.classList.add('album-ready');
   page.setAttribute('aria-label', 'Страница альбома' + (labeled.length ? '. Наклейки: ' + labeled.join(', ') : ''));
   for (const [key, point] of placed) {
     const [, title] = albumStickers[key];
-    const sticker = playerElement('span', '', page);
+    const sticker = playerButton(page, '', null);
     sticker.className = 'album-sticker';
     sticker.dataset.kind = key;
-    sticker.setAttribute('aria-hidden', 'true');
-    sticker.style.setProperty('--x', point.x + '%');
-    sticker.style.setProperty('--y', point.y + '%');
+    sticker.dataset.sticker = key;
+    sticker.setAttribute('aria-label', title + '. Перетащи или выбери и нажми на новое место. Стрелки перемещают наклейку.');
+    sticker.setAttribute('aria-pressed', String(selectedSticker === key));
+    paintAlbumPosition(sticker, point);
     stickerArt(sticker,key);
     playerElement('span', title, sticker);
+    movableAlbumSticker(sticker, page, key);
   }
   const unplaced = Object.keys(activePlayer.stickers).filter(key => activePlayer.stickers[key] === null);
   if (unplaced.length) {
@@ -562,8 +678,7 @@ function renderPlayerAlbum() {
     for (const key of unplaced) {
       const [, title, reason] = albumStickers[key];
       const button = playerButton(tray, '', () => {
-        selectedSticker = selectedSticker === key ? null : key;
-        renderPlayerAlbum();
+        selectAlbumSticker(selectedSticker === key ? null : key);
       });
       button.dataset.sticker = key;
       button.setAttribute('aria-pressed', String(selectedSticker === key));
@@ -575,6 +690,7 @@ function renderPlayerAlbum() {
   } else if (!placed.length) {
     message('Заверши тренировку, чтобы получить первую наклейку.');
   }
+  if (placed.length || selectedSticker) selectAlbumSticker(selectedSticker);
   if (activePlayer.rewards) renderMarioCollection(panel);
   if (restoreFocus) {
     const target = focused.dataset?.sticker && panel.querySelector('[aria-pressed="true"]');

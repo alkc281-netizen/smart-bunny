@@ -121,6 +121,8 @@ h1{font-size:26px}
   border: 2px solid var(--edge);
   background: repeating-linear-gradient(var(--panel) 0 27px, var(--shell) 28px 29px);
   overflow: hidden;
+  padding: 0;
+  border-radius: 12px;
 }
 #album-page.album-ready { outline: 3px dashed var(--accent); outline-offset: 2px; }
 .album-sticker {
@@ -139,8 +141,16 @@ h1{font-size:26px}
   box-shadow: 0 2px 5px #0003;
   text-align: center;
   font: 600 12px/1.15 system-ui, sans-serif;
-  pointer-events: none;
+  padding: 4px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
 }
+.album-sticker[aria-pressed=true], .album-sticker:focus-visible { outline: 3px solid var(--accent); z-index: 1; }
+.album-sticker.album-dragging { cursor: grabbing; z-index: 2; }
+.album-sticker .sticker-art { display: block; width: 34px; height: 34px; margin: 0 auto 2px; pointer-events: none; }
 .album-sticker span:first-child { font-size: 32px; }
 .album-sticker[data-kind=books] { background: #e7ebff; }
 .album-sticker[data-kind=detective] { background: #ffeec2; }
