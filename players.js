@@ -1,31 +1,129 @@
 'use strict';
 
+// BEGIN GENERATED STICKER CATALOG
 const albumStickers = {
-  start: ['🐰', 'Первый раунд', 'За первую завершённую тренировку.'],
-  books: ['📚', 'Книжный герой', 'За тренировку в трёх разных темах или играх.'],
-  detective: ['🔍', 'Сыщик ошибок', 'За верный ответ с первой попытки в работе над ошибками.'],
-  rocket: ['🚀', 'Ракета прогресса', 'За новый личный рекорд в одной теме или игре.'],
-  coin: ['🪙', 'Монетка', 'Первая монетка за тренировку.'],
-  mushroom: ['🍄', 'Супергриб', '10 заданий по двум пройденным темам русского.'],
-  star: ['⭐', 'Звезда', 'Три верных ответа в работе над ошибками. Исправления тоже считаются.'],
-  koopa: ['🐢', 'Купа', '5 заданий на сравнение чисел и 5 на сложение.'],
-  mario: ['🍄', 'Марио', '5 заданий по математике и 5 по русскому.'],
-  chip: ['🐿️', 'Чип', 'Миссия «План Чипа»: 10 заданий по двум пройденным темам русского.'],
-  dale: ['🐿️', 'Дейл', 'Миссия «Находки Дейла»: 5 сравнений чисел и 5 сложений.'],
-  darkwing: ['🦆', 'Чёрный Плащ', 'Миссия «Ночной патруль»: 5 заданий по математике и 5 по русскому.'],
+  "start": [
+    "🐰",
+    "Первый раунд",
+    "За первую завершённую тренировку."
+  ],
+  "books": [
+    "📚",
+    "Книжный герой",
+    "За тренировку в трёх разных темах или играх."
+  ],
+  "detective": [
+    "🔍",
+    "Сыщик ошибок",
+    "За верный ответ с первой попытки в работе над ошибками."
+  ],
+  "rocket": [
+    "🚀",
+    "Ракета прогресса",
+    "За новый личный рекорд в одной теме или игре."
+  ],
+  "coin": [
+    "🪙",
+    "Монетка",
+    "Первая монетка за тренировку."
+  ],
+  "mushroom": [
+    "🍄",
+    "Супергриб",
+    "10 заданий по двум пройденным темам русского."
+  ],
+  "star": [
+    "⭐",
+    "Звезда",
+    "Три верных ответа в работе над ошибками. Исправления тоже считаются."
+  ],
+  "koopa": [
+    "🐢",
+    "Купа",
+    "5 заданий на сравнение чисел и 5 на сложение."
+  ],
+  "mario": [
+    "🍄",
+    "Марио",
+    "5 заданий по математике и 5 по русскому."
+  ],
+  "chip": [
+    "🐿️",
+    "Чип",
+    "Миссия «План Чипа»: 10 заданий по двум пройденным темам русского."
+  ],
+  "dale": [
+    "🐿️",
+    "Дейл",
+    "Миссия «Находки Дейла»: 5 сравнений чисел и 5 сложений."
+  ],
+  "darkwing": [
+    "🦆",
+    "Чёрный Плащ",
+    "Миссия «Ночной патруль»: 5 заданий по математике и 5 по русскому."
+  ]
 };
-const marioStickerArt = {mario:'hero', mushroom:'mushroom', koopa:'koopa'};
+const stickerImagePaths = {
+  "mushroom": "assets/sprites/mario/drawn/mushroom.png",
+  "koopa": "assets/sprites/mario/drawn/koopa.png",
+  "mario": "assets/sprites/mario/drawn/hero.png"
+};
 const characterStickerFrames = {
-  chip:{file:'rescue-rangers.gif',x:23,y:110,width:36,height:35},
-  dale:{file:'rescue-rangers.gif',x:125,y:110,width:34,height:35},
-  darkwing:{file:'darkwing-duck.gif',x:62,y:297,width:53,height:57},
+  "chip": {
+    "file": "rescue-rangers.gif",
+    "x": 23,
+    "y": 110,
+    "width": 36,
+    "height": 35
+  },
+  "dale": {
+    "file": "rescue-rangers.gif",
+    "x": 125,
+    "y": 110,
+    "width": 34,
+    "height": 35
+  },
+  "darkwing": {
+    "file": "darkwing-duck.gif",
+    "x": 62,
+    "y": 297,
+    "width": 53,
+    "height": 57
+  }
 };
-const stickerMissionTypes = {mushroom:'russian', koopa:'math', mario:'mixed', chip:'russian', dale:'math', darkwing:'mixed'};
+const stickerMissionTypes = {
+  "mushroom": "russian",
+  "koopa": "math",
+  "mario": "mixed",
+  "chip": "russian",
+  "dale": "math",
+  "darkwing": "mixed"
+};
 const stickerCollections = [
-  {name:'Коллекция Марио',keys:['mushroom','star','koopa','mario']},
-  {name:'Чип и Дейл',keys:['chip','dale']},
-  {name:'Чёрный Плащ',keys:['darkwing']},
+  {
+    "name": "Коллекция Марио",
+    "keys": [
+      "mushroom",
+      "star",
+      "koopa",
+      "mario"
+    ]
+  },
+  {
+    "name": "Чип и Дейл",
+    "keys": [
+      "chip",
+      "dale"
+    ]
+  },
+  {
+    "name": "Чёрный Плащ",
+    "keys": [
+      "darkwing"
+    ]
+  }
 ];
+// END GENERATED STICKER CATALOG
 const dailyMissionButton = playerButton($('game-menu'), '🪙 Миссия дня', openDailyMission);
 dailyMissionButton.hidden = true;
 const playerAvatars = ['🌸', '⭐', '🐰', '🦊'];
@@ -45,7 +143,7 @@ try {
 } catch {}
 
 async function apiRequest(path, data) {
-  const response = await fetch('/api/' + path + '?rewards=characters', {
+  const response = await fetch('/api/' + path + '?rewards=catalog-v1', {
     cache: 'no-store',
     credentials: 'same-origin',
     signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(8000) : undefined,
@@ -438,8 +536,7 @@ function stickerArt(parent, key) {
     icon.classList.add('mario-coin');
   }
   const frame=characterStickerFrames[key];
-  const source = marioStickerArt[key] ? 'assets/sprites/mario/drawn/' + marioStickerArt[key] + '.png'
-    : frame ? 'assets/stickers/' + frame.file : null;
+  const source = stickerImagePaths[key] || (frame ? 'assets/stickers/' + frame.file : null);
   if (source) {
     const image = document.createElement('img');
     image.alt = '';
@@ -657,7 +754,7 @@ function renderPlayerAlbum() {
   message('');
   const progress = playerElement('p', 'Раундов завершено: ' + activePlayer.rounds + ' · Верных ответов: ' + activePlayer.correct, panel);
   progress.className = 'album-progress';
-  const placed = Object.entries(activePlayer.stickers).filter(([, point]) => point !== null);
+  const placed = Object.entries(activePlayer.stickers).filter(([key, point]) => albumStickers[key] && point !== null);
   const labeled = placed.map(([key]) => albumStickers[key][1]);
   const page = playerElement('div', placed.length ? '' : 'Здесь появятся наклейки', panel);
   page.tabIndex = 0;
@@ -691,7 +788,7 @@ function renderPlayerAlbum() {
     playerElement('span', title, sticker);
     movableAlbumSticker(sticker, page, key);
   }
-  const unplaced = Object.keys(activePlayer.stickers).filter(key => activePlayer.stickers[key] === null);
+  const unplaced = Object.keys(activePlayer.stickers).filter(key => albumStickers[key] && activePlayer.stickers[key] === null);
   if (unplaced.length) {
     const tray = playerElement('div', '', panel);
     tray.className = 'album-tray';
@@ -726,7 +823,7 @@ function playerRoundId() {
 }
 
 let rewardRound;
-names.mission='Миссия Марио';
+names.mission='Миссия за наклейку';
 gameMusic.mission=gameMusic.compare;
 
 function rewardMath(count) {

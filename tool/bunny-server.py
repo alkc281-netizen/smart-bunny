@@ -16,7 +16,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from http.cookies import CookieError, SimpleCookie
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from uuid import UUID, uuid4
 
 
@@ -27,9 +27,12 @@ PREFERENCES = {
 }
 PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "english", "world")
                 for setting in ("class", "count", "studied2", "studied4", "mistakes")}
-REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10,
-                 "chip": 7, "dale": 7, "darkwing": 12}
-MISSION_REWARDS = ("koopa", "mushroom", "mario", "chip", "dale", "darkwing")
+# BEGIN GENERATED STICKER CATALOG
+REWARD_PRICES = {'mushroom': 5, 'star': 6, 'koopa': 7, 'mario': 10, 'chip': 7, 'dale': 7, 'darkwing': 12}
+MISSION_REWARDS = ('mushroom', 'koopa', 'mario', 'chip', 'dale', 'darkwing')
+CHARACTER_STICKERS = ('chip', 'dale', 'darkwing')
+CATALOG_ONLY_STICKERS = ()
+# END GENERATED STICKER CATALOG
 DAILY_MISSIONS = ("koopa", "mushroom", "mario")
 PASSWORD_ROUNDS = 600000
 
@@ -97,16 +100,16 @@ def school_classes(profile):
     return valid or [1, 2, 3, 4]
 
 
-def player_view(player_id, name, avatar, profile, characters=False):
+def player_view(player_id, name, avatar, profile, characters=False, catalog=False):
     day, mission = daily_mission()
     prices = dict(REWARD_PRICES)
     visible = dict(profile)
     visible["schoolClasses"] = school_classes(profile)
+    hidden = set() if catalog else set(CATALOG_ONLY_STICKERS)
     if not characters:
-        # Older open tabs know only the original collections.
-        new_stickers = {"chip", "dale", "darkwing"}
-        prices = {key: cost for key, cost in prices.items() if key not in new_stickers}
-        visible["stickers"] = {key: value for key, value in profile["stickers"].items() if key not in new_stickers}
+        hidden.update(CHARACTER_STICKERS)
+    prices = {key: cost for key, cost in prices.items() if key not in hidden}
+    visible["stickers"] = {key: value for key, value in profile["stickers"].items() if key not in hidden}
     return dict(id=player_id, name=name, avatar=avatar, **visible,
                 rewards=dict(prices=prices, day=day, mission=mission))
 
@@ -204,7 +207,9 @@ class BunnyHandler(SimpleHTTPRequestHandler):
 
     def handle_api(self):
         self.auth_cookie = None
-        self.character_rewards = urlsplit(self.path).query == "rewards=characters"
+        reward_version = parse_qs(urlsplit(self.path).query).get("rewards", [""])[0]
+        self.character_rewards = reward_version in ("characters", "catalog-v1")
+        self.catalog_rewards = reward_version == "catalog-v1"
         host = self.headers.get("Host", "")
         origin = self.headers.get("Origin")
         if host not in self.allowed_hosts or (origin and origin != "http://" + host):
@@ -257,7 +262,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         profile = None
         if account:
             name, avatar, saved = db.execute("SELECT name,avatar,progress FROM players WHERE id=?", (account[0],)).fetchone()
-            profile = player_view(account[0], name, avatar, reward_defaults(json.loads(saved)), self.character_rewards)
+            profile = player_view(account[0], name, avatar, reward_defaults(json.loads(saved)), self.character_rewards, self.catalog_rewards)
         return dict(configured=bool(db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone()),
                     player=profile, parent=bool(account and account[2]), login=account[1] if account else None)
 
@@ -393,7 +398,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if data is not None:
             self.update(db, player_id, profile, data)
             db.execute("UPDATE players SET progress=? WHERE id=?", (json.dumps(profile), player_id))
-        return 200, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False))
+        return 200, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False), getattr(self, "catalog_rewards", False))
 
     @staticmethod
     def update(db, player_id, profile, data):
