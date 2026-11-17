@@ -87,6 +87,16 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
         assert request(child, "players/old-child", event)[0] == 200
         result = request(child, "players/old-child", event)[1]
         assert result["rounds"] == 1 and result["coins"] == 1
+        # Placing and moving an earned sticker changes only its coordinates.
+        for x, y in [(25, 35), (75, 60), (0, 100), (45.125, 55.555)]:
+            code, moved, _ = request(child, "players/old-child", dict(kind="sticker", sticker="start", x=x, y=y))
+            assert code == 200 and moved["stickers"]["start"] == dict(x=round(x, 2), y=round(y, 2))
+            assert moved["rounds"] == 1 and moved["coins"] == 1 and moved["correct"] == 9
+        for invalid in [dict(sticker="mario", x=20, y=30), dict(sticker="start", x=-1, y=30),
+                        dict(sticker="start", x=101, y=30), dict(sticker="start", x=True, y=30),
+                        dict(sticker="start", x="25", y=30)]:
+            assert request(child, "players/old-child", dict(kind="sticker", **invalid))[0] == 400
+        assert request(child, "players/old-child")[1]["stickers"]["start"] == moved["stickers"]["start"]
 
         assert request(second_child, "auth/login", dict(login="child", password="Child-test-123"))[0] == 200
         assert request(parent, "auth/accounts", dict(child_account, password="New-child-test-123"))[0] == 200
