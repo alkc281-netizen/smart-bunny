@@ -448,3 +448,25 @@ h1{font-size:26px}
   padding: 4px 5px;
   font-size: 12px;
 }
+
+.school-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.school-table caption {
+  margin-bottom: .35em;
+  font-weight: 600;
+  text-align: left;
+}
+.school-table th, .school-table td {
+  padding: .4em .65em;
+  border: 1px solid var(--edge);
+}
+.school-table th {
+  font-weight: 600;
+}
+.school-table td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

@@ -44,11 +44,13 @@ const schoolTopics = {
 };
 
 // Each scenario supplies its own distractors, drawn from plausible mistakes in the solution.
-function schoolExample(key, prompt, correct, distractors, explanation) {
+function schoolExample(key, prompt, correct, distractors, explanation, table) {
   const options = [...new Set([correct, ...distractors].map(String))];
   const items = schoolTopics[key].items;
-  if (!items.some(item => item[0] === prompt)) {
-    items.push([prompt, String(correct), options, explanation]);
+  if (!items.some(item => item[0] === prompt && JSON.stringify(item[4]) === JSON.stringify(table))) {
+    const item = [prompt, String(correct), options, explanation];
+    if (table) item.push(table);
+    items.push(item);
   }
 }
 
@@ -97,14 +99,27 @@ function addJuniorMath(n) {
   if (2 * a - c <= 100) add('problems', `Библиотека выдала в понедельник ${a} книг, во вторник — на ${c} меньше. Сколько книг выдали за два дня?`,
     2 * a - c, [a - c, 2 * a + c, a + c],
     `Во вторник выдали ${a} − ${c} = ${a - c} книг. За два дня выдали ${a} + ${a - c} = ${2 * a - c}.`);
-  add('problems', `В мастерской сделали ${a} открыток. После продажи осталось ${b}. К вечеру сделали ещё ${c}. Какой вопрос можно решить действием ${a} − ${b}?`,
-    'Сколько открыток продали?', ['Сколько открыток стало к вечеру?', 'Сколько открыток сделали за день?'],
-    `Из ${a} готовых открыток осталось ${b}. Разность показывает, сколько продали. Новые ${c} к этому вопросу не относятся.`);
-  add('problems', `В таблице указано, сколько грибов нашли:
-Лена — ${a}; Оля — ${a + c}; Макс — ${b}.
-На сколько грибов Оля нашла больше Макса?`,
-    a + c - b, [c, a - b, a + c + b],
-    `Сравниваем Олю и Макса. Вычитаем из ${a + c} число ${b} и получаем ${a + c - b}.`);
+  add('problems', `За день в мастерской продали ${b} открыток, а после продажи сделали ещё ${c}. К вечеру осталось ${a} открыток. Сколько их было утром?`,
+    a - c + b, [a + c + b, a - c, a + b],
+    `Идём от конца дня к началу. До изготовления новых открыток было ${a} − ${c} = ${a - c}. Возвращаем проданные открытки: ${a - c} + ${b} = ${a - c + b}.`);
+  const mushroomTable = {
+    caption: 'Сколько грибов нашли',
+    headers: ['Кто', 'Грибы, шт.'],
+    rows: [['Лена', a], ['Оля', a + c], ['Макс', b]],
+  };
+  add('problems', 'По таблице определи, на сколько больше грибов нашли Лена и Макс вместе, чем Оля одна.',
+    b - c, [c, a + c - b, a + b],
+    `Лена и Макс вместе нашли ${a} + ${b} = ${a + b} грибов. Теперь сравниваем общий результат с Олиным: ${a + b} − ${a + c} = ${b - c}.`,
+    mushroomTable);
+  const booksTable = {
+    caption: 'Дневник чтения',
+    headers: ['День', 'Прочитано страниц'],
+    rows: [['Понедельник', a - c], ['Вторник', '?'], ['Среда', c]],
+  };
+  add('problems', `За три дня прочитали ${a + b} страниц. Сколько из них прочитали во вторник? Пользуйся дневником чтения.`,
+    b, [b + c, a, a + b - c],
+    `Понедельник и среда вместе: ${a - c} + ${c} = ${a} страниц. Вычитаем их из общего числа: ${a + b} − ${a} = ${b}.`,
+    booksTable);
   add('length', `Для модели соединили полоску длиной ${length - t} см и обрезок длиной ${u * 10 + 5} мм. Какова общая длина в миллиметрах?`,
     (length - t + u) * 10 + 5, [length - t + u * 10 + 5, (length + u) * 10 + 5, (length - t + u) * 10],
     `Переведи первый кусок в мм: ${length - t} см = ${(length - t) * 10} мм. Прибавь ${u * 10 + 5} мм.`);

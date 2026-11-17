@@ -25,7 +25,7 @@ function cancelTask(){taskToken++;clearTimeout(timeout);timeout=null;pendingTask
 function wait(ms,fn){const token=++taskToken;clearTimeout(timeout);pendingTask={fn,deadline:performance.now()+ms};timeout=setTimeout(()=>{if(token===taskToken){pendingTask=null;timeout=null;fn()}},ms)}
 function mood(name=''){$('rabbit').className='rabbit '+name}
 function message(text){$('message').textContent=text}
-function panels(){['game-menu','math-modes','math-menu','school-menu','answers','keypad','digits','settings','finished','russian-menu','russian-detail'].forEach(id=>setVisible(id,false))}
+function panels(){['game-menu','math-modes','math-menu','school-menu','school-table','answers','keypad','digits','settings','finished','russian-menu','russian-detail'].forEach(id=>setVisible(id,false))}
 const audioBuffers=new Map();
 const retiringMusic=new Set();
 let loopManifest=null;
@@ -169,7 +169,7 @@ function choose(value){if(game==='russian'){russianChoose(value);return}if(game=
 function nextTask(){round++;const total=roundQuestionCount();if(round>=total){finish();return}updateMarioCourse(round,total);if(round%10===0){mood('happy');sound('bonus');message(`⭐ ${round} заданий пройдено!`);wait(950,newTask)}else newTask()}
 function finish(){const total=roundQuestionCount();updateMarioCourse(total,total);if(game==='russian'){russianFinish();return}if(game==='mission'){window.bunnyMissions.finish();return}if(game==='school'){window.bunnySchool.finish();return}cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';$('score').textContent='⭐ '+score;$('heading').textContent='🏆 Победа!';$('hint').textContent=names[game];message(`⭐ Баллов: ${score} из ${roundQuestionCount()}`);victorySound()}
 function openSettings(){if(phase==='settings')return;
- const ids=['game-menu','math-modes','math-menu','school-menu','answers','keypad','digits','settings','finished','stats','progress','russian-menu','russian-detail'];
+ const ids=['game-menu','math-modes','math-menu','school-menu','school-table','answers','keypad','digits','settings','finished','stats','progress','russian-menu','russian-detail'];
  settingsSnapshot={phase,visible:ids.map(id=>[id,!$(id).hidden]),heading:$('heading').textContent,hint:$('hint').textContent,message:$('message').textContent,messageClass:$('message').className,pending:pendingTask?{fn:pendingTask.fn,remaining:Math.max(0,pendingTask.deadline-performance.now())}:null};
  cancelTask();phase='settings';panels();setVisible('settings',true);$('heading').textContent='🎵 Музыкальное меню';$('hint').textContent='Настрой музыку и звуковые эффекты';message('Выбери мелодию');setAudioLevel()
 }

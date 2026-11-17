@@ -69,8 +69,12 @@ function openSchoolStudied(){
  }
  playerButton(box,'Готово',openSchoolTopics).className='wide';message('Отмечено тем: '+schoolStudied.size);
 }
+function schoolItemId(item) {
+ const [prompt,correct,,,table]=item;
+ return JSON.stringify(table ? [prompt,correct,table] : [prompt,correct]);
+}
 function pickSchoolItems(key,count){
- const items=schoolTopics[key].items,ids=items.map(item=>JSON.stringify(item.slice(0,2)));
+ const items=schoolTopics[key].items,ids=items.map(schoolItemId);
  let history={};try{history=JSON.parse(schoolRead('bunny-school-history-'+key,'{}'))||{}}catch{}
  const valid=new Set(ids),seen=new Set(Array.isArray(history.seen)?history.seen.filter(id=>valid.has(id)):[]);
  const recent=Array.isArray(history.last)?history.last.filter(id=>valid.has(id)).slice(-10):[],deck=[];
@@ -79,9 +83,10 @@ function pickSchoolItems(key,count){
   if (usedInRound.size === items.length) usedInRound.clear();
   let available=items.filter((_,i)=>!seen.has(ids[i])&&!usedInRound.has(ids[i]));
   if(!available.length){seen.clear();available=items.filter((_,i)=>!usedInRound.has(ids[i]))}
-  const fresh=available.filter(item=>!recent.includes(JSON.stringify(item.slice(0,2))));
-  const next=shuffledRussian(fresh.length?fresh:available)[0],id=JSON.stringify(next.slice(0,2));
-  deck.push([...next,key]);seen.add(id);usedInRound.add(id);recent.push(id);if(recent.length>10)recent.shift();
+  const fresh=available.filter(item=>!recent.includes(schoolItemId(item)));
+  const next=shuffledRussian(fresh.length?fresh:available)[0],id=schoolItemId(next);
+  const [prompt,correct,choices,explanation,table]=next;
+  deck.push([prompt,correct,choices,explanation,key,table]);seen.add(id);usedInRound.add(id);recent.push(id);if(recent.length>10)recent.shift();
  }
  schoolSave('bunny-school-history-'+key,JSON.stringify({seen:[...seen],last:recent}));return deck;
 }
@@ -110,11 +115,27 @@ function launchSchoolRound(deck,mode,topic){
  schoolDeck=deck;schoolMode=mode;schoolTopic=topic;schoolCorrected=0;schoolStats={};
  gameMusic.school={math:1,english:2,world:0}[schoolSubject];begin('school');
 }
+function renderSchoolTable(data) {
+ const table=$('school-table');
+ table.replaceChildren();
+ setVisible('school-table',Boolean(data));
+ if(!data)return;
+ playerElement('caption',data.caption,table);
+ const headings=playerElement('tr','',playerElement('thead','',table));
+ for(const label of data.headers) playerElement('th',label,headings).scope='col';
+ const body=playerElement('tbody','',table);
+ for(const [label,value] of data.rows){
+  const row=playerElement('tr','',body);
+  playerElement('th',label,row).scope='row';
+  playerElement('td',String(value),row);
+ }
+}
 function renderSchoolQuestion(){
- const [prompt,correct,choices,,key]=schoolDeck[round],topic=schoolTopics[key];
+ const [prompt,correct,choices,,key,table]=schoolDeck[round],topic=schoolTopics[key];
  phase='answer';answer=correct;$('heading').textContent=schoolMode==='topic'?topic.name:schoolMode==='mistakes'?'Работа над ошибками':'Смешанная тренировка';
- $('hint').textContent=schoolSubjects[schoolSubject][1]+' · '+schoolClass+' класс · '+topic.name+(attempt===2?' · Вторая попытка':'');
+ $('hint').textContent=schoolSubjects[schoolSubject][1]+' · '+schoolClass+' класс'+(schoolMode==='topic'?'':' · '+topic.name)+(attempt===2?' · Вторая попытка':'');
  message(prompt);$('message').classList.toggle('russian-question',true);setVisible('russian-detail',false);
+ renderSchoolTable(table);
  $('answers').replaceChildren();
  const longChoices=choices.some(choice=>choice.length>34);
  for(const choice of shuffledRussian(choices)){
@@ -129,11 +150,11 @@ function schoolChoose(value){
  const [,correct,,,key]=schoolDeck[round],topic=schoolTopics[key],stat=schoolStats[key]||(schoolStats[key]={total:0,correct:0,corrected:0});
  if(attempt===1){stat.total++;if(value===correct){stat.correct++;if(schoolMode==='mistakes')schoolMistakes[key]=Math.max(0,(schoolMistakes[key]||0)-1)}else schoolMistakes[key]=(schoolMistakes[key]||0)+1;schoolSave(schoolKey('mistakes'),JSON.stringify(schoolMistakes))}
  else if(value===correct)stat.corrected++;
- if(value===correct){if(attempt===1)score++;else schoolCorrected++;$('score').textContent='⭐ '+score;mood('happy');sound('coin');message(attempt===1?'Правильно! +1 балл':'Ты исправил ошибку!');wait(1200,nextTask);return;}
+ if(value===correct){setVisible('school-table',false);if(attempt===1)score++;else schoolCorrected++;$('score').textContent='⭐ '+score;mood('happy');sound('coin');message(attempt===1?'Правильно! +1 балл':'Ты исправил ошибку!');wait(1200,nextTask);return;}
  mood('sad');sound('wrong');message('Правильный ответ: '+correct);$('hint').textContent='Разберём задание';
  $('russian-detail').className='hint russian-rule';$('russian-detail').textContent=schoolDeck[round][3]+'\n\n'+topic.rule;setVisible('russian-detail',true);
  const deck=schoolDeck,task=round;let confirmed=false;$('answers').replaceChildren();
- playerButton($('answers'),'Продолжить',()=>{if(confirmed||game!=='school'||schoolDeck!==deck||round!==task||phase!=='feedback')return;confirmed=true;phase='transition';if(attempt===2)nextTask();else{attempt=2;sound('retry');renderSchoolQuestion()}}).className='wide';setVisible('answers',true);
+ playerButton($('answers'),'Продолжить',()=>{if(confirmed||game!=='school'||schoolDeck!==deck||round!==task||phase!=='feedback')return;confirmed=true;phase='transition';if(attempt===2){setVisible('school-table',false);nextTask()}else{attempt=2;sound('retry');renderSchoolQuestion()}}).className='wide';setVisible('answers',true);
 }
 function schoolFinish(){
  cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Раунд завершён';
