@@ -93,6 +93,19 @@ with sqlite3.connect(database) as db:
       launchSchoolRound([[...sample, 'world2nature']], 'topic', 'world2nature'); })()`);
     assert.equal(await evaluate("document.documentElement.scrollWidth>innerWidth"),false);
     assert.ok(await evaluate("Array.from($('answers').children).every(button=>button.style.gridColumn==='1 / -1')"));
+    await evaluate(`(() => { openSchoolClasses('math');
+      const [prompt,correct,choices,why,table]=schoolTopics.math2problems.items.find(item=>item[4]?.rows[0][1]===27 && item[4].caption==='Сколько грибов нашли');
+      launchSchoolRound([[prompt,correct,choices,why,'math2problems',table]], 'topic', 'math2problems'); })()`);
+    assert.deepEqual(await evaluate("Array.from($('school-table').querySelectorAll('tbody td'),cell=>cell.textContent)"),['27','36','15']);
+    assert.equal(await evaluate("document.documentElement.scrollWidth>innerWidth"),false);
+    await evaluate("choose('9');openSettings()");
+    assert.equal(await evaluate("$('school-table').hidden"),true);
+    await evaluate("settingsBack()");
+    assert.equal(await evaluate("$('school-table').hidden"),false);
+    await evaluate("$('answers').children[0].click()");
+    assert.equal(await evaluate("$('school-table').querySelector('caption').textContent"),'Сколько грибов нашли');
+    await evaluate("home()");
+    assert.equal(await evaluate("$('school-table').hidden"),true);
     console.log('PASS subject navigation and long answer layout',width,height);
   }
   await evaluate("openSchoolClasses('english');openSchoolStudied();$('school-menu').children[0].children[0].click();$('school-menu').children[0].children[1].click();openSchoolTopics()");
