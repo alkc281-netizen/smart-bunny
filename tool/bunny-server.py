@@ -25,6 +25,8 @@ PREFERENCES = {
     "bunny-russian-class", "bunny-russian-count", "bunny-russian-grade-1",
     "bunny-russian-mistakes", "bunny-russian-studied-2", "bunny-russian-studied-4",
 }
+PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "english", "world")
+                for setting in ("class", "count", "studied2", "studied4", "mistakes")}
 REWARD_PRICES = {"mushroom": 5, "star": 6, "koopa": 7, "mario": 10,
                  "chip": 7, "dale": 7, "darkwing": 12}
 MISSION_REWARDS = ("koopa", "mushroom", "mario", "chip", "dale", "darkwing")
@@ -133,7 +135,7 @@ def apply_round(profile, data):
         raise ValueError("Некорректный результат тренировки.")
     profile["rounds"] += 1
     profile["correct"] += score
-    profile["topics"] = sorted(set(profile["topics"] + topics))[:100]
+    profile["topics"] = sorted(set(profile["topics"] + topics))[:512]
     award(profile, "start")
     if len(profile["topics"]) >= 3:
         award(profile, "books")
@@ -400,8 +402,10 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             key, value = data.get("key"), data.get("value")
             if not isinstance(key, str) or key not in PREFERENCES or not isinstance(value, str) or len(value) > 8000:
                 raise ValueError("Некорректная настройка.")
-            if key == "bunny-russian-class" and value not in [str(grade) for grade in school_classes(profile)]:
+            if (key == "bunny-russian-class" or (key.startswith("bunny-school-") and key.endswith("-class"))) and value not in [str(grade) for grade in school_classes(profile)]:
                 raise ValueError("Этот класс не выбран для игрока.")
+            if key.startswith("bunny-school-") and key.endswith("-class") and value not in ("2", "4"):
+                raise ValueError("Учебники доступны для 2-го и 4-го классов.")
             profile["preferences"][key] = value
         elif kind == "round":
             operation = data.get("id")
