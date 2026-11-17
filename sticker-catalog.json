@@ -1,0 +1,525 @@
+{
+  "version": 1,
+  "collections": [
+    {
+      "id": "mario",
+      "name": "Коллекция Марио"
+    },
+    {
+      "id": "rangers",
+      "name": "Чип и Дейл"
+    },
+    {
+      "id": "darkwing",
+      "name": "Чёрный Плащ"
+    }
+  ],
+  "stickers": [
+    {
+      "id": "start",
+      "icon": "🐰",
+      "name": "Первый раунд",
+      "rule": "За первую завершённую тренировку.",
+      "collection": "basic",
+      "enabled": true
+    },
+    {
+      "id": "books",
+      "icon": "📚",
+      "name": "Книжный герой",
+      "rule": "За тренировку в трёх разных темах или играх.",
+      "collection": "basic",
+      "enabled": true
+    },
+    {
+      "id": "detective",
+      "icon": "🔍",
+      "name": "Сыщик ошибок",
+      "rule": "За верный ответ с первой попытки в работе над ошибками.",
+      "collection": "basic",
+      "enabled": true
+    },
+    {
+      "id": "rocket",
+      "icon": "🚀",
+      "name": "Ракета прогресса",
+      "rule": "За новый личный рекорд в одной теме или игре.",
+      "collection": "basic",
+      "enabled": true
+    },
+    {
+      "id": "coin",
+      "icon": "🪙",
+      "name": "Монетка",
+      "rule": "Первая монетка за тренировку.",
+      "collection": "basic",
+      "enabled": true
+    },
+    {
+      "id": "mushroom",
+      "icon": "🍄",
+      "name": "Супергриб",
+      "rule": "10 заданий по двум пройденным темам русского.",
+      "collection": "mario",
+      "enabled": true,
+      "cost": 5,
+      "mission": "russian",
+      "image": "assets/sprites/mario/drawn/mushroom.png"
+    },
+    {
+      "id": "star",
+      "icon": "⭐",
+      "name": "Звезда",
+      "rule": "Три верных ответа в работе над ошибками. Исправления тоже считаются.",
+      "collection": "mario",
+      "enabled": true,
+      "cost": 6,
+      "mission": "review"
+    },
+    {
+      "id": "koopa",
+      "icon": "🐢",
+      "name": "Купа",
+      "rule": "5 заданий на сравнение чисел и 5 на сложение.",
+      "collection": "mario",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "image": "assets/sprites/mario/drawn/koopa.png"
+    },
+    {
+      "id": "mario",
+      "icon": "🍄",
+      "name": "Марио",
+      "rule": "5 заданий по математике и 5 по русскому.",
+      "collection": "mario",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "image": "assets/sprites/mario/drawn/hero.png"
+    },
+    {
+      "id": "chip",
+      "icon": "🐿️",
+      "name": "Чип",
+      "rule": "Миссия «План Чипа»: 10 заданий по двум пройденным темам русского.",
+      "collection": "rangers",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "frame": {
+        "file": "rescue-rangers.gif",
+        "x": 23,
+        "y": 110,
+        "width": 36,
+        "height": 35
+      }
+    },
+    {
+      "id": "dale",
+      "icon": "🐿️",
+      "name": "Дейл",
+      "rule": "Миссия «Находки Дейла»: 5 сравнений чисел и 5 сложений.",
+      "collection": "rangers",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "frame": {
+        "file": "rescue-rangers.gif",
+        "x": 125,
+        "y": 110,
+        "width": 34,
+        "height": 35
+      }
+    },
+    {
+      "id": "darkwing",
+      "icon": "🦆",
+      "name": "Чёрный Плащ",
+      "rule": "Миссия «Ночной патруль»: 5 заданий по математике и 5 по русскому.",
+      "collection": "darkwing",
+      "enabled": true,
+      "cost": 12,
+      "mission": "mixed",
+      "frame": {
+        "file": "darkwing-duck.gif",
+        "x": 62,
+        "y": 297,
+        "width": 53,
+        "height": 57
+      }
+    },
+    {
+      "id": "gadget",
+      "icon": "🐿️",
+      "name": "Гаечка",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "Миссия «Гаечка»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/gadget.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "monty",
+      "icon": "🐿️",
+      "name": "Рокфор",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 9,
+      "mission": "math",
+      "rule": "Миссия «Рокфор»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/monty.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "zipper",
+      "icon": "🐿️",
+      "name": "Вжик",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Вжик»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/zipper.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "fatcat",
+      "icon": "🐿️",
+      "name": "Толстопуз",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 11,
+      "mission": "mixed",
+      "rule": "Миссия «Толстопуз»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/fatcat.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "ratcap",
+      "icon": "🐿️",
+      "name": "Капоне",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 12,
+      "mission": "math",
+      "rule": "Миссия «Капоне»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/ratcap.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "wart",
+      "icon": "🐿️",
+      "name": "Бородавка",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "Миссия «Бородавка»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/wart.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "mole",
+      "icon": "🐿️",
+      "name": "Крот",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 9,
+      "mission": "math",
+      "rule": "Миссия «Крот»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/mole.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "mepps",
+      "icon": "🐿️",
+      "name": "Мяу-Мяу",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Мяу-Мяу»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/mepps.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "nimnul",
+      "icon": "🐿️",
+      "name": "Профессор Нимнул",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 11,
+      "mission": "math",
+      "rule": "Миссия «Профессор Нимнул»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/nimnul.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "snout",
+      "icon": "🐿️",
+      "name": "Сыщик",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 12,
+      "mission": "russian",
+      "rule": "Миссия «Сыщик»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/snout.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "mandy",
+      "icon": "🐿️",
+      "name": "Мэнди",
+      "collection": "rangers",
+      "enabled": false,
+      "cost": 8,
+      "mission": "mixed",
+      "rule": "Миссия «Мэнди»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/mandy.png",
+      "source": "https://www.spriters-resource.com/nes/chipndale/"
+    },
+    {
+      "id": "launchpad",
+      "icon": "🦆",
+      "name": "Зигзаг МакКряк",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 8,
+      "mission": "math",
+      "rule": "Миссия «Зигзаг МакКряк»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/launchpad.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "gosalyn",
+      "icon": "🦆",
+      "name": "Гусёна",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 9,
+      "mission": "russian",
+      "rule": "Миссия «Гусёна»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/gosalyn.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "honker",
+      "icon": "🦆",
+      "name": "Гонкер",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Гонкер»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/honker.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "morgana",
+      "icon": "🦆",
+      "name": "Моргана",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 11,
+      "mission": "mixed",
+      "rule": "Миссия «Моргана»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/morgana.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "gizmoduck",
+      "icon": "🦆",
+      "name": "Гизмо",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 12,
+      "mission": "math",
+      "rule": "Миссия «Гизмо»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/gizmoduck.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "stegmutt",
+      "icon": "🦆",
+      "name": "Стегмут",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 8,
+      "mission": "math",
+      "rule": "Миссия «Стегмут»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/stegmutt.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "neptunia",
+      "icon": "🦆",
+      "name": "Нептуния",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 9,
+      "mission": "mixed",
+      "rule": "Миссия «Нептуния»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/neptunia.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "negaduck",
+      "icon": "🦆",
+      "name": "Антиплащ",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Антиплащ»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/negaduck.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "bushroot",
+      "icon": "🦆",
+      "name": "Бушрут",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 11,
+      "mission": "russian",
+      "rule": "Миссия «Бушрут»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/bushroot.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "liquidator",
+      "icon": "🦆",
+      "name": "Ликвидатор",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 12,
+      "mission": "mixed",
+      "rule": "Миссия «Ликвидатор»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/liquidator.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "megavolt",
+      "icon": "🦆",
+      "name": "Мегавольт",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 8,
+      "mission": "math",
+      "rule": "Миссия «Мегавольт»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/megavolt.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "quackerjack",
+      "icon": "🦆",
+      "name": "Квага",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 9,
+      "mission": "mixed",
+      "rule": "Миссия «Квага»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/quackerjack.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "steelbeak",
+      "icon": "🦆",
+      "name": "Стальной Клюв",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Стальной Клюв»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/steelbeak.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "tuskernini",
+      "icon": "🦆",
+      "name": "Таскернини",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 11,
+      "mission": "russian",
+      "rule": "Миссия «Таскернини»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/tuskernini.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "moliarty",
+      "icon": "🦆",
+      "name": "Молиарти",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 12,
+      "mission": "math",
+      "rule": "Миссия «Молиарти»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/moliarty.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "wolfduck",
+      "icon": "🦆",
+      "name": "Волкоутка",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 8,
+      "mission": "mixed",
+      "rule": "Миссия «Волкоутка»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/wolfduck.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "jgander",
+      "icon": "🦆",
+      "name": "Дж. Гандер Гутер",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 9,
+      "mission": "russian",
+      "rule": "Миссия «Дж. Гандер Гутер»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/jgander.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "grizzlikoff",
+      "icon": "🦆",
+      "name": "Гризликов",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "Миссия «Гризликов»: 5 заданий по математике и 5 по русскому.",
+      "image": "assets/stickers/grizzlikoff.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "ammonia",
+      "icon": "🦆",
+      "name": "Аммония Пайн",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 11,
+      "mission": "math",
+      "rule": "Миссия «Аммония Пайн»: 5 сравнений чисел и 5 заданий на сложение.",
+      "image": "assets/stickers/ammonia.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    },
+    {
+      "id": "splatterphoenix",
+      "icon": "🦆",
+      "name": "Сплаттер Феникс",
+      "collection": "darkwing",
+      "enabled": false,
+      "cost": 12,
+      "mission": "russian",
+      "rule": "Миссия «Сплаттер Феникс»: 10 заданий по двум пройденным темам русского.",
+      "image": "assets/stickers/splatterphoenix.png",
+      "source": "https://www.spriters-resource.com/nes/darkwing/"
+    }
+  ]
+}
