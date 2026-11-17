@@ -405,8 +405,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 type(value) in (int, float) and 0 <= value <= 100 and math.isfinite(value) for value in (x, y)
             ):
                 raise ValueError("Выберите полученную наклейку и место на странице.")
-            if profile["stickers"][sticker] is None:
-                profile["stickers"][sticker] = {"x": round(x, 2), "y": round(y, 2)}
+            profile["stickers"][sticker] = {"x": round(x, 2), "y": round(y, 2)}
         elif kind == "redeem":
             sticker = data.get("sticker")
             if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
