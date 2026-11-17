@@ -28,10 +28,10 @@ PREFERENCES = {
 PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "english", "world")
                 for setting in ("class", "count", "studied2", "studied4", "mistakes")}
 # BEGIN GENERATED STICKER CATALOG
-REWARD_PRICES = {'mushroom': 5, 'star': 6, 'koopa': 7, 'mario': 10, 'chip': 7, 'dale': 7, 'darkwing': 12}
-MISSION_REWARDS = ('mushroom', 'koopa', 'mario', 'chip', 'dale', 'darkwing')
-CHARACTER_STICKERS = ('chip', 'dale', 'darkwing')
-CATALOG_ONLY_STICKERS = ()
+REWARD_PRICES = {'mushroom': 5, 'star': 6, 'koopa': 7, 'mario': 10, 'chip': 7, 'dale': 7, 'darkwing': 12, 'gadget': 8, 'monty': 9, 'zipper': 10, 'fatcat': 11, 'wart': 8, 'mole': 9, 'mepps': 10, 'nimnul': 11, 'snout': 12, 'mandy': 8, 'launchpad': 8, 'gosalyn': 9, 'honker': 10, 'morgana': 11, 'gizmoduck': 12, 'stegmutt': 8, 'neptunia': 9, 'negaduck': 10, 'bushroot': 11, 'liquidator': 12, 'megavolt': 8, 'quackerjack': 9, 'steelbeak': 10, 'tuskernini': 11, 'moliarty': 12, 'wolfduck': 8, 'jgander': 9, 'grizzlikoff': 10, 'ammonia': 11, 'splatterphoenix': 12}
+MISSION_REWARDS = ('mushroom', 'koopa', 'mario', 'chip', 'dale', 'darkwing', 'gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
+CHARACTER_STICKERS = ('chip', 'dale', 'darkwing', 'gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
+CATALOG_ONLY_STICKERS = ('gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
 # END GENERATED STICKER CATALOG
 DAILY_MISSIONS = ("koopa", "mushroom", "mario")
 PASSWORD_ROUNDS = 600000
