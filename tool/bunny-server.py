@@ -87,10 +87,19 @@ def reward_defaults(profile):
     return profile
 
 
+def school_classes(profile):
+    saved = profile.get("schoolClasses")
+    if not isinstance(saved, list):
+        return [1, 2, 3, 4]
+    valid = sorted({grade for grade in saved if type(grade) is int and grade in (1, 2, 3, 4)})
+    return valid or [1, 2, 3, 4]
+
+
 def player_view(player_id, name, avatar, profile, characters=False):
     day, mission = daily_mission()
     prices = dict(REWARD_PRICES)
     visible = dict(profile)
+    visible["schoolClasses"] = school_classes(profile)
     if not characters:
         # Older open tabs know only the original collections.
         new_stickers = {"chip", "dale", "darkwing"}
@@ -391,6 +400,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             key, value = data.get("key"), data.get("value")
             if not isinstance(key, str) or key not in PREFERENCES or not isinstance(value, str) or len(value) > 8000:
                 raise ValueError("Некорректная настройка.")
+            if key == "bunny-russian-class" and value not in [str(grade) for grade in school_classes(profile)]:
+                raise ValueError("Этот класс не выбран для игрока.")
             profile["preferences"][key] = value
         elif kind == "round":
             operation = data.get("id")

@@ -30,7 +30,8 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
     with sqlite3.connect(database) as db:
         db.execute("CREATE TABLE players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
         db.execute("INSERT INTO players VALUES (?,?,?,?)", ("old-parent", "Родитель", "⭐", json.dumps(original)))
-        db.execute("INSERT INTO players VALUES (?,?,?,?)", ("old-child", "Ребёнок", "🐰", json.dumps(bunny.initial_profile())))
+        child_profile = dict(bunny.initial_profile(), schoolClasses=[1, 2])
+        db.execute("INSERT INTO players VALUES (?,?,?,?)", ("old-child", "Ребёнок", "🐰", json.dumps(child_profile)))
     bunny.initialize_database(database)
     setup_code = database.with_suffix(".setup-code").read_text().strip()
     assert database.with_suffix(".setup-code").stat().st_mode & 0o777 == 0o600
@@ -77,6 +78,10 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
         code, _, headers = request(child, "auth/login", dict(login="CHILD", password="Child-test-123", remember=True))
         assert code == 200 and "Max-Age=2592000" in headers["Set-Cookie"]
         assert request(child, "players/old-child")[0] == 200
+        assert request(child, "players/old-child")[1]["schoolClasses"] == [1, 2]
+        assert request(child, "players/old-child", dict(kind="preference", key="bunny-russian-class", value="2"))[0] == 200
+        assert request(child, "players/old-child", dict(kind="preference", key="bunny-russian-class", value="3"))[0] == 400
+        assert request(child, "players/old-child", dict(kind="preference", key="schoolClasses", value="[1,2,3,4]"))[0] == 400
         assert request(child, "players/old-parent")[0] == 403
         assert request(child, "players/old-parent", dict(kind="redeem", sticker="mario"))[0] == 403
         assert request(child, "auth/accounts", dict(name="Other", avatar="🦊", login="other", password="Other-test-123"))[0] == 403

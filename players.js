@@ -88,7 +88,14 @@ function readPlayerPreference(key, fallback) {
   } catch { return fallback; }
 }
 
+function playerSchoolClasses() {
+  const saved = activePlayer?.schoolClasses;
+  const valid = Array.isArray(saved) ? [1, 2, 3, 4].filter(grade => saved.includes(grade)) : [];
+  return valid.length ? valid : [1, 2, 3, 4];
+}
+
 function savePlayerPreference(key, value) {
+  if (key === 'bunny-russian-class' && !playerSchoolClasses().includes(Number(value))) return;
   if (!activePlayer || key.startsWith('bunny-russian-history-')) {
     try { localStorage.setItem(activePlayer ? activePlayer.id + ':' + key : key, value); } catch {}
     return;
@@ -200,6 +207,11 @@ function chooseActivePlayer(player) {
   albumDrag = null;
   selectedSticker = null;
   if (player) {
+    // Discard superseded class choices from a tab opened before the parent changed the range.
+    const classes = Array.isArray(player.schoolClasses) && player.schoolClasses.length ? player.schoolClasses : [1, 2, 3, 4];
+    playerOutbox = playerOutbox.filter(item => item.player !== player.id || item.data.kind !== 'preference' ||
+      item.data.key !== 'bunny-russian-class' || classes.includes(Number(item.data.value)));
+    storePlayerOutbox();
     for (const item of playerOutbox) {
       if (item.player === player.id && item.data.kind === 'preference') {
         player.preferences[item.data.key] = item.data.value;

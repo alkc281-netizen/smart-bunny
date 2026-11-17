@@ -2589,13 +2589,14 @@ function saveRussianPreference(key,value){
  if(typeof savePlayerPreference==='function'){savePlayerPreference(key,String(value));return}
  try{localStorage.setItem(key,String(value))}catch{/* Games remain available when storage is blocked. */}
 }
+function allowedRussianClasses(){return typeof playerSchoolClasses==='function'?playerSchoolClasses():[1,2,3,4]}
 let russianClass,russianShowGrade,russianQuestionCount;
 let russianTopic=null,russianDeck=[],russianCorrected=0,russianMode='topic',russianRoundInfo=null;
 let russianRoundStats={},russianMistakes={};
 const russianStudiedByClass = {};
 function loadRussianProgress(){
  russianClass=Number(readRussianPreference('bunny-russian-class','1'));
- if(![1,2,3,4].includes(russianClass))russianClass=1;
+ if(!allowedRussianClasses().includes(russianClass))russianClass=allowedRussianClasses()[0];
  russianShowGrade=readRussianPreference('bunny-russian-grade-1','false')==='true';
  russianQuestionCount=Number(readRussianPreference('bunny-russian-count','10'));
  if(![10,50,100].includes(russianQuestionCount))russianQuestionCount=10;
@@ -2622,8 +2623,8 @@ function shuffledRussian(items){const result=[...items];for(let i=result.length-
 function russianGrade(correct,total=10){const percent=correct/total*100;return percent>=90?5:percent>=70?4:percent>=50?3:2}
 function russianButton(parent,text,action){const b=document.createElement('button');b.textContent=text;b.onclick=action;parent.append(b);return b}
 function russianScreen(title,hint){home();setVisible('game-menu',false);setVisible('russian-menu',true);$('heading').textContent=title;$('hint').textContent=hint;$('russian-menu').replaceChildren();message('');const box=document.createElement('div');box.className='russian-options';$('russian-menu').append(box);return box}
-function openRussianClasses(){const box=russianScreen('📚 Русский язык','Выбери класс');phase='russian-classes';for(let c=1;c<=4;c++){const b=russianButton(box,c+' класс',()=>{russianClass=c;saveRussianPreference('bunny-russian-class',c);openRussianTopics()});b.setAttribute('aria-pressed',String(c===russianClass))}message('Выбран: '+russianClass+' класс')}
-function russianClassTopics(){return Object.keys(russianTopics).filter(k=>(russianTopics[k].grade||1)===russianClass)}
+function openRussianClasses(){const box=russianScreen('📚 Русский язык','Выбери класс');phase='russian-classes';for(const c of allowedRussianClasses()){const b=russianButton(box,c+' класс',()=>{russianClass=c;saveRussianPreference('bunny-russian-class',c);openRussianTopics()});b.setAttribute('aria-pressed',String(c===russianClass))}message('Выбран: '+russianClass+' класс')}
+function russianClassTopics(){if(!allowedRussianClasses().includes(russianClass))return [];return Object.keys(russianTopics).filter(k=>(russianTopics[k].grade||1)===russianClass)}
 function russianMixedTopics(review = false) {
  const studied = russianStudiedByClass[russianClass];
  return russianClassTopics().filter(key => (!studied || studied.has(key)) && (!review || russianMistakes[key] > 0));
@@ -2651,16 +2652,16 @@ function openRussianStudiedTopics() {
 
 function russianCountControls(){const area=$('russian-menu');const label=document.createElement('p');label.className='hint';label.textContent='Количество вопросов';area.append(label);const lengths=document.createElement('div');lengths.className='russian-options';for(const count of [10,50,100]){const b=russianButton(lengths,count+' вопросов',()=>{russianQuestionCount=count;saveRussianPreference('bunny-russian-count',count);openRussianTopics()});b.setAttribute('aria-pressed',String(count===russianQuestionCount))}area.append(lengths);
  if(russianClass===1){const label=document.createElement('label');label.className='russian-grade-option';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=russianShowGrade;toggle.onchange=()=>{russianShowGrade=toggle.checked;saveRussianPreference('bunny-russian-grade-1',toggle.checked)};label.append(toggle,document.createTextNode(' Показывать числовую оценку'));area.append(label)}}
-function openRussianTopics(){const keys=russianClassTopics(),box=russianScreen('📚 '+russianClass+' класс','Выбери тренировку');phase='russian-topics';
+function openRussianTopics(){if(!allowedRussianClasses().includes(russianClass))russianClass=allowedRussianClasses()[0];const keys=russianClassTopics(),box=russianScreen('📚 '+russianClass+' класс','Выбери тренировку');phase='russian-topics';
  russianButton(box,'По темам',openRussianGroups);russianButton(box,'Смешанная тренировка',()=>beginRussianMixed(false));const weak=russianMixedTopics(true);const review=russianButton(box,'Работа над ошибками'+(weak.length?' · '+weak.length+' тем':''),()=>beginRussianMixed(true));review.disabled=!weak.length;russianButton(box,'← Выбрать класс',openRussianClasses);
  if(russianClass===4)russianButton(box,'Повторение 3-го класса',()=>beginRussianMixed(false,true)).className='wide';
  if(russianStudiedByClass[russianClass])russianButton(box,'Пройденные темы · '+russianMixedTopics().length,openRussianStudiedTopics).className='wide';
  russianCountControls();message(keys.length+' тем · '+keys.reduce((n,k)=>n+russianTopics[k].items.length,0)+' заданий. '+(weak.length?'Есть правила для повторения.':'Ошибки пока не записаны.'))}
 function openRussianGroups(){const box=russianScreen('📚 '+russianClass+' класс','Выбери направление');phase='russian-topics';const groups=[...new Set(russianClassTopics().map(k=>russianTopics[k].group))];for(const group of groups)russianButton(box,group,()=>openRussianGroup(group));russianButton(box,'← Виды тренировок',openRussianTopics)}
 function openRussianGroup(group){const box=russianScreen(group,russianClass+' класс · '+russianQuestionCount+' вопросов');phase='russian-topics';for(const key of russianClassTopics().filter(k=>russianTopics[k].group===group))russianButton(box,russianTopics[key].name+' · '+russianTopics[key].items.length,()=>beginRussian(key));russianButton(box,'← Направления',openRussianGroups);message('В длинном раунде небольшой набор повторяется только после прохождения всех примеров темы.')}
-function launchRussianRound(info,deck,mode,topic){russianRoundInfo=info;russianDeck=deck;russianMode=mode;russianTopic=topic;russianCorrected=0;russianRoundStats={};begin('russian')}
-function beginRussian(topic){const selected=russianTopics[topic];if(!selected||(selected.grade||1)!==russianClass)return;launchRussianRound(selected,pickRussianDeck(topic,selected.items,russianQuestionCount).map(item=>[item[0],item[1],item[2],item[3]||'',topic]),'topic',topic)}
-function beginRussianMixed(review=false,repeatThird=false){const keys=repeatThird?Object.keys(russianTopics).filter(k=>russianTopics[k].grade===3):russianMixedTopics(review);if(!keys.length){if(!review&&russianStudiedByClass[russianClass])openRussianStudiedTopics();return;}const order=[];let last=null;while(order.length<russianQuestionCount){let cycle=shuffledRussian(keys);if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];for(const k of cycle){if(order.length===russianQuestionCount)break;order.push(k);last=k}}
+function launchRussianRound(info,deck,mode,topic){if(!deck.length||deck.some(item=>!allowedRussianClasses().includes(russianTopics[item[4]]?.grade||1)))return;russianRoundInfo=info;russianDeck=deck;russianMode=mode;russianTopic=topic;russianCorrected=0;russianRoundStats={};begin('russian')}
+function beginRussian(topic){const selected=russianTopics[topic];if(!selected||!allowedRussianClasses().includes(russianClass)||(selected.grade||1)!==russianClass)return;launchRussianRound(selected,pickRussianDeck(topic,selected.items,russianQuestionCount).map(item=>[item[0],item[1],item[2],item[3]||'',topic]),'topic',topic)}
+function beginRussianMixed(review=false,repeatThird=false){if(!allowedRussianClasses().includes(russianClass)||(repeatThird&&!allowedRussianClasses().includes(3)))return;const keys=repeatThird?Object.keys(russianTopics).filter(k=>russianTopics[k].grade===3):russianMixedTopics(review);if(!keys.length){if(!review&&russianStudiedByClass[russianClass])openRussianStudiedTopics();return;}const order=[];let last=null;while(order.length<russianQuestionCount){let cycle=shuffledRussian(keys);if(cycle.length>1&&cycle[0]===last)[cycle[0],cycle[1]]=[cycle[1],cycle[0]];for(const k of cycle){if(order.length===russianQuestionCount)break;order.push(k);last=k}}
  const queues={};for(const k of keys){const count=order.filter(x=>x===k).length;if(count)queues[k]=pickRussianDeck(k,russianTopics[k].items,count).map(item=>[item[0],item[1],item[2],item[3]||'',k])}const deck=order.map(k=>queues[k].shift());launchRussianRound({name:repeatThird?'Повторение 3-го класса':review?'Работа над ошибками':'Смешанная тренировка',rule:'Повтори темы, которые вызвали трудности.'},deck,repeatThird?'repeat-third':review?'mistakes':'mixed',null)}
 function activeRussianTopic(){return russianTopics[russianDeck[round]?.[4]||russianTopic]||russianRoundInfo}
 function recordRussianAnswer(correct){const key=russianDeck[round][4]||russianTopic;const stat=russianRoundStats[key]||(russianRoundStats[key]={total:0,correct:0,corrected:0});if(attempt===1){stat.total++;if(correct)stat.correct++;else russianMistakes[key]=(russianMistakes[key]||0)+1;if(correct&&russianMode==='mistakes')russianMistakes[key]=Math.max(0,(russianMistakes[key]||0)-1);saveRussianPreference('bunny-russian-mistakes',JSON.stringify(russianMistakes))}else if(correct)stat.corrected++}
