@@ -154,48 +154,76 @@
       "icon": "🐿️",
       "name": "Гаечка",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "russian",
       "rule": "Миссия «Гаечка»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/gadget.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://rincondecomiquitas.blogspot.com/2019/09/chip-y-dale-al-rescate-chip-dale-rescue.html",
+      "sourceImage": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5yrS-EbQlla75BV-rmVtmr6YZQc_rPJM1JlLQBl2_p6GPM7NIpJSVG0r9J09JQAYJa3RwiRkgCtuiXubTxUccPqeaIz43G_aFVVt1kLiHsbs2GauuZkVmMOHfwC4WCE32OHmpyn5zGqs/s1600/gadget-coy.png"
     },
     {
       "id": "monty",
       "icon": "🐿️",
       "name": "Рокфор",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "math",
       "rule": "Миссия «Рокфор»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/monty.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/02/rescue-rangers-ep18-snapshot10.jpg?w=640",
+      "frame": {
+        "file": "monty.png",
+        "x": 433,
+        "y": 64,
+        "width": 207,
+        "height": 262,
+        "removeBackground": false
+      }
     },
     {
       "id": "zipper",
       "icon": "🐿️",
       "name": "Вжик",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Вжик»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/zipper.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/02/rescue-rangers-ep18-snapshot10.jpg?w=640",
+      "frame": {
+        "file": "zipper.png",
+        "x": 327,
+        "y": 40,
+        "width": 109,
+        "height": 123,
+        "removeBackground": false
+      }
     },
     {
       "id": "fatcat",
       "icon": "🐿️",
       "name": "Толстопуз",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "mixed",
       "rule": "Миссия «Толстопуз»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/fatcat.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/04/rescue-rangers-ep4-snapshot2.jpg?w=640",
+      "frame": {
+        "file": "fatcat.png",
+        "x": 282,
+        "y": 110,
+        "width": 207,
+        "height": 178,
+        "removeBackground": false
+      }
     },
     {
       "id": "ratcap",
@@ -214,312 +242,402 @@
       "icon": "🐿️",
       "name": "Бородавка",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "russian",
       "rule": "Миссия «Бородавка»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/wart.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/04/rescue-rangers-ep4-snapshot3.jpg?w=640",
+      "frame": {
+        "file": "wart.png",
+        "x": 51,
+        "y": 141,
+        "width": 119,
+        "height": 137,
+        "removeBackground": false
+      }
     },
     {
       "id": "mole",
       "icon": "🐿️",
       "name": "Крот",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "math",
       "rule": "Миссия «Крот»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/mole.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/04/rescue-rangers-ep4-snapshot3.jpg?w=640",
+      "frame": {
+        "file": "mole.png",
+        "x": 129,
+        "y": 163,
+        "width": 164,
+        "height": 172,
+        "removeBackground": false
+      }
     },
     {
       "id": "mepps",
       "icon": "🐿️",
       "name": "Мяу-Мяу",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Мяу-Мяу»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/mepps.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/04/rescue-rangers-ep4-snapshot3.jpg?w=640",
+      "frame": {
+        "file": "mepps.png",
+        "x": 267,
+        "y": 17,
+        "width": 155,
+        "height": 228,
+        "removeBackground": false
+      }
     },
     {
       "id": "nimnul",
       "icon": "🐿️",
       "name": "Профессор Нимнул",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "math",
       "rule": "Миссия «Профессор Нимнул»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/nimnul.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/01/rescue-rangers-ep16-snapshot9.jpg?w=640",
+      "frame": {
+        "file": "nimnul.png",
+        "x": 326,
+        "y": 215,
+        "width": 95,
+        "height": 147,
+        "removeBackground": false
+      }
     },
     {
       "id": "snout",
       "icon": "🐿️",
       "name": "Сыщик",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 12,
       "mission": "russian",
       "rule": "Миссия «Сыщик»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/snout.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/04/rescue-rangers-ep4-snapshot3.jpg?w=640",
+      "frame": {
+        "file": "snout.png",
+        "x": 354,
+        "y": 170,
+        "width": 124,
+        "height": 165,
+        "removeBackground": false
+      }
     },
     {
       "id": "mandy",
       "icon": "🐿️",
       "name": "Мэнди",
       "collection": "rangers",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "mixed",
       "rule": "Миссия «Мэнди»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/mandy.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
+      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/02/rescue-rangers-ep1-snapshot1.jpg?w=640",
+      "frame": {
+        "file": "mandy.png",
+        "x": 147,
+        "y": 35,
+        "width": 260,
+        "height": 260,
+        "removeBackground": false
+      }
     },
     {
       "id": "launchpad",
       "icon": "🦆",
       "name": "Зигзаг МакКряк",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "math",
       "rule": "Миссия «Зигзаг МакКряк»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/launchpad.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/launchpad-mcquack/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2011-10-31-18h50m01s72-150x150.png"
     },
     {
       "id": "gosalyn",
       "icon": "🦆",
       "name": "Гусёна",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "russian",
       "rule": "Миссия «Гусёна»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/gosalyn.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/gosalyn-mallard/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2012-05-01-02h35m43s48-150x150.png"
     },
     {
       "id": "honker",
       "icon": "🦆",
       "name": "Гонкер",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Гонкер»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/honker.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/honker-muddlefoot/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-509665-150x150.jpg"
     },
     {
       "id": "morgana",
       "icon": "🦆",
       "name": "Моргана",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "mixed",
       "rule": "Миссия «Моргана»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/morgana.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/morgana-macawber/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2025/11/vlcsnap-2018-10-22-22h58m46s472-150x150.png"
     },
     {
       "id": "gizmoduck",
       "icon": "🦆",
       "name": "Гизмо",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 12,
       "mission": "math",
       "rule": "Миссия «Гизмо»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/gizmoduck.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/gizmoduck/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-04h50m10s106-150x150.png"
     },
     {
       "id": "stegmutt",
       "icon": "🦆",
       "name": "Стегмут",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "math",
       "rule": "Миссия «Стегмут»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/stegmutt.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/stegmutt/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h34m15s182-150x150.png"
     },
     {
       "id": "neptunia",
       "icon": "🦆",
       "name": "Нептуния",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "mixed",
       "rule": "Миссия «Нептуния»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/neptunia.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/neptunia-2/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h14m26s72-150x150.png"
     },
     {
       "id": "negaduck",
       "icon": "🦆",
       "name": "Антиплащ",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Антиплащ»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/negaduck.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/negaduck/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/negs.png"
     },
     {
       "id": "bushroot",
       "icon": "🦆",
       "name": "Бушрут",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "russian",
       "rule": "Миссия «Бушрут»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/bushroot.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/bushroot-2/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/bushroot.png"
     },
     {
       "id": "liquidator",
       "icon": "🦆",
       "name": "Ликвидатор",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 12,
       "mission": "mixed",
       "rule": "Миссия «Ликвидатор»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/liquidator.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/the-liquidator/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/licky.png"
     },
     {
       "id": "megavolt",
       "icon": "🦆",
       "name": "Мегавольт",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "math",
       "rule": "Миссия «Мегавольт»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/megavolt.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/megavolt-2/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/megavolt.png"
     },
     {
       "id": "quackerjack",
       "icon": "🦆",
       "name": "Квага",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "mixed",
       "rule": "Миссия «Квага»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/quackerjack.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/quackerjack/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/template.png"
     },
     {
       "id": "steelbeak",
       "icon": "🦆",
       "name": "Стальной Клюв",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Стальной Клюв»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/steelbeak.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/steelbeak-2/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/steelbeak.png"
     },
     {
       "id": "tuskernini",
       "icon": "🦆",
       "name": "Таскернини",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "russian",
       "rule": "Миссия «Таскернини»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/tuskernini.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/tuskerninni-2/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/tuskerninni.png"
     },
     {
       "id": "moliarty",
       "icon": "🦆",
       "name": "Молиарти",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 12,
       "mission": "math",
       "rule": "Миссия «Молиарти»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/moliarty.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/professor-moliarty/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/moliarty.png"
     },
     {
       "id": "wolfduck",
       "icon": "🦆",
       "name": "Волкоутка",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 8,
       "mission": "mixed",
       "rule": "Миссия «Волкоутка»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/wolfduck.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://www.gamekyo.com/group713_40_all.html",
+      "sourceImage": "https://www.gamekyo.com/images_1/08fe82e5221f66dd80c762f30f2b7be720140322215421.jpg",
+      "frame": {
+        "file": "wolfduck.png",
+        "x": 140,
+        "y": 232,
+        "width": 46,
+        "height": 41,
+        "removeBackground": false
+      }
     },
     {
       "id": "jgander",
       "icon": "🦆",
       "name": "Дж. Гандер Гутер",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 9,
       "mission": "russian",
       "rule": "Миссия «Дж. Гандер Гутер»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/jgander.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/j-gander-hooter/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-21-02h08m14s211-150x150.png"
     },
     {
       "id": "grizzlikoff",
       "icon": "🦆",
       "name": "Гризликов",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "Миссия «Гризликов»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/grizzlikoff.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/s-h-u-s-h/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/05/vlcsnap-2015-05-05-22h51m42s944-300x223.png",
+      "frame": {
+        "file": "grizzlikoff.png",
+        "x": 183,
+        "y": 16,
+        "width": 116,
+        "height": 155,
+        "removeBackground": false
+      }
     },
     {
       "id": "ammonia",
       "icon": "🦆",
       "name": "Аммония Пайн",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 11,
       "mission": "math",
       "rule": "Миссия «Аммония Пайн»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/ammonia.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/ammonia-pine/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/ammonia.png"
     },
     {
       "id": "splatterphoenix",
       "icon": "🦆",
       "name": "Сплаттер Феникс",
       "collection": "darkwing",
-      "enabled": false,
+      "enabled": true,
       "cost": 12,
       "mission": "russian",
       "rule": "Миссия «Сплаттер Феникс»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/splatterphoenix.png",
-      "source": "https://www.spriters-resource.com/nes/darkwing/"
+      "source": "https://negaverse.net/the-show/characters/splatter-phoenix/",
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/splatter.png"
     }
   ]
 }

@@ -61,12 +61,192 @@ const albumStickers = {
     "🦆",
     "Чёрный Плащ",
     "Миссия «Ночной патруль»: 5 заданий по математике и 5 по русскому."
+  ],
+  "gadget": [
+    "🐿️",
+    "Гаечка",
+    "Миссия «Гаечка»: 10 заданий по двум пройденным темам русского."
+  ],
+  "monty": [
+    "🐿️",
+    "Рокфор",
+    "Миссия «Рокфор»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "zipper": [
+    "🐿️",
+    "Вжик",
+    "Миссия «Вжик»: 5 заданий по математике и 5 по русскому."
+  ],
+  "fatcat": [
+    "🐿️",
+    "Толстопуз",
+    "Миссия «Толстопуз»: 5 заданий по математике и 5 по русскому."
+  ],
+  "wart": [
+    "🐿️",
+    "Бородавка",
+    "Миссия «Бородавка»: 10 заданий по двум пройденным темам русского."
+  ],
+  "mole": [
+    "🐿️",
+    "Крот",
+    "Миссия «Крот»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "mepps": [
+    "🐿️",
+    "Мяу-Мяу",
+    "Миссия «Мяу-Мяу»: 5 заданий по математике и 5 по русскому."
+  ],
+  "nimnul": [
+    "🐿️",
+    "Профессор Нимнул",
+    "Миссия «Профессор Нимнул»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "snout": [
+    "🐿️",
+    "Сыщик",
+    "Миссия «Сыщик»: 10 заданий по двум пройденным темам русского."
+  ],
+  "mandy": [
+    "🐿️",
+    "Мэнди",
+    "Миссия «Мэнди»: 5 заданий по математике и 5 по русскому."
+  ],
+  "launchpad": [
+    "🦆",
+    "Зигзаг МакКряк",
+    "Миссия «Зигзаг МакКряк»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "gosalyn": [
+    "🦆",
+    "Гусёна",
+    "Миссия «Гусёна»: 10 заданий по двум пройденным темам русского."
+  ],
+  "honker": [
+    "🦆",
+    "Гонкер",
+    "Миссия «Гонкер»: 5 заданий по математике и 5 по русскому."
+  ],
+  "morgana": [
+    "🦆",
+    "Моргана",
+    "Миссия «Моргана»: 5 заданий по математике и 5 по русскому."
+  ],
+  "gizmoduck": [
+    "🦆",
+    "Гизмо",
+    "Миссия «Гизмо»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "stegmutt": [
+    "🦆",
+    "Стегмут",
+    "Миссия «Стегмут»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "neptunia": [
+    "🦆",
+    "Нептуния",
+    "Миссия «Нептуния»: 5 заданий по математике и 5 по русскому."
+  ],
+  "negaduck": [
+    "🦆",
+    "Антиплащ",
+    "Миссия «Антиплащ»: 5 заданий по математике и 5 по русскому."
+  ],
+  "bushroot": [
+    "🦆",
+    "Бушрут",
+    "Миссия «Бушрут»: 10 заданий по двум пройденным темам русского."
+  ],
+  "liquidator": [
+    "🦆",
+    "Ликвидатор",
+    "Миссия «Ликвидатор»: 5 заданий по математике и 5 по русскому."
+  ],
+  "megavolt": [
+    "🦆",
+    "Мегавольт",
+    "Миссия «Мегавольт»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "quackerjack": [
+    "🦆",
+    "Квага",
+    "Миссия «Квага»: 5 заданий по математике и 5 по русскому."
+  ],
+  "steelbeak": [
+    "🦆",
+    "Стальной Клюв",
+    "Миссия «Стальной Клюв»: 5 заданий по математике и 5 по русскому."
+  ],
+  "tuskernini": [
+    "🦆",
+    "Таскернини",
+    "Миссия «Таскернини»: 10 заданий по двум пройденным темам русского."
+  ],
+  "moliarty": [
+    "🦆",
+    "Молиарти",
+    "Миссия «Молиарти»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "wolfduck": [
+    "🦆",
+    "Волкоутка",
+    "Миссия «Волкоутка»: 5 заданий по математике и 5 по русскому."
+  ],
+  "jgander": [
+    "🦆",
+    "Дж. Гандер Гутер",
+    "Миссия «Дж. Гандер Гутер»: 10 заданий по двум пройденным темам русского."
+  ],
+  "grizzlikoff": [
+    "🦆",
+    "Гризликов",
+    "Миссия «Гризликов»: 5 заданий по математике и 5 по русскому."
+  ],
+  "ammonia": [
+    "🦆",
+    "Аммония Пайн",
+    "Миссия «Аммония Пайн»: 5 сравнений чисел и 5 заданий на сложение."
+  ],
+  "splatterphoenix": [
+    "🦆",
+    "Сплаттер Феникс",
+    "Миссия «Сплаттер Феникс»: 10 заданий по двум пройденным темам русского."
   ]
 };
 const stickerImagePaths = {
   "mushroom": "assets/sprites/mario/drawn/mushroom.png",
   "koopa": "assets/sprites/mario/drawn/koopa.png",
-  "mario": "assets/sprites/mario/drawn/hero.png"
+  "mario": "assets/sprites/mario/drawn/hero.png",
+  "gadget": "assets/stickers/gadget.png",
+  "monty": "assets/stickers/monty.png",
+  "zipper": "assets/stickers/zipper.png",
+  "fatcat": "assets/stickers/fatcat.png",
+  "wart": "assets/stickers/wart.png",
+  "mole": "assets/stickers/mole.png",
+  "mepps": "assets/stickers/mepps.png",
+  "nimnul": "assets/stickers/nimnul.png",
+  "snout": "assets/stickers/snout.png",
+  "mandy": "assets/stickers/mandy.png",
+  "launchpad": "assets/stickers/launchpad.png",
+  "gosalyn": "assets/stickers/gosalyn.png",
+  "honker": "assets/stickers/honker.png",
+  "morgana": "assets/stickers/morgana.png",
+  "gizmoduck": "assets/stickers/gizmoduck.png",
+  "stegmutt": "assets/stickers/stegmutt.png",
+  "neptunia": "assets/stickers/neptunia.png",
+  "negaduck": "assets/stickers/negaduck.png",
+  "bushroot": "assets/stickers/bushroot.png",
+  "liquidator": "assets/stickers/liquidator.png",
+  "megavolt": "assets/stickers/megavolt.png",
+  "quackerjack": "assets/stickers/quackerjack.png",
+  "steelbeak": "assets/stickers/steelbeak.png",
+  "tuskernini": "assets/stickers/tuskernini.png",
+  "moliarty": "assets/stickers/moliarty.png",
+  "wolfduck": "assets/stickers/wolfduck.png",
+  "jgander": "assets/stickers/jgander.png",
+  "grizzlikoff": "assets/stickers/grizzlikoff.png",
+  "ammonia": "assets/stickers/ammonia.png",
+  "splatterphoenix": "assets/stickers/splatterphoenix.png"
 };
 const characterStickerFrames = {
   "chip": {
@@ -89,6 +269,94 @@ const characterStickerFrames = {
     "y": 297,
     "width": 53,
     "height": 57
+  },
+  "monty": {
+    "file": "monty.png",
+    "x": 433,
+    "y": 64,
+    "width": 207,
+    "height": 262,
+    "removeBackground": false
+  },
+  "zipper": {
+    "file": "zipper.png",
+    "x": 327,
+    "y": 40,
+    "width": 109,
+    "height": 123,
+    "removeBackground": false
+  },
+  "fatcat": {
+    "file": "fatcat.png",
+    "x": 282,
+    "y": 110,
+    "width": 207,
+    "height": 178,
+    "removeBackground": false
+  },
+  "wart": {
+    "file": "wart.png",
+    "x": 51,
+    "y": 141,
+    "width": 119,
+    "height": 137,
+    "removeBackground": false
+  },
+  "mole": {
+    "file": "mole.png",
+    "x": 129,
+    "y": 163,
+    "width": 164,
+    "height": 172,
+    "removeBackground": false
+  },
+  "mepps": {
+    "file": "mepps.png",
+    "x": 267,
+    "y": 17,
+    "width": 155,
+    "height": 228,
+    "removeBackground": false
+  },
+  "nimnul": {
+    "file": "nimnul.png",
+    "x": 326,
+    "y": 215,
+    "width": 95,
+    "height": 147,
+    "removeBackground": false
+  },
+  "snout": {
+    "file": "snout.png",
+    "x": 354,
+    "y": 170,
+    "width": 124,
+    "height": 165,
+    "removeBackground": false
+  },
+  "mandy": {
+    "file": "mandy.png",
+    "x": 147,
+    "y": 35,
+    "width": 260,
+    "height": 260,
+    "removeBackground": false
+  },
+  "wolfduck": {
+    "file": "wolfduck.png",
+    "x": 140,
+    "y": 232,
+    "width": 46,
+    "height": 41,
+    "removeBackground": false
+  },
+  "grizzlikoff": {
+    "file": "grizzlikoff.png",
+    "x": 183,
+    "y": 16,
+    "width": 116,
+    "height": 155,
+    "removeBackground": false
   }
 };
 const stickerMissionTypes = {
@@ -97,7 +365,37 @@ const stickerMissionTypes = {
   "mario": "mixed",
   "chip": "russian",
   "dale": "math",
-  "darkwing": "mixed"
+  "darkwing": "mixed",
+  "gadget": "russian",
+  "monty": "math",
+  "zipper": "mixed",
+  "fatcat": "mixed",
+  "wart": "russian",
+  "mole": "math",
+  "mepps": "mixed",
+  "nimnul": "math",
+  "snout": "russian",
+  "mandy": "mixed",
+  "launchpad": "math",
+  "gosalyn": "russian",
+  "honker": "mixed",
+  "morgana": "mixed",
+  "gizmoduck": "math",
+  "stegmutt": "math",
+  "neptunia": "mixed",
+  "negaduck": "mixed",
+  "bushroot": "russian",
+  "liquidator": "mixed",
+  "megavolt": "math",
+  "quackerjack": "mixed",
+  "steelbeak": "mixed",
+  "tuskernini": "russian",
+  "moliarty": "math",
+  "wolfduck": "mixed",
+  "jgander": "russian",
+  "grizzlikoff": "mixed",
+  "ammonia": "math",
+  "splatterphoenix": "russian"
 };
 const stickerCollections = [
   {
@@ -113,13 +411,43 @@ const stickerCollections = [
     "name": "Чип и Дейл",
     "keys": [
       "chip",
-      "dale"
+      "dale",
+      "gadget",
+      "monty",
+      "zipper",
+      "fatcat",
+      "wart",
+      "mole",
+      "mepps",
+      "nimnul",
+      "snout",
+      "mandy"
     ]
   },
   {
     "name": "Чёрный Плащ",
     "keys": [
-      "darkwing"
+      "darkwing",
+      "launchpad",
+      "gosalyn",
+      "honker",
+      "morgana",
+      "gizmoduck",
+      "stegmutt",
+      "neptunia",
+      "negaduck",
+      "bushroot",
+      "liquidator",
+      "megavolt",
+      "quackerjack",
+      "steelbeak",
+      "tuskernini",
+      "moliarty",
+      "wolfduck",
+      "jgander",
+      "grizzlikoff",
+      "ammonia",
+      "splatterphoenix"
     ]
   }
 ];
@@ -551,7 +879,7 @@ function stickerArt(parent, key) {
       const pixels=context.getImageData(0,0,frame.width,frame.height);
       const background=Array.from(pixels.data.slice(0,3));
       // The original sprite sheets use a flat green background between sprites.
-      for (let i=0;i<pixels.data.length;i+=4) {
+      for (let i=0;frame.removeBackground !== false && i<pixels.data.length;i+=4) {
         if (pixels.data[i]===background[0] && pixels.data[i+1]===background[1] && pixels.data[i+2]===background[2]) {
           pixels.data[i+3]=0;
         }
