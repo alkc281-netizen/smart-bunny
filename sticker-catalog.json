@@ -171,17 +171,8 @@
       "cost": 9,
       "mission": "math",
       "rule": "Миссия «Рокфор»: 5 сравнений чисел и 5 заданий на сложение.",
-      "image": "assets/stickers/monty.png",
-      "source": "https://kattthepig.wordpress.com/tag/chip-n-dale-rescue-rangers/page/2/",
-      "sourceImage": "https://kattthepig.wordpress.com/wp-content/uploads/2026/02/rescue-rangers-ep18-snapshot10.jpg?w=640",
-      "frame": {
-        "file": "monty.png",
-        "x": 433,
-        "y": 64,
-        "width": 207,
-        "height": 262,
-        "removeBackground": false
-      }
+      "image": "assets/stickers/monty-illustrated-v1.png",
+      "source": "Generated with OpenAI imagegen for private family use"
     },
     {
       "id": "zipper",
@@ -372,9 +363,8 @@
       "cost": 8,
       "mission": "math",
       "rule": "Миссия «Зигзаг МакКряк»: 5 сравнений чисел и 5 заданий на сложение.",
-      "image": "assets/stickers/launchpad.png",
-      "source": "https://negaverse.net/the-show/characters/launchpad-mcquack/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2011-10-31-18h50m01s72-150x150.png"
+      "image": "assets/stickers/launchpad-illustrated-v1.png",
+      "source": "https://www.pngaaa.com/detail/231806"
     },
     {
       "id": "gosalyn",

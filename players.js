@@ -218,7 +218,7 @@ const stickerImagePaths = {
   "koopa": "assets/sprites/mario/drawn/koopa.png",
   "mario": "assets/sprites/mario/drawn/hero.png",
   "gadget": "assets/stickers/gadget.png",
-  "monty": "assets/stickers/monty.png",
+  "monty": "assets/stickers/monty-illustrated-v1.png",
   "zipper": "assets/stickers/zipper.png",
   "fatcat": "assets/stickers/fatcat.png",
   "wart": "assets/stickers/wart.png",
@@ -227,7 +227,7 @@ const stickerImagePaths = {
   "nimnul": "assets/stickers/nimnul.png",
   "snout": "assets/stickers/snout.png",
   "mandy": "assets/stickers/mandy.png",
-  "launchpad": "assets/stickers/launchpad.png",
+  "launchpad": "assets/stickers/launchpad-illustrated-v1.png",
   "gosalyn": "assets/stickers/gosalyn.png",
   "honker": "assets/stickers/honker.png",
   "morgana": "assets/stickers/morgana.png",
@@ -269,14 +269,6 @@ const characterStickerFrames = {
     "y": 297,
     "width": 53,
     "height": 57
-  },
-  "monty": {
-    "file": "monty.png",
-    "x": 433,
-    "y": 64,
-    "width": 207,
-    "height": 262,
-    "removeBackground": false
   },
   "zipper": {
     "file": "zipper.png",
