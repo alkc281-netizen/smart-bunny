@@ -138,6 +138,7 @@ h1{font-size:26px}
   height: 1600px;
   background: repeating-linear-gradient(var(--panel) 0 27px, var(--shell) 28px 29px);
   will-change: transform;
+  transform-origin: 0 0;
 }
 #album-world .album-sticker {
   position: absolute;
@@ -188,6 +189,9 @@ h1{font-size:26px}
   margin: 10px 0;
 }
 .album-actions button { flex: 1; min-height: 44px; }
+.album-zoom { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+.album-zoom button { min-width: 48px; min-height: 44px; font-size: 20px; }
+.album-zoom output { min-width: 60px; font-variant-numeric: tabular-nums; }
 .album-empty { position: relative; display: block; padding: 24px; pointer-events: none; }
 .sticker-dialog {
   width: min(90vw, 420px);

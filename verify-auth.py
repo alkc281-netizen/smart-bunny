@@ -153,12 +153,20 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
         durable = request(child, "players/old-child")[1]
         assert durable["albumView"] == dict(x=700.25, y=850.5)
         assert durable["stickers"]["start"] == board and durable["coins"] == 1
+        # Zoom is validated and retained when an older tab sends only camera coordinates.
+        for zoom in (0.5, 1.2345, 2):
+            scaled = request(child, "players/old-child", dict(kind="album-view", x=700.25, y=850.5, zoom=zoom))[1]
+            assert scaled["albumView"] == dict(x=700.25, y=850.5, zoom=zoom)
+        for zoom in (0.49, 2.01, True, "1", float("nan"), float("inf")):
+            assert request(child, "players/old-child", dict(kind="album-view", x=700.25, y=850.5, zoom=zoom))[0] == 400
+        legacy = request(child, "players/old-child", dict(kind="album-view", x=710, y=860))[1]
+        assert legacy["albumView"] == dict(x=710, y=860, zoom=2)
         layout = board
 
         assert request(second_child, "auth/login", dict(login="child", password="Child-test-123"))[0] == 200
         reopened = request(second_child, "players/old-child")[1]
         assert reopened["stickers"]["start"] == layout and reopened["albumPages"] == 3
-        assert reopened["albumView"] == dict(x=700.25, y=850.5)
+        assert reopened["albumView"] == dict(x=710, y=860, zoom=2)
         assert request(parent, "auth/accounts", dict(child_account, password="New-child-test-123"))[0] == 200
         assert request(child, "players/old-child")[0] == 401
         assert request(second_child, "players/old-child")[0] == 401

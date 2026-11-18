@@ -551,7 +551,7 @@ function applyPendingAlbumUpdate(profile, data) {
     profile.albumPages = Math.max(profile.albumPages || 1, data.pages);
     profile.albumPage = data.page;
   } else if (data.kind === 'album-view') {
-    profile.albumView = {x:data.x,y:data.y};
+    profile.albumView = {...profile.albumView,x:data.x,y:data.y,...(data.zoom!==undefined?{zoom:data.zoom}:{})};
   }
 }
 
@@ -1048,6 +1048,7 @@ function saveAlbumPosition(key, point, remember=true) {
 }
 
 function undoAlbumAction() {
+  if (albumDrag) return;
   const action=albumUndo.pop();
   if (!action || action.player!==activePlayer?.id) return;
   saveAlbumPosition(action.key,action.before,false);
@@ -1064,77 +1065,139 @@ function paintAlbumPosition(sticker, point) {
 function paintAlbumView() {
   const viewport=$('album-page'),world=$('album-world');
   if (!viewport || !world || !albumCamera || !viewport.clientWidth) return;
-  const halfX=Math.min(albumWorldSize/2,viewport.clientWidth/2);
-  const halfY=Math.min(albumWorldSize/2,viewport.clientHeight/2);
+  const zoom=albumCamera.zoom=Math.max(0.5,Math.min(2,albumCamera.zoom||1));
+  const halfX=Math.min(albumWorldSize/2,viewport.clientWidth/(2*zoom));
+  const halfY=Math.min(albumWorldSize/2,viewport.clientHeight/(2*zoom));
   albumCamera.x=Math.max(halfX,Math.min(albumWorldSize-halfX,albumCamera.x));
   albumCamera.y=Math.max(halfY,Math.min(albumWorldSize-halfY,albumCamera.y));
-  world.style.transform='translate('+(viewport.clientWidth/2-albumCamera.x)+'px,'+
-    (viewport.clientHeight/2-albumCamera.y)+'px)';
+  world.style.transform='translate('+(viewport.clientWidth/2-albumCamera.x*zoom)+'px,'+
+    (viewport.clientHeight/2-albumCamera.y*zoom)+'px) scale('+zoom+')';
+  if ($('album-zoom-value')) $('album-zoom-value').textContent=Math.round(zoom*100)+'%';
+  if ($('album-zoom-out')) $('album-zoom-out').disabled=zoom<=0.50001;
+  if ($('album-zoom-in')) $('album-zoom-in').disabled=zoom>=1.99999;
+}
+
+function albumPointerOffset(x,y) {
+  const viewport=$('album-page'),bounds=viewport.getBoundingClientRect();
+  return {x:x-bounds.left-viewport.clientLeft-viewport.clientWidth/2,
+    y:y-bounds.top-viewport.clientTop-viewport.clientHeight/2};
+}
+
+function zoomAlbum(value, pointer=null) {
+  if (!albumCamera) return;
+  const before=albumCamera.zoom||1,zoom=Math.max(0.5,Math.min(2,value));
+  const offset=pointer?albumPointerOffset(pointer.x,pointer.y):{x:0,y:0};
+  albumCamera.x+=offset.x/before-offset.x/zoom;
+  albumCamera.y+=offset.y/before-offset.y/zoom;
+  albumCamera.zoom=zoom;
+  paintAlbumView();
 }
 
 function saveAlbumView() {
   if (!activePlayer || !albumCamera || albumCamera.player!==activePlayer.id) return;
-  const {x,y}=albumCamera;
-  activePlayer.albumView={x,y};
-  enqueuePlayerUpdate({kind:'album-view',x,y});
+  const {x,y,zoom}=albumCamera;
+  activePlayer.albumView={x,y,zoom};
+  enqueuePlayerUpdate({kind:'album-view',x,y,zoom});
 }
 
 function panAlbum(viewport) {
   let gesture=null,suppressClick=false,wheelTimer;
+  const pointers=new Map();
   const owner=activePlayer.id,version=playerScreenVersion;
   const live=()=>activePlayer?.id===owner && phase==='player-album' && version===playerScreenVersion && viewport.isConnected;
+  const view=()=>({x:albumCamera.x,y:albumCamera.y,zoom:albumCamera.zoom||1});
+  const pair=()=>{
+    const [a,b]=[...pointers.values()];
+    return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,distance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};
+  };
   viewport.addEventListener('click',event=>{
     if (suppressClick && event.detail) { event.preventDefault();event.stopImmediatePropagation();suppressClick=false; }
   },true);
   viewport.onpointerdown=event=>{
-    if (!event.isPrimary || event.button!==0 || albumDrag || !live()) return;
-    const sticker=event.target.closest('[data-sticker]');
-    const key=sticker?.dataset.sticker;
-    gesture={pointer:event.pointerId,x:event.clientX,y:event.clientY,view:{x:albumCamera.x,y:albumCamera.y},
+    if (event.button!==0 || !live() || pointers.size>=2 || (albumDrag && albumDrag!==gesture)) return;
+    if (wheelTimer) { clearTimeout(wheelTimer);wheelTimer=null;saveAlbumView(); }
+    pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    viewport.setPointerCapture(event.pointerId);
+    if (pointers.size===2) {
+      // A second finger always cancels an unfinished sticker move.
+      const initialView=gesture?.initialView||view();
+      clearTimeout(gesture?.timer);
+      if (gesture?.sticker) {
+        paintAlbumPosition(gesture.sticker,gesture.origin);
+        gesture.sticker.classList.remove('album-dragging');
+      }
+      const center=pair(),offset=albumPointerOffset(center.x,center.y),start=view();
+      gesture={mode:'pinch',initialView,start,distance:center.distance,
+        anchor:{x:start.x+offset.x/start.zoom,y:start.y+offset.y/start.zoom}};
+      albumDrag=gesture;suppressClick=true;event.preventDefault();
+      return;
+    }
+    const sticker=event.target.closest('[data-sticker]'),key=sticker?.dataset.sticker;
+    gesture={pointer:event.pointerId,x:event.clientX,y:event.clientY,view:view(),initialView:view(),
       key,sticker,mode:'tap',moved:false,origin:key?albumBoardPosition(key):null};
     const saved=gesture;
     if (key) saved.timer=setTimeout(()=>{
-      if (gesture===saved && albumDrag===saved && live() && !saved.moved) {
+      if (gesture===saved && albumDrag===saved && live() && !saved.moved && pointers.size===1) {
         saved.mode='move';sticker.classList.add('album-dragging');
         message('Теперь перетащи наклейку.');
       }
     },450);
     suppressClick=false;albumDrag=gesture;
-    viewport.setPointerCapture(event.pointerId);
   };
   viewport.onpointermove=event=>{
-    if (!gesture || gesture!==albumDrag || gesture.pointer!==event.pointerId || !live()) return;
+    if (!pointers.has(event.pointerId) || !gesture || gesture!==albumDrag || !live()) return;
+    pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    if (gesture.mode==='pinch' && pointers.size===2) {
+      const center=pair(),offset=albumPointerOffset(center.x,center.y);
+      const zoom=Math.max(0.5,Math.min(2,gesture.start.zoom*center.distance/gesture.distance));
+      albumCamera.zoom=zoom;
+      albumCamera.x=gesture.anchor.x-offset.x/zoom;
+      albumCamera.y=gesture.anchor.y-offset.y/zoom;
+      paintAlbumView();gesture.moved=true;event.preventDefault();
+      return;
+    }
+    if (gesture.pointer!==event.pointerId) return;
     const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
     if (!gesture.moved && Math.hypot(dx,dy)<8) return;
-    clearTimeout(gesture.timer);
-    gesture.moved=true;
-    event.preventDefault();
+    clearTimeout(gesture.timer);gesture.moved=true;event.preventDefault();
     if (gesture.mode==='move') {
       const clamp=value=>Math.max(80,Math.min(albumWorldSize-80,value));
-      gesture.point={x:clamp(gesture.origin.x+dx),y:clamp(gesture.origin.y+dy)};
+      gesture.point={x:clamp(gesture.origin.x+dx/gesture.view.zoom),y:clamp(gesture.origin.y+dy/gesture.view.zoom)};
       paintAlbumPosition(gesture.sticker,gesture.point);
     } else {
       gesture.mode='pan';
-      albumCamera.x=gesture.view.x-dx;albumCamera.y=gesture.view.y-dy;
+      albumCamera.x=gesture.view.x-dx/gesture.view.zoom;
+      albumCamera.y=gesture.view.y-dy/gesture.view.zoom;
       paintAlbumView();
     }
   };
   const end=(event,cancelled)=>{
-    if (!gesture || gesture.pointer!==event.pointerId) return;
+    if (!pointers.has(event.pointerId) || !gesture) return;
     const saved=gesture,valid=live()&&albumDrag===gesture;
-    gesture=null;clearTimeout(saved.timer);
-    if (albumDrag===saved) albumDrag=null;
-    saved.sticker?.classList.remove('album-dragging');
-    if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
-    suppressClick=true;
-    if (!valid || cancelled) {
+    clearTimeout(saved.timer);pointers.delete(event.pointerId);suppressClick=true;
+    if (cancelled || !valid) {
+      gesture=null;if (albumDrag===saved) albumDrag=null;
+      saved.sticker?.classList.remove('album-dragging');
       if (saved.sticker) paintAlbumPosition(saved.sticker,saved.origin);
-      if (valid) { Object.assign(albumCamera,saved.view);paintAlbumView(); }
+      if (valid) { Object.assign(albumCamera,saved.initialView);paintAlbumView(); }
+      const captures=[event.pointerId,...pointers.keys()];pointers.clear();
+      for(const id of captures) if(viewport.hasPointerCapture(id))viewport.releasePointerCapture(id);
       return;
     }
+    if (saved.mode==='pinch' && pointers.size===1) {
+      // Continue panning from the remaining finger without a jump or a tap.
+      const [id,point]=[...pointers.entries()][0];
+      gesture={mode:'pan',pointer:id,...point,view:view(),initialView:saved.initialView,moved:true};
+      albumDrag=gesture;
+      if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+      return;
+    }
+    gesture=null;if(albumDrag===saved)albumDrag=null;
+    saved.sticker?.classList.remove('album-dragging');
+    if(viewport.hasPointerCapture(event.pointerId))viewport.releasePointerCapture(event.pointerId);
     if (saved.mode==='move' && saved.moved) {
       saveAlbumPosition(saved.key,{...activePlayer.stickers[saved.key],boardX:saved.point.x,boardY:saved.point.y});
-    } else if (saved.mode==='pan' && saved.moved) saveAlbumView();
+    } else if ((saved.mode==='pan'||saved.mode==='pinch') && saved.moved) saveAlbumView();
     else if (saved.mode==='tap' && saved.key) showStickerDetail(saved.key);
   };
   viewport.onpointerup=event=>end(event,false);
@@ -1143,15 +1206,19 @@ function panAlbum(viewport) {
     if (!live() || albumDrag) return;
     event.preventDefault();
     const unit=event.deltaMode===1?16:event.deltaMode===2?viewport.clientHeight:1;
-    albumCamera.x+=event.deltaX*unit;albumCamera.y+=event.deltaY*unit;
-    paintAlbumView();clearTimeout(wheelTimer);
-    wheelTimer=setTimeout(()=>{if(live())saveAlbumView();},180);
+    if (event.ctrlKey) zoomAlbum(albumCamera.zoom*Math.exp(-event.deltaY*unit*.01),{x:event.clientX,y:event.clientY});
+    else {
+      albumCamera.x+=event.deltaX*unit/albumCamera.zoom;albumCamera.y+=event.deltaY*unit/albumCamera.zoom;
+      paintAlbumView();
+    }
+    clearTimeout(wheelTimer);
+    wheelTimer=setTimeout(()=>{wheelTimer=null;if(live())saveAlbumView();},180);
   };
   viewport.onkeydown=event=>{
-    if (event.target!==viewport) return;
+    if (event.target!==viewport || albumDrag) return;
     const delta={ArrowLeft:[-80,0],ArrowRight:[80,0],ArrowUp:[0,-80],ArrowDown:[0,80]}[event.key];
     if (!delta) return;
-    event.preventDefault();albumCamera.x+=delta[0];albumCamera.y+=delta[1];paintAlbumView();saveAlbumView();
+    event.preventDefault();albumCamera.x+=delta[0]/albumCamera.zoom;albumCamera.y+=delta[1]/albumCamera.zoom;paintAlbumView();saveAlbumView();
   };
 }
 
@@ -1164,12 +1231,20 @@ function renderPlayerAlbum() {
   playerElement('p','Раундов завершено: '+activePlayer.rounds+' · Верных ответов: '+activePlayer.correct,panel).className='album-progress';
   const actions=playerElement('div','',panel);actions.className='album-actions';
   playerButton(actions,'◎ В центр',()=>{
-    Object.assign(albumCamera,albumInitialView());paintAlbumView();saveAlbumView();
+    if (albumDrag) return;
+    Object.assign(albumCamera,albumInitialView(),{zoom:1});paintAlbumView();saveAlbumView();
   });
   const undo=playerButton(actions,'↶ Отменить',undoAlbumAction);undo.id='album-undo';undo.disabled=!albumUndo.length;
-  playerElement('p','Двигай поле пальцем. Коснись наклейки, чтобы рассмотреть. Удержи, чтобы переставить.',panel).className='hint';
+  const zoomControls=playerElement('div','',panel);zoomControls.className='album-zoom';
+  zoomControls.setAttribute('role','group');zoomControls.setAttribute('aria-label','Масштаб альбома');
+  const zoomOut=playerButton(zoomControls,'−',()=>{if(!albumDrag){zoomAlbum(albumCamera.zoom-.25);saveAlbumView();}});
+  zoomOut.id='album-zoom-out';zoomOut.setAttribute('aria-label','Уменьшить альбом');
+  const zoomValue=playerElement('output','100%',zoomControls);zoomValue.id='album-zoom-value';zoomValue.setAttribute('aria-label','Масштаб');
+  const zoomIn=playerButton(zoomControls,'+',()=>{if(!albumDrag){zoomAlbum(albumCamera.zoom+.25);saveAlbumView();}});
+  zoomIn.id='album-zoom-in';zoomIn.setAttribute('aria-label','Увеличить альбом');
+  playerElement('p','Двигай поле одним пальцем, меняй масштаб двумя. Коснись наклейки, чтобы рассмотреть; удержи, чтобы переставить.',panel).className='hint';
   const viewport=playerElement('div','',panel);viewport.id='album-page';viewport.tabIndex=0;
-  viewport.setAttribute('role','group');viewport.setAttribute('aria-label','Альбом наклеек. Двигай поле пальцем или стрелками клавиатуры.');
+  viewport.setAttribute('role','group');viewport.setAttribute('aria-label','Альбом наклеек. Двигай поле одним пальцем, меняй масштаб двумя пальцами или кнопками.');
   const world=playerElement('div','',viewport);world.id='album-world';
   for(const key of Object.keys(activePlayer.stickers).filter(key=>albumStickers[key])) {
     const title=albumStickers[key][1];
@@ -1192,7 +1267,7 @@ function renderPlayerAlbum() {
   }
   if (!world.children.length) playerElement('span','Заверши тренировку, чтобы получить первую наклейку.',viewport).className='album-empty';
   if (!albumCamera || albumCamera.player!==activePlayer.id) {
-    albumCamera={player:activePlayer.id,...(activePlayer.albumView||albumInitialView())};
+    albumCamera={player:activePlayer.id,zoom:1,...(activePlayer.albumView||albumInitialView())};
   }
   panAlbum(viewport);paintAlbumView();
   viewport.onscroll=()=>{viewport.scrollLeft=0;viewport.scrollTop=0;};
