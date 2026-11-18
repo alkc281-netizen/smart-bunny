@@ -27,10 +27,14 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
     # An existing profile from before login was introduced.
     original = bunny.initial_profile()
     original.update(rounds=12, correct=87, coins=8, stickers={"chip": {"x": 20, "y": 30}})
+    original.pop("albumPages")
+    original.pop("albumPage")
     with sqlite3.connect(database) as db:
         db.execute("CREATE TABLE players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
         db.execute("INSERT INTO players VALUES (?,?,?,?)", ("old-parent", "Родитель", "⭐", json.dumps(original)))
         child_profile = dict(bunny.initial_profile(), schoolClasses=[1, 2])
+        child_profile.pop("albumPages")
+        child_profile.pop("albumPage")
         db.execute("INSERT INTO players VALUES (?,?,?,?)", ("old-child", "Ребёнок", "🐰", json.dumps(child_profile)))
     bunny.initialize_database(database)
     setup_code = database.with_suffix(".setup-code").read_text().strip()
@@ -109,7 +113,33 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
             assert request(child, "players/old-child", dict(kind="sticker", **invalid))[0] == 400
         assert request(child, "players/old-child")[1]["stickers"]["start"] == moved["stickers"]["start"]
 
+        # Album layout is private, durable, and compatible with older x/y-only tabs.
+        assert request(child, "players/old-child")[1]["albumPages"] == 1
+        assert request(child, "players/old-child", dict(kind="album-page", pages=3, page=2))[0] == 200
+        layout = dict(x=42.25, y=67.5, page=2, scale=1.5, rotation=30)
+        status, changed, _ = request(child, "players/old-child", dict(kind="sticker", sticker="start", **layout))
+        assert status == 200 and changed["stickers"]["start"] == layout
+        status, changed, _ = request(child, "players/old-child", dict(kind="sticker", sticker="start", x=30, y=40))
+        layout.update(x=30, y=40)
+        assert status == 200 and changed["stickers"]["start"] == layout
+        for fields in (dict(page=3), dict(page=True), dict(scale=0.1), dict(scale=1.51),
+                       dict(rotation=31), dict(rotation=float("nan")), dict(scale=True)):
+            invalid = dict(layout, **fields)
+            assert request(child, "players/old-child", dict(kind="sticker", sticker="start", **invalid))[0] == 400
+        for pages, page in ((0, 0), (13, 0), (3, 3), (3, -1), (True, 0)):
+            assert request(child, "players/old-child", dict(kind="album-page", pages=pages, page=page))[0] == 400
+        assert request(child, "players/old-child")[1]["stickers"]["start"] == layout
+        # Retry after an offline page addition cannot shrink the album.
+        status, changed, _ = request(child, "players/old-child", dict(kind="album-page", pages=1, page=0))
+        assert status == 200 and changed["albumPages"] == 3
+        assert request(child, "players/old-child", dict(kind="sticker", sticker="start", placed=False))[1]["stickers"]["start"] is None
+        changed = request(child, "players/old-child", dict(kind="sticker", sticker="start", **layout))[1]
+        assert changed["stickers"]["start"] == layout
+        assert (changed["rounds"], changed["coins"], changed["correct"]) == (1, 1, 9)
+
         assert request(second_child, "auth/login", dict(login="child", password="Child-test-123"))[0] == 200
+        reopened = request(second_child, "players/old-child")[1]
+        assert reopened["stickers"]["start"] == layout and reopened["albumPages"] == 3
         assert request(parent, "auth/accounts", dict(child_account, password="New-child-test-123"))[0] == 200
         assert request(child, "players/old-child")[0] == 401
         assert request(second_child, "players/old-child")[0] == 401
