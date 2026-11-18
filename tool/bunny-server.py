@@ -89,6 +89,8 @@ def reward_defaults(profile):
     profile.setdefault("coins", 0)
     profile.setdefault("reviewWins", 0)
     profile.setdefault("dailyDone", "")
+    profile.setdefault("albumPages", 1)
+    profile.setdefault("albumPage", 0)
     return profile
 
 
@@ -421,11 +423,36 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 apply_round(profile, data)
         elif kind == "sticker":
             sticker, x, y = (data.get(key) for key in ("sticker", "x", "y"))
-            if not isinstance(sticker, str) or sticker not in profile["stickers"] or not all(
+            if not isinstance(sticker, str) or sticker not in profile["stickers"]:
+                raise ValueError("Выберите полученную наклейку.")
+            if data.get("placed") is False:
+                profile["stickers"][sticker] = None
+                return
+            if not all(
                 type(value) in (int, float) and 0 <= value <= 100 and math.isfinite(value) for value in (x, y)
             ):
                 raise ValueError("Выберите полученную наклейку и место на странице.")
-            profile["stickers"][sticker] = {"x": round(x, 2), "y": round(y, 2)}
+            # Older tabs send only x/y; retain new layout fields when they move a sticker.
+            point = dict(profile["stickers"][sticker] or {})
+            for key, low, high in (("page", 0, profile.get("albumPages", 1) - 1),
+                                   ("scale", 0.65, 1.5), ("rotation", -30, 30)):
+                if key not in data:
+                    continue
+                value = data[key]
+                if (type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high
+                        or (key == "page" and type(value) is not int)):
+                    raise ValueError("Некорректное оформление наклейки.")
+                point[key] = value if key == "page" else round(value, 2)
+            point.update(x=round(x, 2), y=round(y, 2))
+            profile["stickers"][sticker] = point
+        elif kind == "album-page":
+            pages, page = data.get("pages"), data.get("page")
+            if (type(pages) is not int or type(page) is not int or not 1 <= pages <= 12
+                    or not 0 <= page < pages):
+                raise ValueError("Выберите страницу альбома.")
+            # Retried/offline events must never remove pages added from another device.
+            profile["albumPages"] = max(profile.get("albumPages", 1), pages)
+            profile["albumPage"] = page
         elif kind == "redeem":
             sticker = data.get("sticker")
             if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
