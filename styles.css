@@ -115,83 +115,80 @@ h1{font-size:26px}
 .auth-required #open-settings, .auth-required #home, .auth-required .nes-controls { display: none !important; }
 #album-page {
   position: relative;
-  display: block;
   width: 100%;
-  height: clamp(240px, 42vw, 390px);
+  height: clamp(340px, 54svh, 560px);
   border: 2px solid var(--edge);
-  background: repeating-linear-gradient(var(--panel) 0 27px, var(--shell) 28px 29px);
+  background: var(--panel);
   overflow: hidden;
   padding: 0;
-  border-radius: 12px;
-  touch-action: pan-y;
-  margin-top: 10px;
-}
-#album-page.album-ready { outline: 3px dashed var(--accent); outline-offset: 2px; }
-.album-sticker {
-  position: absolute;
-  left: clamp(var(--inset, 49px), var(--x), calc(100% - var(--inset, 49px)));
-  top: clamp(var(--inset, 49px), var(--y), calc(100% - var(--inset, 49px)));
-  transform: translate(-50%, -50%) rotate(var(--rotation, -6deg)) scale(var(--scale, 1));
-  display: grid;
-  place-content: center;
-  width: 87px;
-  height: 87px;
-  border: 3px solid #fff;
-  border-radius: 23px;
-  background: #fbe1ee;
-  color: #42263b;
-  box-shadow: 0 2px 5px #0003;
-  text-align: center;
-  font: 600 12px/1.15 system-ui, sans-serif;
-  padding: 4px;
+  border-radius: 18px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  margin-top: 12px;
+  cursor: grab;
+  overscroll-behavior: contain;
+}
+#album-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 1600px;
+  background: repeating-linear-gradient(var(--panel) 0 27px, var(--shell) 28px 29px);
+  will-change: transform;
+}
+#album-world .album-sticker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-content: center;
+  width: 96px;
+  height: 96px;
+  min-height: 96px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #fbe1ee;
+  color: #42263b;
+  box-shadow: 0 2px 5px #0003;
+  text-align: center;
+  font: 500 12px/1.1 system-ui, sans-serif;
+  padding: 4px;
+  touch-action: none;
   cursor: grab;
 }
-.album-sticker[aria-pressed=true], .album-sticker:focus-visible { outline: 3px solid var(--accent); z-index: 1; }
-.album-sticker.album-dragging { cursor: grabbing; z-index: 2; }
-.album-sticker .sticker-art { display: block; width: 34px; height: 34px; margin: 0 auto 2px; pointer-events: none; }
-.album-sticker span:first-child { font-size: 32px; }
-.album-sticker[data-kind=books] { background: #e7ebff; }
-.album-sticker[data-kind=detective] { background: #ffeec2; }
-.album-sticker[data-kind=rocket] { background: #d8f4e0; }
-.album-tray { margin-top: 10px; }
-.album-page-nav, .album-actions {
+#album-world .album-sticker:focus-visible { outline: 3px solid var(--accent); }
+#album-world .album-sticker.album-dragging {
+  cursor: grabbing;
+  z-index: 2;
+  outline: 3px solid var(--accent);
+  box-shadow: 0 5px 12px #0005;
+}
+#album-world .album-sticker .sticker-art {
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 3px;
+  font-size: 38px;
+  line-height: 46px;
+  pointer-events: none;
+}
+#album-world .sticker-art img { max-height: 46px; }
+#album-world .album-sticker > span:last-child { max-width: 80px; }
+#album-world .album-sticker[data-kind=books] { background: #e7ebff; }
+#album-world .album-sticker[data-kind=detective] { background: #ffeec2; }
+#album-world .album-sticker[data-kind=rocket] { background: #d8f4e0; }
+.album-actions {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin: 10px 0;
 }
-.album-page-nav button { min-width: 44px; min-height: 44px; }
-.album-page-nav span { flex: 1; }
-.album-actions { flex-wrap: wrap; }
 .album-actions button { flex: 1; min-height: 44px; }
-.album-empty { display: block; padding: 20px; pointer-events: none; }
-#album-editor:empty { display: none; }
-#album-editor { margin: 14px 0; }
-#album-editor h3 { margin: 0 0 8px; }
-.album-edit-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-  text-align: left;
-}
-.album-edit-fields label { display: grid; gap: 5px; min-width: 0; }
-.album-edit-fields input { width: 100%; min-height: 44px; margin: 0; }
-.album-edit-fields select {
-  min-height: 44px;
-  max-width: 100%;
-  color: var(--text);
-  background: var(--button);
-  border: 2px solid var(--edge);
-  border-radius: 10px;
-  padding: 6px;
-  font: inherit;
-}
+.album-empty { position: relative; display: block; padding: 24px; pointer-events: none; }
 .sticker-dialog {
   width: min(90vw, 420px);
   max-height: 85dvh;
@@ -218,7 +215,6 @@ h1{font-size:26px}
 .sticker-dialog p { font-size: 16px; line-height: 1.5; }
 .sticker-dialog button { min-width: 120px; min-height: 44px; }
 .sticker-dialog > .sticker-art.mario-coin { width: 100px; height: 150px; display: block; }
-.album-tray button span { display: block; margin-top: 3px; font-size: 12px; }
 .sticker-art img { width: 100%; height: 100%; object-fit: contain; }
 .sticker-art canvas { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
 .sticker-art.mario-coin {
@@ -242,7 +238,6 @@ h1{font-size:26px}
   background: #a76a10;
   box-shadow: 2px 0 #ffed78;
 }
-.album-sticker .sticker-art img { max-height: 34px; }
 .album-tray button .sticker-art, .mario-sticker-card .sticker-art, #player-panel > .sticker-art {
   display: block;
   width: 52px;

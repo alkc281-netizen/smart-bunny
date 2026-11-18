@@ -434,7 +434,11 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Выберите полученную наклейку и место на странице.")
             # Older tabs send only x/y; retain new layout fields when they move a sticker.
             point = dict(profile["stickers"][sticker] or {})
-            for key, low, high in (("page", 0, profile.get("albumPages", 1) - 1),
+            if data.get("boardReset") is True:
+                point.pop("boardX", None)
+                point.pop("boardY", None)
+            for key, low, high in (("boardX", 80, 1520), ("boardY", 80, 1520),
+                                   ("page", 0, profile.get("albumPages", 1) - 1),
                                    ("scale", 0.65, 1.5), ("rotation", -30, 30)):
                 if key not in data:
                     continue
@@ -453,6 +457,12 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             # Retried/offline events must never remove pages added from another device.
             profile["albumPages"] = max(profile.get("albumPages", 1), pages)
             profile["albumPage"] = page
+        elif kind == "album-view":
+            x, y = data.get("x"), data.get("y")
+            if not all(type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 1600
+                       for value in (x, y)):
+                raise ValueError("Некорректное положение альбома.")
+            profile["albumView"] = {"x": round(x, 2), "y": round(y, 2)}
         elif kind == "redeem":
             sticker = data.get("sticker")
             if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
