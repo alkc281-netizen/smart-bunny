@@ -449,9 +449,10 @@ dailyMissionButton.hidden = true;
 const playerAvatars = ['🌸', '⭐', '🐰', '🦊'];
 let activePlayer = null;
 let playerList = [];
-let selectedSticker = null;
 let albumDrag = null;
 let albumUndo = [];
+let albumCamera = null;
+let albumResize = null;
 let stickerDialog = null;
 let playerApiReady = false;
 let parentSession = false;
@@ -540,11 +541,17 @@ function applyPendingAlbumUpdate(profile, data) {
   if (data.kind === 'sticker' && Object.hasOwn(profile.stickers, data.sticker)) {
     profile.stickers[data.sticker] = data.placed === false ? null : {
       ...profile.stickers[data.sticker],
-      ...Object.fromEntries(['x','y','page','scale','rotation'].filter(key => data[key] !== undefined).map(key => [key,data[key]])),
+      ...Object.fromEntries(['x','y','page','scale','rotation','boardX','boardY'].filter(key => data[key] !== undefined).map(key => [key,data[key]])),
     };
+    if (data.boardReset === true && profile.stickers[data.sticker]) {
+      delete profile.stickers[data.sticker].boardX;
+      delete profile.stickers[data.sticker].boardY;
+    }
   } else if (data.kind === 'album-page') {
     profile.albumPages = Math.max(profile.albumPages || 1, data.pages);
     profile.albumPage = data.page;
+  } else if (data.kind === 'album-view') {
+    profile.albumView = {x:data.x,y:data.y};
   }
 }
 
@@ -568,7 +575,7 @@ async function flushPlayerUpdates() {
         }
         const previous = Object.keys(activePlayer.stickers);
         activePlayer = result;
-        if (phase === 'player-album' && !albumDrag && !['preference', 'sticker', 'album-page'].includes(data.kind)) {
+        if (phase === 'player-album' && !albumDrag && !['preference', 'sticker', 'album-page', 'album-view'].includes(data.kind)) {
           renderPlayerAlbum();
           if (data.kind === 'redeem') message(Object.hasOwn(result.stickers,data.sticker)
             ? 'Наклейка в альбоме. Теперь её можно приклеить!' : 'Пока не хватает монет.');
@@ -637,9 +644,8 @@ function playerButton(parent, text, action) {
 }
 
 function chooseActivePlayer(player) {
-  if (activePlayer?.id !== player?.id) albumUndo = [];
+  if (activePlayer?.id !== player?.id) { albumUndo = []; albumCamera = null; }
   albumDrag = null;
-  selectedSticker = null;
   if (player) {
     // Discard superseded class choices from a tab opened before the parent changed the range.
     const classes = Array.isArray(player.schoolClasses) && player.schoolClasses.length ? player.schoolClasses : [1, 2, 3, 4];
@@ -840,7 +846,6 @@ async function logoutPlayer() {
 
 function openPlayerAlbum() {
   if (!activePlayer) { openPlayerPicker(); return; }
-  selectedSticker = null;
   renderPlayerAlbum();
   startMusic();
   if (playerOutbox.length) flushPlayerUpdates();
@@ -976,13 +981,23 @@ function openDailyMission() {
   refreshRewardProfile('player-daily',showDailyMission);
 }
 
-function albumPosition(point) {
-  return {x: point?.x ?? 50, y: point?.y ?? 50, page: point?.page ?? 0,
-    scale: point?.scale ?? 1, rotation: point?.rotation ?? -6};
-}
+const albumWorldSize = 1600;
 
-function currentAlbumPage() { return activePlayer.albumPage || 0; }
-function albumPageCount() { return activePlayer.albumPages || 1; }
+// Stable honeycomb slots do not shift when another reward is earned.
+function albumBoardPosition(key, point=activePlayer.stickers[key]) {
+  if (Number.isFinite(point?.boardX) && Number.isFinite(point?.boardY)) return {x:point.boardX,y:point.boardY};
+  const index=Object.keys(albumStickers).indexOf(key);
+  const slots=[[0,0]];
+  const directions=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+  for(let radius=1;slots.length<=index;radius++) {
+    let q=-radius,r=radius;
+    for(const [dq,dr] of directions) for(let side=0;side<radius;side++) {
+      slots.push([q,r]);q+=dq;r+=dr;
+    }
+  }
+  const [q,r]=slots[Math.max(0,index)];
+  return {x:800+116*(q+r/2),y:800+116*Math.sqrt(3)/2*r};
+}
 
 function showStickerDetail(key) {
   if (!activePlayer || !albumStickers[key]) return;
@@ -1014,280 +1029,182 @@ function showStickerDetail(key) {
   dialog.showModal();
 }
 
-function selectAlbumSticker(key) {
-  selectedSticker = key;
-  $('album-page').classList.toggle('album-ready', Boolean(key));
-  for (const button of $('player-panel').querySelectorAll('[data-sticker]')) {
-    button.setAttribute('aria-pressed', String(button.dataset.sticker === key));
-  }
-  renderAlbumEditor();
-  message(key ? 'Перетащи наклейку или нажми на новое место. Настройки — под страницей.'
-    : 'Выбери наклейку для изменения. Листай страницы кнопками или свайпом по свободному месту.');
-}
-
 function saveAlbumPosition(key, point, remember=true) {
   if (!activePlayer || !Object.hasOwn(activePlayer.stickers,key)) return;
-  const before = activePlayer.stickers[key];
-  const next = point === null ? null : albumPosition(point);
-  if (JSON.stringify(before) === JSON.stringify(next)) return;
+  const before=activePlayer.stickers[key];
+  const next=point===null?null:{x:50,y:50,...point};
+  if (JSON.stringify(before)===JSON.stringify(next)) return;
   if (remember) {
-    albumUndo.push({player:activePlayer.id,key,before:before === null ? null : {...before}});
+    albumUndo.push({player:activePlayer.id,key,before:before===null?null:{...before}});
     if (albumUndo.length>30) albumUndo.shift();
   }
-  activePlayer.stickers[key] = next;
-  selectedSticker = key;
-  const needsRender = before === null || next === null || albumPosition(before).page !== next.page;
-  if (needsRender) renderPlayerAlbum();
-  else {
-    const sticker = $('album-page').querySelector('[data-sticker="'+key+'"]');
-    if (sticker) paintAlbumPosition(sticker,next);
-    selectAlbumSticker(key);
-  }
-  const undo = $('album-undo');
-  if (undo) undo.disabled = !albumUndo.length;
-  if (before === null && next !== null && remember) {
-    const complete = Object.keys(albumStickers).every(id => activePlayer.stickers[id]);
-    message(complete ? 'Все наклейки собраны!' : 'Наклейка приклеена!');
-    albumRewardSound(complete ? 'albumClear' : 'bonus');
-  } else message(remember ? 'Оформление наклейки сохранено.' : 'Последнее изменение отменено.');
-  enqueuePlayerUpdate({kind:'sticker',sticker:key,...(next === null ? {placed:false} : next)});
+  activePlayer.stickers[key]=next;
+  const sticker=$('album-world')?.querySelector('[data-sticker="'+key+'"]');
+  if (sticker) paintAlbumPosition(sticker,albumBoardPosition(key,next));
+  if ($('album-undo')) $('album-undo').disabled=!albumUndo.length;
+  message(remember?'Наклейка перемещена.':'Последнее перемещение отменено.');
+  enqueuePlayerUpdate({kind:'sticker',sticker:key,...(next===null?{placed:false}:
+    {...next,...(!Number.isFinite(next.boardX)?{boardReset:true}:{})})});
 }
 
 function undoAlbumAction() {
-  const action = albumUndo.pop();
-  if (!action || action.player !== activePlayer?.id) return;
-  if (action.before !== null && albumPosition(action.before).page !== currentAlbumPage()) {
-    setAlbumPage(albumPosition(action.before).page);
-  }
+  const action=albumUndo.pop();
+  if (!action || action.player!==activePlayer?.id) return;
   saveAlbumPosition(action.key,action.before,false);
-}
-
-function setAlbumPage(page, pages=albumPageCount()) {
-  if (!activePlayer || !Number.isInteger(page) || page<0 || page>=pages || pages>12) return;
-  activePlayer.albumPages = pages;
-  activePlayer.albumPage = page;
-  renderPlayerAlbum();
-  enqueuePlayerUpdate({kind:'album-page',pages,page});
-}
-
-function renderAlbumEditor() {
-  const editor = $('album-editor');
-  if (!editor) return;
-  const focusedId = editor.contains(document.activeElement) ? document.activeElement.id : null;
-  editor.replaceChildren();
-  const key = selectedSticker;
-  if (!key || !Object.hasOwn(activePlayer.stickers,key)) return;
-  playerElement('h3',albumStickers[key][1],editor);
-  playerButton(editor,'Рассмотреть крупно',()=>showStickerDetail(key));
-  const saved = activePlayer.stickers[key];
-  if (saved === null) { playerElement('p','Коснись свободного места на странице, чтобы приклеить.',editor); return; }
-  const fields=playerElement('div','',editor); fields.className='album-edit-fields';
-  for (const [field,title,min,max,step,unit] of [
-    ['scale','Размер',0.65,1.5,0.05,'%'],['rotation','Поворот',-30,30,1,'°'],
-  ]) {
-    const label=playerElement('label','',fields);
-    const output=playerElement('span','',label);
-    const input=playerElement('input','',label);
-    input.id='album-'+field; input.type='range'; input.min=min; input.max=max; input.step=step;
-    input.value=albumPosition(saved)[field];
-    const preview=()=>{
-      const value=Number(input.value);
-      output.textContent=title+': '+Math.round(field==='scale'?value*100:value)+unit;
-      const sticker=$('album-page').querySelector('[data-sticker="'+key+'"]');
-      if (sticker) paintAlbumPosition(sticker,{...albumPosition(activePlayer.stickers[key]),[field]:value});
-    };
-    input.oninput=preview;
-    input.onchange=()=>saveAlbumPosition(key,{...albumPosition(activePlayer.stickers[key]),[field]:Number(input.value)});
-    preview();
-  }
-  const label=playerElement('label','Страница',fields);
-  const select=playerElement('select','',label); select.id='album-sticker-page';
-  for(let index=0;index<albumPageCount();index++) {
-    const option=playerElement('option','Страница '+(index+1),select); option.value=index;
-  }
-  select.value=albumPosition(saved).page;
-  select.onchange=()=>{
-    const page=Number(select.value);
-    saveAlbumPosition(key,{...albumPosition(activePlayer.stickers[key]),page});
-    if (page!==currentAlbumPage()) setAlbumPage(page);
-  };
-  if (focusedId) $(focusedId)?.focus();
-}
-
-function albumPoint(page, x, y) {
-  const bounds = page.getBoundingClientRect();
-  const percent = (value, start, size) => Math.min(100, Math.max(0, 100 * (value - start) / size));
-  return {x: percent(x, bounds.left, bounds.width), y: percent(y, bounds.top, bounds.height)};
-}
-
-function albumInset(point) {
-  const {rotation,scale}=albumPosition(point), radians=rotation*Math.PI/180;
-  return Math.ceil(87*scale*(Math.abs(Math.cos(radians))+Math.abs(Math.sin(radians)))/2+4);
+  Object.assign(albumCamera,albumBoardPosition(action.key,action.before));
+  paintAlbumView();
+  saveAlbumView();
 }
 
 function paintAlbumPosition(sticker, point) {
-  const position=albumPosition(point);
-  for (const field of ['x','y']) sticker.style.setProperty('--'+field,position[field]+'%');
-  sticker.style.setProperty('--scale',position.scale);
-  sticker.style.setProperty('--rotation',position.rotation+'deg');
-  sticker.style.setProperty('--inset',albumInset(position)+'px');
+  sticker.style.left=point.x+'px';
+  sticker.style.top=point.y+'px';
 }
 
-function movableAlbumSticker(sticker, page, key) {
-  let gesture = null;
-  let suppressClick = false;
-  sticker.onclick = event => {
-    event.stopPropagation();
-    if (suppressClick) { suppressClick = false; return; }
-    selectAlbumSticker(selectedSticker === key ? null : key);
+function paintAlbumView() {
+  const viewport=$('album-page'),world=$('album-world');
+  if (!viewport || !world || !albumCamera || !viewport.clientWidth) return;
+  const halfX=Math.min(albumWorldSize/2,viewport.clientWidth/2);
+  const halfY=Math.min(albumWorldSize/2,viewport.clientHeight/2);
+  albumCamera.x=Math.max(halfX,Math.min(albumWorldSize-halfX,albumCamera.x));
+  albumCamera.y=Math.max(halfY,Math.min(albumWorldSize-halfY,albumCamera.y));
+  world.style.transform='translate('+(viewport.clientWidth/2-albumCamera.x)+'px,'+
+    (viewport.clientHeight/2-albumCamera.y)+'px)';
+}
+
+function saveAlbumView() {
+  if (!activePlayer || !albumCamera || albumCamera.player!==activePlayer.id) return;
+  const {x,y}=albumCamera;
+  activePlayer.albumView={x,y};
+  enqueuePlayerUpdate({kind:'album-view',x,y});
+}
+
+function panAlbum(viewport) {
+  let gesture=null,suppressClick=false,wheelTimer;
+  const owner=activePlayer.id,version=playerScreenVersion;
+  const live=()=>activePlayer?.id===owner && phase==='player-album' && version===playerScreenVersion && viewport.isConnected;
+  viewport.addEventListener('click',event=>{
+    if (suppressClick && event.detail) { event.preventDefault();event.stopImmediatePropagation();suppressClick=false; }
+  },true);
+  viewport.onpointerdown=event=>{
+    if (!event.isPrimary || event.button!==0 || albumDrag || !live()) return;
+    const sticker=event.target.closest('[data-sticker]');
+    const key=sticker?.dataset.sticker;
+    gesture={pointer:event.pointerId,x:event.clientX,y:event.clientY,view:{x:albumCamera.x,y:albumCamera.y},
+      key,sticker,mode:'tap',moved:false,origin:key?albumBoardPosition(key):null};
+    const saved=gesture;
+    if (key) saved.timer=setTimeout(()=>{
+      if (gesture===saved && albumDrag===saved && live() && !saved.moved) {
+        saved.mode='move';sticker.classList.add('album-dragging');
+        message('Теперь перетащи наклейку.');
+      }
+    },450);
+    suppressClick=false;albumDrag=gesture;
+    viewport.setPointerCapture(event.pointerId);
   };
-  sticker.ondblclick = event => { event.stopPropagation(); showStickerDetail(key); };
-  sticker.onpointerdown = event => {
-    if (!event.isPrimary || event.button !== 0 || albumDrag) return;
-    const bounds = page.getBoundingClientRect();
-    const rect = sticker.getBoundingClientRect();
-    const origin = albumPosition(activePlayer.stickers[key]);
-    gesture = {pointer: event.pointerId, player: activePlayer.id, version: playerScreenVersion,
-      x: event.clientX, y: event.clientY, centerX: (rect.left + rect.right) / 2,
-      centerY: (rect.top + rect.bottom) / 2, bounds, origin, point: origin, moved: false};
-    suppressClick = false;
-    albumDrag = gesture;
-    sticker.setPointerCapture(event.pointerId);
-  };
-  const current = event => gesture && gesture === albumDrag && gesture.pointer === event.pointerId &&
-    gesture.player === activePlayer?.id && gesture.version === playerScreenVersion && phase === 'player-album';
-  sticker.onpointermove = event => {
-    if (!current(event)) return;
-    const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
-    if (!gesture.moved && Math.hypot(dx, dy) < 6) return;
-    if (!gesture.moved) {
-      gesture.moved = true;
-      selectAlbumSticker(key);
-      sticker.classList.add('album-dragging');
+  viewport.onpointermove=event=>{
+    if (!gesture || gesture!==albumDrag || gesture.pointer!==event.pointerId || !live()) return;
+    const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
+    if (!gesture.moved && Math.hypot(dx,dy)<8) return;
+    clearTimeout(gesture.timer);
+    gesture.moved=true;
+    event.preventDefault();
+    if (gesture.mode==='move') {
+      const clamp=value=>Math.max(80,Math.min(albumWorldSize-80,value));
+      gesture.point={x:clamp(gesture.origin.x+dx),y:clamp(gesture.origin.y+dy)};
+      paintAlbumPosition(gesture.sticker,gesture.point);
+    } else {
+      gesture.mode='pan';
+      albumCamera.x=gesture.view.x-dx;albumCamera.y=gesture.view.y-dy;
+      paintAlbumView();
     }
-    event.preventDefault();
-    const {bounds} = gesture, inset=albumInset(gesture.origin);
-    const clamp = (value, start, size) => Math.min(start + size - inset, Math.max(start + inset, value));
-    gesture.point = {...gesture.origin,...albumPoint(page, clamp(gesture.centerX + dx, bounds.left, bounds.width),
-      clamp(gesture.centerY + dy, bounds.top, bounds.height))};
-    paintAlbumPosition(sticker, gesture.point);
-  };
-  const end = (event, cancelled) => {
-    if (!gesture || gesture.pointer !== event.pointerId) return;
-    const saved = gesture;
-    const valid = current(event);
-    gesture = null;
-    if (albumDrag === saved) albumDrag = null;
-    sticker.classList.remove('album-dragging');
-    if (sticker.hasPointerCapture(event.pointerId)) sticker.releasePointerCapture(event.pointerId);
-    suppressClick = saved.moved || cancelled;
-    if (!valid || cancelled) { paintAlbumPosition(sticker, saved.origin); return; }
-    if (saved.moved) saveAlbumPosition(key, saved.point);
-  };
-  sticker.onpointerup = event => end(event, false);
-  sticker.onpointercancel = sticker.onlostpointercapture = event => end(event, true);
-  sticker.onkeydown = event => {
-    const delta = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[event.key];
-    if (!delta) return;
-    event.preventDefault();
-    const point = albumPosition(activePlayer.stickers[key]);
-    const step = event.shiftKey ? 10 : 2;
-    saveAlbumPosition(key,{...point,x:Math.max(0,Math.min(100,point.x+delta[0]*step)),
-      y:Math.max(0,Math.min(100,point.y+delta[1]*step))});
-  };
-}
-
-function swipeAlbumPage(page) {
-  let touch=null, suppressClick=false;
-  page.onpointerdown=event=>{
-    if (!event.isPrimary || event.button!==0 || event.target.closest('[data-sticker]') || albumDrag) return;
-    touch={pointer:event.pointerId,x:event.clientX,y:event.clientY,version:playerScreenVersion};
-    page.setPointerCapture(event.pointerId);
-  };
-  page.onpointermove=event=>{
-    if (!touch || touch.pointer!==event.pointerId) return;
-    if (Math.abs(event.clientX-touch.x)>50 && Math.abs(event.clientY-touch.y)<Math.abs(event.clientX-touch.x)/2) event.preventDefault();
   };
   const end=(event,cancelled)=>{
-    if (!touch || touch.pointer!==event.pointerId) return;
-    const saved=touch; touch=null;
-    if (page.hasPointerCapture(event.pointerId)) page.releasePointerCapture(event.pointerId);
-    const dx=event.clientX-saved.x,dy=event.clientY-saved.y;
-    suppressClick=cancelled || Math.hypot(dx,dy)>12;
-    if (!cancelled && phase==='player-album' && saved.version===playerScreenVersion && Math.abs(dx)>50 && Math.abs(dy)<Math.abs(dx)/2) {
-      setAlbumPage(currentAlbumPage()+(dx<0?1:-1));
+    if (!gesture || gesture.pointer!==event.pointerId) return;
+    const saved=gesture,valid=live()&&albumDrag===gesture;
+    gesture=null;clearTimeout(saved.timer);
+    if (albumDrag===saved) albumDrag=null;
+    saved.sticker?.classList.remove('album-dragging');
+    if (viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+    suppressClick=true;
+    if (!valid || cancelled) {
+      if (saved.sticker) paintAlbumPosition(saved.sticker,saved.origin);
+      if (valid) { Object.assign(albumCamera,saved.view);paintAlbumView(); }
+      return;
     }
+    if (saved.mode==='move' && saved.moved) {
+      saveAlbumPosition(saved.key,{...activePlayer.stickers[saved.key],boardX:saved.point.x,boardY:saved.point.y});
+    } else if (saved.mode==='pan' && saved.moved) saveAlbumView();
+    else if (saved.mode==='tap' && saved.key) showStickerDetail(saved.key);
   };
-  page.onpointerup=event=>end(event,false);
-  page.onpointercancel=page.onlostpointercapture=event=>end(event,true);
-  page.onclick=event=>{
-    if (suppressClick) { suppressClick=false; return; }
-    if (!selectedSticker) { selectAlbumSticker(null); return; }
-    const point=event.detail?albumPoint(page,event.clientX,event.clientY):{x:50,y:50};
-    saveAlbumPosition(selectedSticker,{...albumPosition(activePlayer.stickers[selectedSticker]),...point,page:currentAlbumPage()});
-    $('album-page').focus();
+  viewport.onpointerup=event=>end(event,false);
+  viewport.onpointercancel=viewport.onlostpointercapture=event=>end(event,true);
+  viewport.onwheel=event=>{
+    if (!live() || albumDrag) return;
+    event.preventDefault();
+    const unit=event.deltaMode===1?16:event.deltaMode===2?viewport.clientHeight:1;
+    albumCamera.x+=event.deltaX*unit;albumCamera.y+=event.deltaY*unit;
+    paintAlbumView();clearTimeout(wheelTimer);
+    wheelTimer=setTimeout(()=>{if(live())saveAlbumView();},180);
   };
-  page.onkeydown=event=>{
-    if (event.target!==page) return;
-    if (['ArrowLeft','ArrowRight'].includes(event.key)) {
-      event.preventDefault();setAlbumPage(currentAlbumPage()+(event.key==='ArrowRight'?1:-1));
-    } else if (['Enter',' '].includes(event.key)) { event.preventDefault();page.onclick({detail:0}); }
+  viewport.onkeydown=event=>{
+    if (event.target!==viewport) return;
+    const delta={ArrowLeft:[-80,0],ArrowRight:[80,0],ArrowUp:[0,-80],ArrowDown:[0,80]}[event.key];
+    if (!delta) return;
+    event.preventDefault();albumCamera.x+=delta[0];albumCamera.y+=delta[1];paintAlbumView();saveAlbumView();
   };
 }
 
 function renderPlayerAlbum() {
-  albumDrag = null;
-  const focused = document.activeElement;
-  const focusId=focused?.id;
-  const focusSticker=focused?.dataset?.sticker;
-  const panel = phase === 'player-album' ? $('player-panel')
-    : playerScreen('📒 Мой альбом', activePlayer.avatar + ' ' + activePlayer.name, 'player-album');
+  albumDrag=null;albumResize?.disconnect();
+  const focusedKey=document.activeElement?.dataset?.sticker;
+  const panel=phase==='player-album'?$('player-panel')
+    :playerScreen('📒 Мой альбом',activePlayer.avatar+' '+activePlayer.name,'player-album');
   panel.replaceChildren();
-  const progress = playerElement('p', 'Раундов завершено: ' + activePlayer.rounds + ' · Верных ответов: ' + activePlayer.correct, panel);
-  progress.className = 'album-progress';
-  const nav=playerElement('nav','',panel);nav.className='album-page-nav';nav.setAttribute('aria-label','Страницы альбома');
-  playerButton(nav,'←',()=>setAlbumPage(currentAlbumPage()-1)).disabled=currentAlbumPage()===0;
-  nav.lastElementChild.setAttribute('aria-label','Предыдущая страница');
-  const number=playerElement('span','Страница '+(currentAlbumPage()+1)+' из '+albumPageCount(),nav);
-  number.id='album-page-number';number.setAttribute('aria-live','polite');
-  playerButton(nav,'→',()=>setAlbumPage(currentAlbumPage()+1)).disabled=currentAlbumPage()===albumPageCount()-1;
-  nav.lastElementChild.setAttribute('aria-label','Следующая страница');
-  const actions=playerElement('div','',panel); actions.className='album-actions';
-  const add=playerButton(actions,'＋ Новая страница',()=>setAlbumPage(albumPageCount(),albumPageCount()+1));
-  add.id='album-add-page';add.disabled=albumPageCount()>=12;
+  playerElement('p','Раундов завершено: '+activePlayer.rounds+' · Верных ответов: '+activePlayer.correct,panel).className='album-progress';
+  const actions=playerElement('div','',panel);actions.className='album-actions';
+  playerButton(actions,'◎ В центр',()=>{
+    Object.assign(albumCamera,albumInitialView());paintAlbumView();saveAlbumView();
+  });
   const undo=playerButton(actions,'↶ Отменить',undoAlbumAction);undo.id='album-undo';undo.disabled=!albumUndo.length;
-  playerElement('p','Листай свайпом по свободному месту. Наклейки можно перетаскивать.',panel).className='hint';
-  const placed = Object.entries(activePlayer.stickers).filter(([key, point]) => albumStickers[key] && point !== null && albumPosition(point).page===currentAlbumPage());
-  const page = playerElement('div','',panel);
-  page.tabIndex = 0; page.id='album-page';page.setAttribute('role','group');
-  page.setAttribute('aria-label','Страница '+(currentAlbumPage()+1)+'. Наклейки: '+(placed.map(([key])=>albumStickers[key][1]).join(', ')||'пока нет'));
-  if (!placed.length) playerElement('span','Здесь можно приклеить наклейки',page).className='album-empty';
-  swipeAlbumPage(page);
-  for (const [key, point] of placed) {
+  playerElement('p','Двигай поле пальцем. Коснись наклейки, чтобы рассмотреть. Удержи, чтобы переставить.',panel).className='hint';
+  const viewport=playerElement('div','',panel);viewport.id='album-page';viewport.tabIndex=0;
+  viewport.setAttribute('role','group');viewport.setAttribute('aria-label','Альбом наклеек. Двигай поле пальцем или стрелками клавиатуры.');
+  const world=playerElement('div','',viewport);world.id='album-world';
+  for(const key of Object.keys(activePlayer.stickers).filter(key=>albumStickers[key])) {
     const title=albumStickers[key][1];
-    const sticker=playerButton(page,'',null);sticker.className='album-sticker';
+    const sticker=playerButton(world,'',()=>showStickerDetail(key));sticker.className='album-sticker';
     sticker.dataset.kind=key;sticker.dataset.sticker=key;
-    sticker.setAttribute('aria-label',title+'. Выбери для изменения, перетащи или перемести стрелками клавиатуры.');
-    paintAlbumPosition(sticker,point);stickerArt(sticker,key);playerElement('span',title,sticker);
-    movableAlbumSticker(sticker,page,key);
+    sticker.setAttribute('aria-label',title+'. Рассмотреть. Удержи для перемещения.');
+    paintAlbumPosition(sticker,albumBoardPosition(key));stickerArt(sticker,key);playerElement('span',title,sticker);
+    sticker.onfocus=()=>{
+      if (sticker.matches(':focus-visible')) { Object.assign(albumCamera,albumBoardPosition(key));paintAlbumView(); }
+      viewport.scrollLeft=0;viewport.scrollTop=0;
+    };
+    sticker.onkeydown=event=>{
+      const delta={ArrowLeft:[-12,0],ArrowRight:[12,0],ArrowUp:[0,-12],ArrowDown:[0,12]}[event.key];
+      if (!delta) return;
+      event.preventDefault();event.stopPropagation();
+      const point=albumBoardPosition(key);
+      saveAlbumPosition(key,{...activePlayer.stickers[key],boardX:Math.max(80,Math.min(1520,point.x+delta[0])),
+        boardY:Math.max(80,Math.min(1520,point.y+delta[1]))});
+    };
   }
-  const editor=playerElement('section','',panel);editor.id='album-editor';editor.setAttribute('aria-label','Оформление выбранной наклейки');
-  const unplaced=Object.keys(activePlayer.stickers).filter(key=>albumStickers[key]&&activePlayer.stickers[key]===null);
-  if (unplaced.length) {
-    playerElement('h3','Ещё не приклеены',panel);
-    const tray=playerElement('div','',panel);tray.className='album-tray';
-    for (const key of unplaced) {
-      const title=albumStickers[key][1];
-      const button=playerButton(tray,'',()=>selectAlbumSticker(selectedSticker===key?null:key));
-      button.dataset.sticker=key;stickerArt(button,key);button.append(document.createTextNode(title));
-    }
+  if (!world.children.length) playerElement('span','Заверши тренировку, чтобы получить первую наклейку.',viewport).className='album-empty';
+  if (!albumCamera || albumCamera.player!==activePlayer.id) {
+    albumCamera={player:activePlayer.id,...(activePlayer.albumView||albumInitialView())};
   }
-  selectAlbumSticker(selectedSticker);
-  if (!Object.keys(activePlayer.stickers).length) message('Заверши тренировку, чтобы получить первую наклейку.');
+  panAlbum(viewport);paintAlbumView();
+  viewport.onscroll=()=>{viewport.scrollLeft=0;viewport.scrollTop=0;};
+  if (typeof ResizeObserver==='function') { albumResize=new ResizeObserver(paintAlbumView);albumResize.observe(viewport); }
+  message('Все твои наклейки — на одном поле.');
   if (activePlayer.rewards) renderMarioCollection(panel);
-  const target=focusId && panel.querySelector('#'+CSS.escape(focusId));
-  if (target) target.focus();
-  else if (focusSticker) (panel.querySelector('[data-sticker="'+focusSticker+'"]')||page).focus();
+  if (focusedKey) world.querySelector('[data-sticker="'+focusedKey+'"]')?.focus({preventScroll:true});
+}
+
+function albumInitialView() {
+  const points=Object.keys(activePlayer.stickers).filter(key=>albumStickers[key]).map(key=>albumBoardPosition(key));
+  return points.length?{x:points.reduce((sum,p)=>sum+p.x,0)/points.length,y:points.reduce((sum,p)=>sum+p.y,0)/points.length}:{x:800,y:800};
 }
 
 function playerRoundId() {

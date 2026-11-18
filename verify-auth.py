@@ -137,9 +137,28 @@ with tempfile.TemporaryDirectory(prefix="bunny-auth-") as directory:
         assert changed["stickers"]["start"] == layout
         assert (changed["rounds"], changed["coins"], changed["correct"]) == (1, 1, 9)
 
+        # One pannable field keeps rewards from all old pages and stores camera separately.
+        board = dict(layout, boardX=712.5, boardY=894)
+        assert request(child, "players/old-child", dict(kind="sticker", sticker="start", **board))[0] == 200
+        updated = request(child, "players/old-child", dict(kind="sticker", sticker="start", x=30, y=40))[1]
+        assert updated["stickers"]["start"] == board
+        reset = request(child, "players/old-child", dict(kind="sticker", sticker="start", boardReset=True, **layout))[1]
+        assert reset["stickers"]["start"] == layout
+        assert request(child, "players/old-child", dict(kind="sticker", sticker="start", **board))[0] == 200
+        assert request(child, "players/old-child", dict(kind="album-view", x=700.25, y=850.5))[0] == 200
+        for fields in (dict(boardX=79), dict(boardY=1521), dict(boardX=True), dict(boardY=float("nan"))):
+            assert request(child, "players/old-child", dict(kind="sticker", sticker="start", **dict(board, **fields)))[0] == 400
+        for x, y in ((-1, 800), (800, 1601), (True, 800), (float("nan"), 800)):
+            assert request(child, "players/old-child", dict(kind="album-view", x=x, y=y))[0] == 400
+        durable = request(child, "players/old-child")[1]
+        assert durable["albumView"] == dict(x=700.25, y=850.5)
+        assert durable["stickers"]["start"] == board and durable["coins"] == 1
+        layout = board
+
         assert request(second_child, "auth/login", dict(login="child", password="Child-test-123"))[0] == 200
         reopened = request(second_child, "players/old-child")[1]
         assert reopened["stickers"]["start"] == layout and reopened["albumPages"] == 3
+        assert reopened["albumView"] == dict(x=700.25, y=850.5)
         assert request(parent, "auth/accounts", dict(child_account, password="New-child-test-123"))[0] == 200
         assert request(child, "players/old-child")[0] == 401
         assert request(second_child, "players/old-child")[0] == 401
