@@ -462,7 +462,15 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             if not all(type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 1600
                        for value in (x, y)):
                 raise ValueError("Некорректное положение альбома.")
-            profile["albumView"] = {"x": round(x, 2), "y": round(y, 2)}
+            view = {"x": round(x, 2), "y": round(y, 2)}
+            if "zoom" in data:
+                zoom = data["zoom"]
+                if type(zoom) not in (int, float) or not math.isfinite(zoom) or not 0.5 <= zoom <= 2:
+                    raise ValueError("Масштаб альбома — от 50% до 200%.")
+                view["zoom"] = round(zoom, 4)
+            elif "zoom" in (profile.get("albumView") or {}):
+                view["zoom"] = profile["albumView"]["zoom"]
+            profile["albumView"] = view
         elif kind == "redeem":
             sticker = data.get("sticker")
             if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
