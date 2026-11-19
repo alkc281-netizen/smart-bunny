@@ -455,6 +455,10 @@ let albumCamera = null;
 let albumResize = null;
 let stickerDialog = null;
 let playerApiReady = false;
+let practiceMode = false;
+let practiceStore = null;
+let practiceSaved = true;
+const practiceStorageKey = 'bunny-local-practice-v1';
 let parentSession = false;
 let authConfigured = false;
 let writingPlayer = false;
@@ -532,6 +536,7 @@ function storePlayerOutbox() {
 }
 
 function enqueuePlayerUpdate(data) {
+  if (practiceMode) { savePracticeResult(data); return; }
   playerOutbox.push({player: activePlayer.id, data});
   storePlayerOutbox();
   flushPlayerUpdates();
@@ -556,7 +561,7 @@ function applyPendingAlbumUpdate(profile, data) {
 }
 
 async function flushPlayerUpdates() {
-  if (writingPlayer) return;
+  if (practiceMode || writingPlayer) return;
   writingPlayer = true;
   try {
     while (activePlayer) {
@@ -604,7 +609,8 @@ function refreshPlayerNav() {
   $('choose-player').textContent = activePlayer ? activePlayer.avatar + ' ' + activePlayer.name : '👤 Выбрать игрока';
   setVisible('open-album', Boolean(activePlayer));
   dailyMissionButton.hidden = !activePlayer?.rewards;
-  $('logout-player').hidden = !activePlayer;
+  $('logout-player').hidden = !activePlayer || practiceMode;
+  $('open-album').textContent = practiceMode ? '📈 Мой прогресс' : '📒 Мой альбом';
   $('parent-settings').hidden = !activePlayer || !parentSession;
   window.bunnyMario?.refreshButtons();
 }
@@ -704,11 +710,103 @@ function rememberField(form) {
   return input;
 }
 
+function newPracticeProfile(name='Тренировка', avatar='🐰', classes=[1,2,3,4]) {
+  return {id:'practice-'+playerRoundId(),name,avatar,schoolClasses:classes,
+    preferences:{},rounds:0,correct:0,topics:[],best:{},stickers:{},completed:[]};
+}
+
+function paintPracticeNote() {
+  let note=$('practice-note');
+  if (!note) {
+    note=playerElement('p','',$('app'));note.id='practice-note';note.className='practice-note';
+    note.setAttribute('role','status');
+  }
+  note.hidden=!practiceMode;
+  note.textContent=practiceSaved
+    ? 'На этом устройстве · '+(activePlayer?.name||'Тренировка')+'. Прогресс сохраняется в этом браузере.'
+    : 'На этом устройстве. Браузер не разрешает сохранить прогресс — он доступен до закрытия страницы.';
+}
+
+function persistPractice() {
+  practiceStore.active=activePlayer?.id;
+  try {localStorage.setItem(practiceStorageKey,JSON.stringify(practiceStore));practiceSaved=true;}
+  catch {practiceSaved=false;}
+  paintPracticeNote();
+}
+
+function choosePractice(profile) {
+  practiceMode=true;parentSession=false;playerApiReady=true;authConfigured=false;
+  chooseActivePlayer(profile);persistPractice();
+}
+
+function startPractice() {
+  if (!practiceStore) {
+    try {practiceStore=JSON.parse(localStorage.getItem(practiceStorageKey)||'null');}catch {}
+    if (!practiceStore || !Array.isArray(practiceStore.profiles)) practiceStore={profiles:[]};
+    practiceStore.profiles=practiceStore.profiles.filter(p=>p&&typeof p.id==='string'&&p.id.startsWith('practice-')&&
+      typeof p.name==='string'&&p.preferences&&typeof p.preferences==='object'&&
+      Array.isArray(p.completed)&&Array.isArray(p.topics)&&p.best&&
+      Number.isSafeInteger(p.rounds)&&p.rounds>=0&&Number.isSafeInteger(p.correct)&&p.correct>=0);
+    for (const profile of practiceStore.profiles) {profile.stickers={};delete profile.rewards;}
+    if (!practiceStore.profiles.length) practiceStore.profiles.push(newPracticeProfile());
+  }
+  choosePractice(practiceStore.profiles.find(p=>p.id===practiceStore.active)||practiceStore.profiles[0]);
+}
+
+function savePracticeResult(data) {
+  if (!practiceMode||!activePlayer?.id.startsWith('practice-'))return;
+  if (data.kind==='round') {
+    if (activePlayer.completed.includes(data.id))return;
+    if (!Number.isInteger(data.score)||![10,50,100].includes(data.total)||data.score<0||data.score>data.total||
+        typeof data.id!=='string'||!Array.isArray(data.topics)||!data.topics.length||data.mission)return;
+    activePlayer.completed.push(data.id);activePlayer.rounds++;activePlayer.correct+=data.score;
+    activePlayer.topics=[...new Set([...activePlayer.topics,...data.topics])].sort().slice(0,512);
+    if(data.topics.length===1){const key=data.topics[0];activePlayer.best[key]=Math.max(activePlayer.best[key]||0,Math.floor(data.score*100/data.total));}
+    if(phase==='finished')$('round-album').textContent='📈 Мой прогресс';
+  } else if (data.kind!=='preference') return;
+  persistPractice();
+}
+
+function openPracticePicker() {
+  const panel=playerScreen('На этом устройстве','Локальные тренировки не отправляются в домашние профили.','player-select');
+  const choices=playerElement('div','',panel);choices.className='player-choices';
+  for(const profile of practiceStore.profiles)playerButton(choices,profile.avatar+' '+profile.name,()=>choosePractice(profile));
+  const form=playerElement('form','',panel);form.className='auth-form';
+  const name=authField(form,'Имя для тренировок','text','off');name.maxLength=20;
+  const label=playerElement('label','Классы',form),classes=playerElement('select','',label);
+  for(const [title,value]of [['1–2 классы','1,2'],['3–4 классы','3,4'],['1–4 классы','1,2,3,4']])playerElement('option',title,classes).value=value;
+  const create=playerElement('button','Добавить игрока на этом устройстве',form);create.type='submit';
+  form.onsubmit=event=>{
+    event.preventDefault();const title=name.value.trim().replace(/\s+/g,' ');
+    if(!title||title.length>20)return;
+    const profile=newPracticeProfile(title,'🐰',classes.value.split(',').map(Number));
+    practiceStore.profiles.push(profile);choosePractice(profile);
+  };
+  playerButton(panel,'← К заданиям',home);
+  if(!/(^|\.)github\.io$/.test(location.hostname))playerButton(panel,'Повторить подключение к домашним профилям',()=>{
+    loadPlayerSession().catch(()=>message('Домашний сервер пока недоступен. Можно продолжать тренироваться на этом устройстве.'));
+  });
+}
+
+function openPracticeProgress() {
+  const panel=playerScreen('📈 Мой прогресс','На этом устройстве · '+activePlayer.name,'player-progress');
+  playerElement('p','Завершено тренировок: '+activePlayer.rounds,panel);
+  playerElement('p','Верных ответов с первой попытки: '+activePlayer.correct,panel);
+  playerElement('p','Пройдено тем: '+activePlayer.topics.length,panel);
+  playerElement('p','Домашние наклейки, монеты и доступ к Марио хранятся отдельно на Lenovo. Эти тренировки не изменяют их.',panel).className='hint';
+  playerButton(panel,'← К заданиям',home);
+}
+
 async function loadPlayerSession() {
+  if (/(^|\.)github\.io$/.test(location.hostname)) { startPractice(); return; }
   const status = await apiRequest('auth/status');
+  const list = await playerRequest('');
+  practiceMode = false;
+  const note = $('practice-note');
+  if (note) note.hidden = true;
   authConfigured = status.configured;
   parentSession = status.parent;
-  playerList = await playerRequest('');
+  playerList = list;
   playerApiReady = true;
   chooseActivePlayer(status.player);
   if (!status.player) {
@@ -718,6 +816,7 @@ async function loadPlayerSession() {
 }
 
 function openPlayerPicker() {
+  if (practiceMode) { openPracticePicker(); return; }
   if (!authConfigured) { openParentSetup(); return; }
   const panel = playerScreen('Вход в игру', 'Выбери аватар или введи свой логин', 'player-select');
   const version = playerScreenVersion;
@@ -849,6 +948,7 @@ async function logoutPlayer() {
 }
 
 function openPlayerAlbum() {
+  if (practiceMode) { openPracticeProgress(); return; }
   if (!activePlayer) { openPlayerPicker(); return; }
   renderPlayerAlbum();
   startMusic();
@@ -1447,7 +1547,5 @@ window.addEventListener('online', flushPlayerUpdates);
 $('logout-player').onclick = logoutPlayer;
 $('parent-settings').onclick = openParentSettings;
 loadPlayerSession().catch(() => {
-  const panel = playerScreen('Вход в игру', 'Открой игру по домашнему адресу Lenovo', 'player-select');
-  message('Не удалось связаться с сервером входа.');
-  playerButton(panel, 'Повторить', () => location.reload());
+  startPractice();
 });

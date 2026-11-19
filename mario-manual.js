@@ -24,7 +24,7 @@
 
   async function refreshAccess() {
     const player=activePlayer?.id,version=++accessVersion;
-    if (!player) {access=null;refreshButtons();return null;}
+    if (!player || practiceMode) {access=null;refreshButtons();return null;}
     try {
       const result=await apiRequest('mario');
       if (activePlayer?.id!==player||version!==accessVersion) return null;

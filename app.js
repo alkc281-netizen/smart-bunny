@@ -29,6 +29,7 @@ function panels(){['game-menu','math-modes','math-menu','school-menu','school-ta
 const audioBuffers=new Map();
 const retiringMusic=new Set();
 let loopManifest=null;
+const privateAudioAvailable=!/(^|\.)github\.io$/.test(globalThis.location?.hostname||'');
 function ensureAudio(){try{if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;audioCtx=new C();musicBus=audioCtx.createGain();musicBus.connect(audioCtx.destination)}if(audioCtx.state==='suspended'||audioCtx.state==='interrupted')audioCtx.resume().catch(()=>{});return true}catch{return false}}
 function decodeAudio(data){return new Promise((resolve,reject)=>audioCtx.decodeAudioData(data,resolve,reject))}
 function loadAudio(url){if(!audioBuffers.has(url)){const pending=fetch(url).then(r=>{if(!r.ok)throw new Error('Audio HTTP '+r.status);return r.arrayBuffer()}).then(decodeAudio).catch(e=>{audioBuffers.delete(url);throw e});audioBuffers.set(url,pending)}return audioBuffers.get(url)}
@@ -48,6 +49,7 @@ function setAudioLevel(){
 function retireMusic(fade=0){const now=audioCtx?.currentTime||0;for(const n of musicNodes){if(fade){n.gain.gain.cancelScheduledValues(now);n.gain.gain.setValueAtTime(n.gain.gain.value,now);n.gain.gain.linearRampToValueAtTime(0,now+fade)}retiringMusic.add(n);try{n.source.stop(now+fade)}catch{}}musicNodes=[]}
 function stopMusic(){pendingAlbumSound=null;musicGeneration++;musicWanted=false;musicPreview=false;retireMusic();$('track-label').textContent='Музыка остановлена';for(const n of retiringMusic){try{n.source.stop()}catch{}}}
 async function startMusic(preview=false){
+ if(!privateAudioAvailable){stopMusic();$('track-label').textContent='Оригинальный звук доступен в домашней версии';return}
  const token=++musicGeneration,index=autoMusic&&musicScreen()==='player-album'?music.length-1:selectedMusic;musicWanted=true;musicPreview=preview;
  if(!enableMusic||mute||!musicAllowed()){musicWanted=false;retireMusic();return}
  if([...players.values()].includes('win'))return;
@@ -69,7 +71,7 @@ async function startMusic(preview=false){
   setAudioLevel();source.start(now);$('track-label').textContent='♫ '+music[index].name;
  }catch(e){if(token===musicGeneration){musicWanted=false;retireMusic();$('track-label').textContent='Музыка недоступна — попробуй ещё раз';console.warn('Music playback:',e)}}
 }
-function warmAudio(){if(!ensureAudio())return;loadAudio('assets/audio/smb_stage_clear.wav').catch(()=>{});loadLoops().catch(()=>{});for(const tune of music)if(tune.file!=='ending.wav')loadAudio('assets/audio/music/'+tune.file).catch(()=>{})}
+function warmAudio(){if(!privateAudioAvailable||!ensureAudio())return;loadAudio('assets/audio/smb_stage_clear.wav').catch(()=>{});loadLoops().catch(()=>{});for(const tune of music)if(tune.file!=='ending.wav')loadAudio('assets/audio/music/'+tune.file).catch(()=>{})}
 const players=new Map();
 function resumeWantedMusic(){
  const reward=pendingAlbumSound;
@@ -82,6 +84,7 @@ function albumRewardSound(name){
  else sound(name);
 }
 function playVictory(){
+ if(!privateAudioAvailable)return;
  if(mute||!enableVictory||[...players.values()].includes('win')||!ensureAudio())return;
  let source=null,gain=null,cancelled=false,volume=fxVolume;
  const player={pause(){cancelled=true;if(source){try{source.stop()}catch{}}},get volume(){return volume},set volume(v){volume=v;if(gain)gain.gain.setTargetAtTime(v,audioCtx.currentTime,.015)}};
@@ -94,6 +97,7 @@ function playVictory(){
  return player;
 }
 function sound(name){
+ if(!privateAudioAvailable)return;
  if(phase==='player-mario')return;
  if(mute||!ensureAudio())return;
  if(name==='win')return playVictory();
