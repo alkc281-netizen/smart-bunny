@@ -64,6 +64,8 @@ def initialize_database(database):
     with closing(sqlite3.connect(database)) as db, db:
         db.execute("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
         db.execute("CREATE TABLE IF NOT EXISTS rounds (player TEXT, id TEXT, PRIMARY KEY(player,id))")
+        db.execute("CREATE TABLE IF NOT EXISTS mario_tickets (player TEXT, round TEXT, created REAL NOT NULL, used REAL, PRIMARY KEY(player,round))")
+        db.execute("CREATE TABLE IF NOT EXISTS mario_sessions (player TEXT PRIMARY KEY, id TEXT NOT NULL, auth TEXT NOT NULL, expires REAL)")
         db.execute("CREATE TABLE IF NOT EXISTS accounts (player TEXT PRIMARY KEY, login TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, digest TEXT NOT NULL, parent INTEGER NOT NULL DEFAULT 0)")
         db.execute("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, player TEXT NOT NULL, expires REAL NOT NULL)")
         db.execute("CREATE TABLE IF NOT EXISTS auth_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
@@ -375,6 +377,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
     def route(self, db, path, data):
         if path.startswith("/api/auth/"):
             return self.route_auth(db, path, data)
+        if path == "/api/mario":
+            return self.route_mario(db, data)
         if path == "/api/players":
             if data is None:
                 accounts = self.account_list(db)
@@ -402,6 +406,41 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             db.execute("UPDATE players SET progress=? WHERE id=?", (json.dumps(profile), player_id))
         return 200, player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False), getattr(self, "catalog_rewards", False))
 
+    def route_mario(self, db, data):
+        account = self.account(db)
+        if not account:
+            return 401, {"error": "Войдите в свой профиль."}
+        player, _login, parent = account
+        now = time.time()
+        auth = token_digest(self.session_token())
+        session = db.execute("SELECT id,auth,expires FROM mario_sessions WHERE player=?", (player,)).fetchone()
+        valid = bool(session and (session[2] is None and parent or session[2] is not None and session[2] > now))
+        action = data.get("action") if data is not None else None
+        if action == "start":
+            if not valid:
+                if not parent:
+                    ticket = db.execute("SELECT round FROM mario_tickets WHERE player=? AND used IS NULL ORDER BY created,round LIMIT 1", (player,)).fetchone()
+                    if not ticket:
+                        return 403, {"error": "Сначала полностью заверши учебный раунд — получишь 10 минут Марио."}
+                    db.execute("UPDATE mario_tickets SET used=? WHERE player=? AND round=?", (now, player, ticket[0]))
+                session = (secrets.token_urlsafe(24), auth, None if parent else now + 600)
+                db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
+            elif session[1] != auth:
+                # Transfer an earned session to another signed-in device without extending it.
+                session = (secrets.token_urlsafe(24), auth, session[2])
+                db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
+            valid = True
+        elif action == "heartbeat":
+            if not valid or session[1] != auth or not isinstance(data.get("id"), str) or not hmac.compare_digest(session[0], data["id"]):
+                return 403, {"error": "Время игры закончилось. Заверши ещё один учебный раунд."}
+        elif data is not None:
+            raise ValueError("Неизвестное действие Марио.")
+        tickets = db.execute("SELECT count(*) FROM mario_tickets WHERE player=? AND used IS NULL", (player,)).fetchone()[0]
+        result = dict(admin=bool(parent), tickets=tickets, canResume=valid, serverTime=now)
+        if valid and session[1] == auth:
+            result.update(id=session[0], expires=session[2], remaining=None if session[2] is None else max(0, session[2]-now))
+        return 200, result
+
     @staticmethod
     def update(db, player_id, profile, data):
         kind = data.get("kind")
@@ -421,6 +460,7 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             inserted = db.execute("INSERT OR IGNORE INTO rounds VALUES (?, ?)", (player_id, operation)).rowcount
             if inserted:
                 apply_round(profile, data)
+                db.execute("INSERT INTO mario_tickets (player,round,created) VALUES (?,?,?)", (player_id, operation, time.time()))
         elif kind == "sticker":
             sticker, x, y = (data.get(key) for key in ("sticker", "x", "y"))
             if not isinstance(sticker, str) or sticker not in profile["stickers"]:

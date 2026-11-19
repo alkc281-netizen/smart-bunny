@@ -59,6 +59,7 @@
   let loadVersion = 0;
   let currentCompleted = 0;
   let currentTotal = 0;
+  let manualActive = false;
   let effectsBus;
   let nextAudioTime = 0;
   const effectSources = new Set();
@@ -96,6 +97,7 @@
         nes.fromJSON(structuredClone(state));
         previous=buttons;
       },
+      release() { for(const button of directions)nes.buttonUp(1,button);previous=0; },
       step(buttons) {
         for (let i=0;i<8;i++) {
           const mask=1<<i;
@@ -243,14 +245,14 @@
   }
 
   function schedulePlayback() {
-    if (!frameRequest && chosen && marioTheme && session && frame<target && !document.hidden) {
+    if (!manualActive && !frameRequest && chosen && marioTheme && session && frame<target && !document.hidden) {
       frameRequest=requestAnimationFrame(advance);
     }
   }
 
   function advance(now) {
     frameRequest=0;
-    if (!chosen || !marioTheme || !session || document.hidden) return;
+    if (manualActive || !chosen || !marioTheme || !session || document.hidden) return;
     if (phase==='settings' || phase==='show') {
       lastFrame=null;
       stopEffectsPlayback();
@@ -414,6 +416,26 @@
 
   window.bunnyReplay={
     setEffectsVolume,
+    async manual(level,render) {
+      manualActive=true;stopPlayback();
+      const version=++loadVersion;
+      const gameRom=rom||new Uint8Array(await readHomeRom());
+      validateRomHeader(gameRom);
+      const engine=await loadReplayEngine();
+      const result=verifiedLevels.get(level)||await verifyRoute(engine,gameRom,level,version);
+      if (!result || version!==loadVersion || !manualActive) return null;
+      rom=gameRom;verifiedLevels.set(level,result);
+      const runtime=makeSession(engine,gameRom,render,recordSample);
+      runtime.restore(result.startState,result.buttons[result.start]);
+      isolateEffects(runtime.nes);render(result.startImage);
+      return {
+        step(buttons) {sampleCount=0;runtime.step(buttons);playEffectSamples();},
+        snapshot() {runtime.release();return runtime.nes.toJSON();},
+        restore(state) {runtime.restore(state,0);runtime.release();},
+        silence:stopEffectsPlayback,
+      };
+    },
+    stopManual() {manualActive=false;loadVersion++;stopEffectsPlayback();updateVisibility();},
     setTheme(value) {
       marioTheme=value;
       updateVisibility();

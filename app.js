@@ -36,7 +36,7 @@ function loadLoops(){if(!loopManifest)loopManifest=fetch('assets/audio/music/loo
 function musicScreen(){return phase==='settings'?settingsSnapshot?.phase:phase}
 function musicAllowed(){
  const screen=musicScreen();
- return (phase==='settings'&&musicPreview)||screen==='player-album'||Boolean(game&&!['menu','finished'].includes(screen));
+ return (phase==='settings'&&musicPreview)||screen==='player-album'||(screen==='player-mario'&&window.bunnyMario?.isPlaying())||Boolean(game&&!['menu','finished'].includes(screen));
 }
 function setAudioLevel(){
  window.bunnyReplay?.setEffectsVolume?.(mute?0:fxVolume);
@@ -221,7 +221,7 @@ home();
 $('rabbit').setAttribute('role','button');$('rabbit').tabIndex=0;$('rabbit').setAttribute('aria-label','Прыгнуть');
 function jump(){if($('app').classList.contains?.('mario')){marioAction('hero');return}if([...players.values()].includes('win'))return;mood();void $('rabbit').offsetWidth;mood('happy');sound('jump')}
 $('rabbit').onclick=jump;$('rabbit').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jump()}};
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#keypad')&&!['test-victory','mute','choose-player','album-page','mario-mushroom','mario-koopa','mario-goomba'].includes(b.id))sound('tap')});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('#keypad,.mario-touch-controls')&&!['test-victory','mute','choose-player','album-page','mario-mushroom','mario-koopa','mario-goomba'].includes(b.id))sound('tap')});
 
 function updateMarioCourse(completed,total) {
  const progress=total>0?Math.min(1,completed/total):0;
