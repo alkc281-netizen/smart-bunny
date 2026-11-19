@@ -535,6 +535,11 @@ h1{font-size:26px}
 
 /* Manual NES occupies the viewport. Only the emulator's 8px black overscan is
    cropped; the visible 240x224 game keeps its original square-pixel ratio. */
+html:has(.manual-playing), body:has(.manual-playing), .manual-playing * {
+  user-select: none !important; -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important; -webkit-tap-highlight-color: transparent;
+}
+html:has(.manual-playing), body:has(.manual-playing) { touch-action: none; overscroll-behavior: none; }
 body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; background: #10131b; }
 .console.manual-playing, .console.manual-playing.modern {
   position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh;
