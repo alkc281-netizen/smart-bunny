@@ -433,6 +433,7 @@
       return {
         step(buttons) {sampleCount=0;runtime.step(buttons);playEffectSamples();},
         isPaused() {return Boolean(runtime.nes.cpu.mem[0x0776]&1);},
+        releaseInput() {runtime.release();},
         snapshot() {runtime.release();return runtime.nes.toJSON();},
         restore(state) {runtime.restore(state,0);runtime.release();},
         silence:stopEffectsPlayback,

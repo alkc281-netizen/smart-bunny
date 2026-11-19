@@ -10,6 +10,8 @@
   let playing=false,loading=false,frameRequest=0,lastFrame=null,heartbeatFlight=null,heartbeatVersion=-1;
   let canvas,status,pauseButton,startButton,clock;
   let pendingPress=0,audioPrimed=false;
+  const tapFrames=new Map(),touchPanels=new WeakSet();
+  const nativeTouch='ontouchstart' in window;
   const pointers=new Map(),keys=new Map(),memory=new Map();
   const frameMs=1000/60.0988138974405;
 
@@ -62,7 +64,8 @@
   }
 
   function clearInput() {
-    pointers.clear();keys.clear();pendingPress=0;
+    pointers.clear();keys.clear();pendingPress=0;tapFrames.clear();
+    runtime?.releaseInput();
     for(const button of document.querySelectorAll('.mario-touch-controls [data-mask]'))button.setAttribute('aria-pressed','false');
   }
 
@@ -105,43 +108,93 @@
     return [...pointers.values()].reduce((mask,touch)=>mask|touch.mask,0)|[...keys.values()].reduce((mask,key)=>mask|key,0);
   }
 
+  function updateControls() {
+    const held=heldMask();
+    for(const button of document.querySelectorAll('.mario-touch-controls [data-mask]'))
+      button.setAttribute('aria-pressed',String(Boolean(held&Number(button.dataset.mask))));
+  }
+
+  function press(mask) {
+    // Two NES frames let even a quick tap reach the ROM's input polling.
+    // Sustained input still comes exclusively from fingers/keys held down.
+    if(!(heldMask()&mask))tapFrames.set(mask,2);
+  }
+
+  function releaseContact(id,cancelled=false) {
+    const contact=pointers.get(id);if(!contact)return;
+    pointers.delete(id);
+    if(cancelled&&!(heldMask()&contact.mask))tapFrames.delete(contact.mask);
+    updateControls();
+  }
+
+  function moveContact(contact,x,y) {
+    if(!contact.pad.classList.contains('manual-dpad'))return;
+    const button=document.elementFromPoint(x,y)?.closest('[data-mask]');
+    if(button&&contact.pad.contains(button)){
+      const mask=Number(button.dataset.mask);
+      if(mask!==contact.mask)press(mask);
+      contact.button=button;contact.mask=mask;
+    }else{
+      const r=contact.button.getBoundingClientRect(),slop=16;
+      if(x<r.left-slop||x>r.right+slop||y<r.top-slop||y>r.bottom+slop)contact.mask=0;
+    }
+    updateControls();
+  }
+
   function bindControls(container) {
-    const update=()=>{
-      const held=heldMask();
-      for(const button of container.querySelectorAll('[data-mask]'))button.setAttribute('aria-pressed',String(Boolean(held&Number(button.dataset.mask))));
-    };
     container.onpointerdown=event=>{
-      const button=event.target.closest('[data-mask]');
+      if(nativeTouch&&event.pointerType==='touch')return;
+      const button=event.target.closest('[data-mask]')||event.target.closest('.manual-action')?.querySelector('button');
       if(!playing||!button||event.button!==0)return;
       event.preventDefault();unlockAudio();
-      const mask=Number(button.dataset.mask);pendingPress|=mask;
-      pointers.set(event.pointerId,{mask,button});
-      button.setPointerCapture(event.pointerId);update();
+      const mask=Number(button.dataset.mask);press(mask);
+      pointers.set('pointer:'+event.pointerId,{mask,button,pad:container});
+      // Capture on the stable pad, and also listen for release at window level.
+      try{container.setPointerCapture(event.pointerId);}catch{}
+      updateControls();
     };
     container.onpointermove=event=>{
-      if(!pointers.has(event.pointerId))return;
-      event.preventDefault();
-      // A/B stay held until release. The D-pad can slide to another direction;
-      // allow a small thumb slip outside the current key without releasing it.
-      if(!container.classList.contains('manual-dpad'))return;
-      const touch=pointers.get(event.pointerId);
-      const button=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-mask]');
-      if(button&&container.contains(button)){
-        touch.button=button;touch.mask=Number(button.dataset.mask);pendingPress|=touch.mask;
-      }else{
-        const r=touch.button.getBoundingClientRect(),slop=16;
-        if(event.clientX<r.left-slop||event.clientX>r.right+slop||event.clientY<r.top-slop||event.clientY>r.bottom+slop)touch.mask=0;
+      const id='pointer:'+event.pointerId,contact=pointers.get(id);if(!contact)return;
+      if(event.buttons===0){releaseContact(id,true);return;}
+      event.preventDefault();moveContact(contact,event.clientX,event.clientY);
+    };
+    container.onlostpointercapture=event=>releaseContact('pointer:'+event.pointerId,true);
+  }
+
+  function reconcileTouches(event,cancelled=false) {
+    const live=new Set([...event.touches].map(touch=>'touch:'+touch.identifier));
+    for(const id of [...pointers.keys()])
+      if(id.startsWith('touch:')&&!live.has(id))releaseContact(id,cancelled);
+  }
+
+  function bindTouchControls(panel) {
+    if(touchPanels.has(panel))return;
+    touchPanels.add(panel);
+    // Non-passive touch handling prevents Safari selection/callouts and uses
+    // the real active-finger list instead of relying on pointer capture alone.
+    panel.addEventListener('touchstart',event=>{
+      if(!screenOpen)return;
+      event.preventDefault();reconcileTouches(event);unlockAudio();
+      const selection=window.getSelection();if(selection?.rangeCount)selection.removeAllRanges();
+      for(const touch of event.changedTouches){
+        const button=touch.target.closest('button')||touch.target.closest('.manual-action')?.querySelector('button');
+        if(!button||!panel.contains(button)||button.disabled)continue;
+        const pad=button.closest('.mario-touch-controls');
+        if(pad&&playing){
+          const mask=Number(button.dataset.mask);press(mask);
+          pointers.set('touch:'+touch.identifier,{mask,button,pad});
+        }else if(!pad)button.click();
       }
-      update();
-    };
-    const release=event=>{
-      const touch=pointers.get(event.pointerId);if(!touch)return;
-      pointers.delete(event.pointerId);
-      if(event.type!=='pointerup')pendingPress&=~touch.mask;
-      event.preventDefault();update();
-    };
-    container.onpointerup=container.onpointercancel=container.onlostpointercapture=release;
-    container.oncontextmenu=event=>event.preventDefault();
+      updateControls();
+    },{passive:false});
+    panel.addEventListener('touchmove',event=>{
+      if(!screenOpen)return;
+      event.preventDefault();reconcileTouches(event);
+      for(const touch of event.changedTouches){
+        const contact=pointers.get('touch:'+touch.identifier);
+        if(contact)moveContact(contact,touch.clientX,touch.clientY);
+      }
+    },{passive:false});
   }
 
   function tick(now) {
@@ -154,8 +207,13 @@
     if(count>0){
       lastFrame=lastFrame===null?now:Math.max(now-2*frameMs,lastFrame+count*frameMs);
       try {for(let i=0;i<count;i++){
-        // Even a tap entirely between animation frames reaches one NES frame.
-        const mask=heldMask()|pendingPress;pendingPress=0;runtime.step(mask);
+        // Deliver held controls and short taps at the original NES frame rate.
+        let mask=heldMask()|pendingPress;pendingPress=0;
+        for(const [button,frames]of tapFrames){
+          mask|=button;
+          if(frames<=1)tapFrames.delete(button);else tapFrames.set(button,frames-1);
+        }
+        runtime.step(mask);
       }}catch{pause('Не удалось продолжить. Вернись к заданиям и открой игру ещё раз.');return;}
       const nativePaused=runtime.isPaused();
       pauseButton.setAttribute('aria-pressed',String(nativePaused));
@@ -300,8 +358,8 @@
       playerElement('span',note,action).className='manual-control-note';
     }
     // Block text selection/callouts only inside the manual game, not in lessons.
-    panel.oncontextmenu=panel.onselectstart=event=>event.preventDefault();
-    bindControls(pad);bindControls(actions);refreshButtons();
+    panel.oncontextmenu=panel.onselectstart=event=>{if(screenOpen)event.preventDefault();};
+    bindControls(pad);bindControls(actions);bindTouchControls(panel);refreshButtons();
     loadGame();
   }
 
@@ -311,9 +369,20 @@
       event.preventDefault();if(!event.repeat)systemButton(event.code.startsWith('Shift')?32:16);return;
     }
     const mask={ArrowRight:1,ArrowLeft:2,ArrowDown:4,ArrowUp:8,KeyZ:64,KeyX:128,Space:128}[event.code];
-    if(playing&&mask){event.preventDefault();unlockAudio();keys.set(event.code,mask);pendingPress|=mask;}
+    if(playing&&mask){event.preventDefault();unlockAudio();if(!keys.has(event.code))press(mask);keys.set(event.code,mask);}
   });
   document.addEventListener('keyup',event=>{if(keys.delete(event.code))event.preventDefault();});
+  for(const type of ['pointerup','pointercancel'])window.addEventListener(type,event=>{
+    releaseContact('pointer:'+event.pointerId,type==='pointercancel');
+  },true);
+  for(const type of ['touchend','touchcancel'])window.addEventListener(type,event=>{
+    if(!screenOpen)return;
+    reconcileTouches(event,type==='touchcancel');
+    if(event.cancelable&&event.target.closest?.('#player-panel'))event.preventDefault();
+  },{capture:true,passive:false});
+  document.addEventListener('selectionchange',()=>{
+    if(screenOpen){const selection=window.getSelection();if(selection?.rangeCount)selection.removeAllRanges();}
+  });
   window.addEventListener('blur',()=>{if(screenOpen){pause('Пауза. Нажми START.');saveState();}});
   window.addEventListener('offline',()=>{if(screenOpen){pause('Нет связи с сервером. Нажми START после восстановления связи.');saveState();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&screenOpen){pause('Пауза. Нажми START.');saveState();}});

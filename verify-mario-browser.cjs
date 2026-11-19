@@ -116,7 +116,7 @@ with sqlite3.connect(database) as db:
   await touch('touchEnd');await delay(60);
   assert.equal(await evaluate('testNES.at(-1).controllers[1].state[jsnes.Controller.BUTTON_A]&1'),0);
   // A sub-frame tap still reaches one emulated frame, then releases normally.
-  await evaluate(`window.buttonEdges=[];const nes=testNES.at(-1),down=nes.buttonDown,up=nes.buttonUp;nes.buttonDown=function(p,b){buttonEdges.push(['down',b,p]);return down.call(this,p,b);};nes.buttonUp=function(p,b){buttonEdges.push(['up',b,p]);return up.call(this,p,b);};const b=document.querySelector('.manual-action-pad [data-mask="128"]'),parent=b.closest('.mario-touch-controls');b.setPointerCapture=()=>{};const e={target:b,button:0,pointerId:999,preventDefault(){}};parent.onpointerdown(e);parent.onpointerup({...e,type:'pointerup'});`);
+  await evaluate(`window.buttonEdges=[];const nes=testNES.at(-1),down=nes.buttonDown,up=nes.buttonUp;nes.buttonDown=function(p,b){buttonEdges.push(['down',b,p]);return down.call(this,p,b);};nes.buttonUp=function(p,b){buttonEdges.push(['up',b,p]);return up.call(this,p,b);};const b=document.querySelector('.manual-action-pad [data-mask="128"]'),parent=b.closest('.mario-touch-controls');b.setPointerCapture=()=>{};const e={target:b,button:0,pointerId:999,preventDefault(){}};parent.onpointerdown(e);window.dispatchEvent(new PointerEvent('pointerup',{pointerId:999,button:0,bubbles:true}));`);
   await delay(100);
   assert.deepEqual(await evaluate(`buttonEdges.filter(e=>e[1]===jsnes.Controller.BUTTON_A&&e[2]===1).map(e=>e[0])`),['down','up']);
   // Restoring a suspended context is triggered by a real control gesture.
