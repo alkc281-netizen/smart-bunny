@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import hmac
+import ipaddress
 import json
 import math
 import os
@@ -16,7 +17,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from http.cookies import CookieError, SimpleCookie
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 from uuid import UUID, uuid4
 
 
@@ -173,10 +174,21 @@ def apply_round(profile, data):
             profile["best"][topic] = max(percentage, previous or 0)
 
 
+def public_origin(value):
+    parsed = urlsplit(value)
+    if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
+            or parsed.path not in ('', '/') or parsed.query or parsed.fragment
+            or parsed.port not in (None, 443) or ':' in parsed.hostname
+            or any(not (c.isascii() and (c.isalnum() or c in '.-')) for c in parsed.hostname)):
+        raise ValueError('Public origin must be an HTTPS hostname without a path.')
+    return 'https://' + parsed.hostname.lower()
+
+
 class BunnyHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, database, allowed_hosts, directory, **kwargs):
+    def __init__(self, *args, database, allowed_hosts, directory, external_origin=None, **kwargs):
         self.database = database
         self.allowed_hosts = allowed_hosts
+        self.external_origin = external_origin
         super().__init__(*args, directory=directory, **kwargs)
 
     def list_directory(self, _path):
@@ -187,13 +199,59 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if urlsplit(self.path).path.startswith("/api/"):
             self.handle_api()
         else:
-            super().do_GET()
+            if self.static_access():
+                super().do_GET()
 
     def do_HEAD(self):
         if urlsplit(self.path).path.startswith("/api/"):
             self.send_error(405)
         else:
-            super().do_HEAD()
+            if self.static_access():
+                super().do_HEAD()
+
+    def static_access(self):
+        if not self.external_origin:
+            return True
+        if not self.valid_origin():
+            self.send_error(403)
+            return False
+        path = unquote(urlsplit(self.path).path)
+        if ('\x00' in path or '\\' in path or any(p in ('.', '..') for p in path.split('/'))):
+            self.send_error(404)
+            return False
+        code = {'/', '/index.html', '/styles.css', '/app.js', '/russian-curriculum.js', '/russian.js',
+                '/school-curriculum.js', '/school.js', '/players.js', '/mario-replay.js', '/mario-manual.js'}
+        root = Path(self.directory).resolve()
+        target = (root / path.lstrip('/')).resolve()
+        if not target.is_relative_to(root) or (path not in code and not path.startswith('/assets/')):
+            self.send_error(404)
+            return False
+        if path.startswith('/assets/'):
+            with closing(sqlite3.connect(self.database, timeout=5)) as db:
+                signed_in = self.account(db)
+            if not signed_in:
+                self.send_error(401)
+                return False
+        return True
+
+    def end_headers(self):
+        if self.external_origin:
+            self.send_header('Cache-Control', 'private, no-store')
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Referrer-Policy', 'same-origin')
+            self.send_header('X-Frame-Options', 'DENY')
+            self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+        super().end_headers()
+
+    def valid_origin(self):
+        host = self.headers.get('Host', '')
+        origin = self.headers.get('Origin')
+        if len(self.headers.get_all('Host', [])) != 1 or host not in self.allowed_hosts:
+            return False
+        expected = self.external_origin or 'http://' + host
+        if self.external_origin and self.command == 'POST' and not origin:
+            return False
+        return origin is None or origin == expected
 
     def do_POST(self):
         self.handle_api()
@@ -214,10 +272,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         reward_version = parse_qs(urlsplit(self.path).query).get("rewards", [""])[0]
         self.character_rewards = reward_version in ("characters", "catalog-v1")
         self.catalog_rewards = reward_version == "catalog-v1"
-        host = self.headers.get("Host", "")
-        origin = self.headers.get("Origin")
-        if host not in self.allowed_hosts or (origin and origin != "http://" + host):
-            self.respond(403, {"error": "Откройте игру по домашнему адресу."})
+        if not self.valid_origin():
+            self.respond(403, {"error": "Откройте игру по её настроенному адресу."})
             return
         try:
             data = None
@@ -258,6 +314,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         duration = 30 * 86400 if remember else 12 * 3600
         db.execute("INSERT INTO sessions VALUES (?,?,?)", (token_digest(token), player_id, time.time() + duration))
         self.auth_cookie = "bunny_session=" + token + "; HttpOnly; SameSite=Strict; Path=/"
+        if self.external_origin:
+            self.auth_cookie += '; Secure'
         if remember:
             self.auth_cookie += "; Max-Age=" + str(duration)
 
@@ -271,7 +329,16 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                     player=profile, parent=bool(account and account[2]), login=account[1] if account else None)
 
     def auth_scope(self, action, login=""):
-        return action + ":" + self.client_address[0] + ":" + login
+        address = self.client_address[0]
+        # Only the loopback-only external instance trusts the last hop added by
+        # its local reverse proxy. A caller-supplied prefix cannot evade limits.
+        if self.external_origin and ipaddress.ip_address(address).is_loopback:
+            forwarded = self.headers.get('X-Forwarded-For', '').split(',')[-1].strip()
+            try:
+                address = str(ipaddress.ip_address(forwarded))
+            except ValueError:
+                pass
+        return action + ":" + address + ":" + login
 
     def blocked(self, db, scope):
         row = db.execute("SELECT blocked FROM login_attempts WHERE scope=?", (scope,)).fetchone()
@@ -334,6 +401,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if path == "/api/auth/logout":
             db.execute("DELETE FROM sessions WHERE token=?", (token_digest(self.session_token()),))
             self.auth_cookie = "bunny_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0"
+            if self.external_origin:
+                self.auth_cookie += '; Secure'
             return 200, {"ok": True}
         if path == "/api/auth/login":
             login = normalize_login(data.get("login"))
@@ -352,6 +421,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             # The new cookie is sent with the response and is not in the request yet.
             return 200, {"ok": True}
         if path == "/api/auth/setup":
+            if self.external_origin:
+                return 403, {"error": "Первоначальная настройка выполняется в домашней сети."}
             if db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone():
                 return 409, {"error": "Родительский доступ уже настроен. Войдите с паролем."}
             scope = self.auth_scope("setup")
@@ -383,6 +454,8 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             if data is None:
                 accounts = self.account_list(db)
                 current = self.account(db)
+                if self.external_origin and not current:
+                    return 200, []
                 setup = not db.execute("SELECT 1 FROM accounts WHERE parent=1").fetchone()
                 return 200, accounts if setup or (current and current[2]) else [item for item in accounts if item["ready"]]
             return 403, {"error": "Создавайте игроков в родительском кабинете."}
@@ -530,13 +603,27 @@ def main():
     parser.add_argument("--bind", default="127.0.0.1")
     parser.add_argument("--port", default=8097, type=int)
     parser.add_argument("--host", action="append", default=[])
+    parser.add_argument('--public-origin', help='HTTPS origin for a separate loopback-only tunnel listener')
     options = parser.parse_args()
     if options.database.resolve().is_relative_to(options.directory.resolve()):
         parser.error("The database must be outside the web directory.")
     options.database.parent.mkdir(parents=True, exist_ok=True)
     initialize_database(options.database)
     allowed_hosts = {f"{host}:{options.port}" for host in ["127.0.0.1", "localhost", *options.host]}
-    handler = partial(BunnyHandler, database=options.database, directory=options.directory, allowed_hosts=allowed_hosts)
+    external_origin = None
+    if options.public_origin:
+        if options.bind != '127.0.0.1':
+            parser.error('The public tunnel listener must bind to 127.0.0.1.')
+        try:
+            external_origin = public_origin(options.public_origin)
+        except ValueError as error:
+            parser.error(str(error))
+        allowed_hosts = {urlsplit(external_origin).netloc}
+        with closing(sqlite3.connect(options.database)) as db:
+            if not db.execute('SELECT 1 FROM accounts WHERE parent=1').fetchone():
+                parser.error('Configure the parent account through the home listener first.')
+    handler = partial(BunnyHandler, database=options.database, directory=options.directory,
+                      allowed_hosts=allowed_hosts, external_origin=external_origin)
     with ThreadingHTTPServer((options.bind, options.port), handler) as server:
         server.serve_forever()
 
