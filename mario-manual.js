@@ -8,7 +8,8 @@
   let access=null,accessVersion=0,screenOpen=false,owner=null,generation=0;
   let runtime=null,loadedLevel=0,level=0,lease=null,deadline=0,verifiedUntil=0;
   let playing=false,loading=false,frameRequest=0,lastFrame=null,heartbeatFlight=null,heartbeatVersion=-1;
-  let canvas,status,pauseButton,startButton,restartButton,levelSelect,clock;
+  let canvas,status,pauseButton,startButton,restartButton,levelSelect,clock,options,closeOptions,soundButton,menuStatus;
+  let pendingPress=0,audioPrimed=false;
   const pointers=new Map(),keys=new Map(),memory=new Map();
   const frameMs=1000/60.0988138974405;
 
@@ -61,16 +62,21 @@
   }
 
   function clearInput() {
-    pointers.clear();keys.clear();
+    pointers.clear();keys.clear();pendingPress=0;
     for(const button of document.querySelectorAll('.mario-touch-controls [data-mask]'))button.setAttribute('aria-pressed','false');
+  }
+
+  function report(text) {
+    if(status&&screenOpen)status.textContent=text;
+    if(menuStatus&&screenOpen)menuStatus.textContent=text;
   }
 
   function pause(text='Пауза') {
     playing=false;clearInput();
     if(frameRequest)cancelAnimationFrame(frameRequest);
     frameRequest=0;lastFrame=null;runtime?.silence();stopMusic();
-    if(pauseButton)pauseButton.textContent='▶ Продолжить';
-    if(status&&screenOpen)status.textContent=text;
+    if(pauseButton){pauseButton.textContent='START';pauseButton.setAttribute('aria-label','Продолжить игру');pauseButton.setAttribute('aria-pressed','true');}
+    report(text);
   }
 
   function leave() {
@@ -80,24 +86,61 @@
     window.bunnyReplay?.stopManual();
   }
 
+  // Called directly from gestures, before any network or IndexedDB awaits.
+  // Safari may suspend/interrupt Web Audio independently of the emulator.
+  function unlockAudio() {
+    if(mute)return;
+    try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch{}
+    const wasSleeping=!audioCtx||audioCtx.state!=='running';
+    if(!ensureAudio())return;
+    if(!audioPrimed||wasSleeping){
+      try{
+        const source=audioCtx.createBufferSource();source.buffer=audioCtx.createBuffer(1,1,22050);
+        source.connect(audioCtx.destination);source.onended=()=>source.disconnect();source.start();audioPrimed=true;
+      }catch{}
+    }
+    setAudioLevel();
+  }
+
+  function heldMask() {
+    return [...pointers.values()].reduce((mask,touch)=>mask|touch.mask,0)|[...keys.values()].reduce((mask,key)=>mask|key,0);
+  }
+
   function bindControls(container) {
     const update=()=>{
-      const held=[...pointers.values(),...keys.values()].reduce((mask,value)=>mask|value,0);
+      const held=heldMask();
       for(const button of container.querySelectorAll('[data-mask]'))button.setAttribute('aria-pressed',String(Boolean(held&Number(button.dataset.mask))));
     };
     container.onpointerdown=event=>{
       const button=event.target.closest('[data-mask]');
       if(!playing||!button||event.button!==0)return;
-      event.preventDefault();pointers.set(event.pointerId,Number(button.dataset.mask));
+      event.preventDefault();unlockAudio();
+      const mask=Number(button.dataset.mask);pendingPress|=mask;
+      pointers.set(event.pointerId,{mask,button});
       button.setPointerCapture(event.pointerId);update();
     };
     container.onpointermove=event=>{
       if(!pointers.has(event.pointerId))return;
       event.preventDefault();
+      // A/B stay held until release. The D-pad can slide to another direction;
+      // allow a small thumb slip outside the current key without releasing it.
+      if(!container.classList.contains('manual-dpad'))return;
+      const touch=pointers.get(event.pointerId);
       const button=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-mask]');
-      pointers.set(event.pointerId,button&&container.contains(button)?Number(button.dataset.mask):0);update();
+      if(button&&container.contains(button)){
+        touch.button=button;touch.mask=Number(button.dataset.mask);pendingPress|=touch.mask;
+      }else{
+        const r=touch.button.getBoundingClientRect(),slop=16;
+        if(event.clientX<r.left-slop||event.clientX>r.right+slop||event.clientY<r.top-slop||event.clientY>r.bottom+slop)touch.mask=0;
+      }
+      update();
     };
-    const release=event=>{if(pointers.delete(event.pointerId)){event.preventDefault();update();}};
+    const release=event=>{
+      const touch=pointers.get(event.pointerId);if(!touch)return;
+      pointers.delete(event.pointerId);
+      if(event.type!=='pointerup')pendingPress&=~touch.mask;
+      event.preventDefault();update();
+    };
     container.onpointerup=container.onpointercancel=container.onlostpointercapture=release;
     container.oncontextmenu=event=>event.preventDefault();
   }
@@ -105,14 +148,16 @@
   function tick(now) {
     frameRequest=0;
     if(!playing||!screenOpen||!runtime)return;
-    if(document.hidden){pause('Пауза. Нажми «Продолжить», когда вернёшься.');saveState();return;}
+    if(document.hidden){pause('Пауза. Нажми START, когда вернёшься.');saveState();return;}
     if(now>=deadline){expire();return;}
-    if(now>=verifiedUntil){pause('Проверяем доступ. Нажми «Продолжить».');heartbeat();return;}
+    if(now>=verifiedUntil){pause('Проверяем доступ. Нажми START.');heartbeat();return;}
     const count=lastFrame===null?1:Math.min(3,Math.floor((now-lastFrame)/frameMs));
     if(count>0){
       lastFrame=lastFrame===null?now:Math.max(now-2*frameMs,lastFrame+count*frameMs);
-      const mask=[...pointers.values(),...keys.values()].reduce((value,button)=>value|button,0);
-      try {for(let i=0;i<count;i++)runtime.step(mask);}catch{pause('Не удалось продолжить. Попробуй «Заново».');return;}
+      try {for(let i=0;i<count;i++){
+        // Even a tap entirely between animation frames reaches one NES frame.
+        const mask=heldMask()|pendingPress;pendingPress=0;runtime.step(mask);
+      }}catch{pause('Не удалось продолжить. Попробуй «Заново».');return;}
     }
     frameRequest=requestAnimationFrame(tick);
   }
@@ -137,7 +182,7 @@
         applyLease(result,sent);return true;
       }catch(error){
         if(current===generation&&screenOpen){
-          if(error.status===403)expire();else pause('Нет связи с сервером. Нажми «Продолжить» после восстановления связи.');
+          if(error.status===403)expire();else pause('Нет связи с сервером. Нажми START после восстановления связи.');
           if(error.status===401)loadPlayerSession().catch(()=>{});
         }
         return false;
@@ -161,6 +206,7 @@
     lease=null;pauseButton.disabled=true;startButton.hidden=false;startButton.disabled=false;
     startButton.textContent='🎮 Следующий заработанный запуск';
     clock.textContent='Время закончилось';
+    options.hidden=false;closeOptions.hidden=true;
     refreshAccess().then(result=>{
       if(!screenOpen||lease)return;
       const more=result&&(result.admin||result.tickets>0);
@@ -171,11 +217,12 @@
 
   function resume() {
     if(!screenOpen||!runtime||!lease||loading)return;
-    ensureAudio();
+    unlockAudio();
     heartbeat().then(ok=>{
       if(!ok||!screenOpen||!runtime)return;
-      playing=true;lastFrame=null;clearInput();pauseButton.textContent='⏸ Пауза';
-      status.textContent='Играй!';
+      playing=true;lastFrame=null;clearInput();options.hidden=true;closeOptions.hidden=false;
+      pauseButton.textContent='START';pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
+      report('');
       if(autoMusic){selectedMusic=0;$('song').value='0';}
       startMusic();if(!frameRequest)frameRequest=requestAnimationFrame(tick);
     });
@@ -183,7 +230,7 @@
 
   async function loadGame(fresh=false) {
     if(loading||!screenOpen)return;
-    ensureAudio();pause('Готовим уровень…');
+    unlockAudio();pause('Готовим уровень…');
     loading=true;const current=++generation,player=owner,previousLease=lease;
     await saveState();
     if(current!==generation||!screenOpen||activePlayer?.id!==player)return;
@@ -201,14 +248,15 @@
       const result=await apiRequest('mario',previousLease?{action:'heartbeat',id:previousLease}:{action:'start'});
       if(current!==generation||activePlayer?.id!==player||!screenOpen)return;
       applyLease(result,sent);startButton.hidden=true;pauseButton.disabled=false;restartButton.disabled=false;
-      playing=true;lastFrame=null;status.textContent='Играй!';pauseButton.textContent='⏸ Пауза';
+      playing=true;lastFrame=null;report('');options.hidden=true;closeOptions.hidden=false;
+      pauseButton.textContent='START';pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
       if(autoMusic){selectedMusic=0;$('song').value='0';}startMusic();
       frameRequest=requestAnimationFrame(tick);
       saveState();
     }catch(error){
       if(current===generation&&screenOpen){
         if(error.status===403&&lease)expire();
-        else{pause(error.message||'Не удалось запустить Марио.');startButton.hidden=false;startButton.disabled=false;refreshAccess();}
+        else{pause(error.message||'Не удалось запустить Марио.');options.hidden=false;startButton.hidden=false;startButton.disabled=false;refreshAccess();}
         if(error.status===401)loadPlayerSession().catch(()=>{});
       }
     }finally{if(current===generation){loading=false;levelSelect.disabled=false;startButton.disabled=false;}}
@@ -216,50 +264,90 @@
 
   async function open() {
     if(!activePlayer)return;
-    ensureAudio();const player=activePlayer.id;
+    unlockAudio();const player=activePlayer.id;
     const allowed=await refreshAccess();
     if(activePlayer?.id!==player)return;
     if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала полностью заверши учебный раунд.');return;}
     const panel=playerScreen('🎮 Марио','', 'player-mario');
     screenOpen=true;owner=player;generation++;loading=false;lease=null;runtime=null;playing=false;
     $('app').classList.add('manual-playing');
-    const toolbar=playerElement('div','',panel);toolbar.className='manual-toolbar';
-    const label=playerElement('label','Старт ',toolbar);levelSelect=playerElement('select','',label);
-    for(let index=0;index<3;index++)playerElement('option','1-'+(index+1),levelSelect).value=index;
-    try{const saved=Number(localStorage.getItem(player+':mario-level')||0);level=[0,1,2].includes(saved)?saved:0;}catch{level=0;}levelSelect.value=level;
-    levelSelect.onchange=()=>{pause();level=Number(levelSelect.value);try{localStorage.setItem(owner+':mario-level',String(level));}catch{}if(runtime)loadGame();};
-    pauseButton=playerButton(toolbar,'⏸ Пауза',()=>playing?(pause(),saveState()):resume());pauseButton.disabled=true;pauseButton.id='manual-pause';
-    restartButton=playerButton(toolbar,'↻ Заново',()=>loadGame(true));restartButton.disabled=true;
-    playerButton(toolbar,'🔊',()=>$('mute').click()).setAttribute('aria-label','Включить или выключить звук');
-    playerButton(toolbar,'← К заданиям',home);
-    clock=playerElement('p','',panel);clock.id='manual-clock';
-    startButton=playerButton(panel,allowed.admin?'▶ Начать игру':allowed.canResume?'▶ Продолжить заработанную игру':'▶ Начать заработанные 10 минут',()=>loadGame());
-    startButton.id='manual-start';
-    status=playerElement('p',allowed.admin?'Свободная игра администратора.':
-      (allowed.canResume?'Продолжи оставшееся время. ':'')+'Каждый полный раунд даёт 10 минут. Время идёт с запуска, включая паузу. Новых запусков: '+allowed.tickets+'.',panel);
-    status.id='manual-status';status.setAttribute('role','status');
     const layout=playerElement('div','',panel);layout.className='manual-layout';
+    const left=playerElement('div','',layout);left.className='manual-side manual-left';
+    clock=playerElement('p','',left);clock.id='manual-clock';
+    status=playerElement('p','',left);status.id='manual-status';status.setAttribute('role','status');
     const view=playerElement('div','',layout);view.className='manual-view';
     canvas=playerElement('canvas','',view);canvas.width=256;canvas.height=240;canvas.id='manual-picture';canvas.setAttribute('aria-label','Super Mario Bros.');
-    const pad=playerElement('div','',layout);pad.className='manual-dpad mario-touch-controls';pad.setAttribute('role','group');pad.setAttribute('aria-label','Движение Марио');
+    const right=playerElement('div','',layout);right.className='manual-side manual-right';
+    const top=playerElement('div','',right);top.className='manual-top';
+    pauseButton=playerButton(top,'START',()=>playing?(pause(),saveState()):resume());pauseButton.disabled=true;pauseButton.id='manual-pause';
+    pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
+    const settingsButton=playerButton(top,'⚙',()=>{pause();saveState();syncAudioUI();options.hidden=false;});
+    settingsButton.id='manual-settings';settingsButton.setAttribute('aria-label','Настройки приложения');
+    const pad=playerElement('div','',left);pad.className='manual-dpad mario-touch-controls';pad.setAttribute('role','group');pad.setAttribute('aria-label','Движение Марио');
     for(const [name,mask,direction]of[['↑',8,'up'],['←',2,'left'],['↓',4,'down'],['→',1,'right']]){
       const button=playerButton(pad,name,()=>{});button.dataset.mask=mask;button.dataset.direction=direction;button.setAttribute('aria-label',({up:'Вверх',left:'Влево',down:'Вниз',right:'Вправо'})[direction]);
     }
-    const actions=playerElement('div','',layout);actions.className='manual-action-pad mario-touch-controls';actions.setAttribute('role','group');actions.setAttribute('aria-label','Прыжок и бег');
-    for(const [name,mask]of[['B · Бег / огонь',64],['A · Прыжок',128]]){const button=playerButton(actions,name,()=>{});button.dataset.mask=mask;}
+    const actions=playerElement('div','',right);actions.className='manual-action-pad mario-touch-controls';actions.setAttribute('role','group');actions.setAttribute('aria-label','Прыжок и бег');
+    for(const [name,mask,note]of[['B',64,'Бег / огонь'],['A',128,'Прыжок']]){
+      const action=playerElement('div','',actions);action.className='manual-action manual-action-'+name.toLowerCase();
+      const button=playerButton(action,name,()=>{});button.dataset.mask=mask;button.setAttribute('aria-label',name+' · '+note);
+      playerElement('span',note,action).className='manual-control-note';
+    }
+    options=playerElement('div','',panel);options.className='manual-options';options.id='manual-options';
+    const card=playerElement('section','',options);card.className='manual-options-card';card.setAttribute('aria-label','Настройки приложения для Марио');
+    playerElement('h2','Марио · настройки приложения',card);
+    menuStatus=playerElement('p','',card);menuStatus.id='manual-menu-status';menuStatus.setAttribute('role','status');
+    playerElement('p',allowed.admin?'Свободная игра администратора.':
+      (allowed.canResume?'Продолжи оставшееся время. ':'')+'Каждый полный раунд даёт 10 минут. Время идёт с запуска, включая паузу. Новых запусков: '+allowed.tickets+'.',card);
+    const toolbar=playerElement('div','',card);toolbar.className='manual-toolbar';
+    const label=playerElement('label','Уровень ',toolbar);levelSelect=playerElement('select','',label);
+    for(let index=0;index<3;index++)playerElement('option','1-'+(index+1),levelSelect).value=index;
+    try{const saved=Number(localStorage.getItem(player+':mario-level')||0);level=[0,1,2].includes(saved)?saved:0;}catch{level=0;}levelSelect.value=level;
+    levelSelect.onchange=()=>{pause();level=Number(levelSelect.value);try{localStorage.setItem(owner+':mario-level',String(level));}catch{}if(runtime)loadGame();};
+    restartButton=playerButton(toolbar,'↻ Заново',()=>loadGame(true));restartButton.disabled=true;restartButton.id='manual-restart';
+    soundButton=playerButton(toolbar,'',()=>{$('mute').click();unlockAudio();syncAudioUI();});soundButton.id='manual-sound';
+    playerButton(toolbar,'← К заданиям',home).id='manual-home';
+    const audioOptions=playerElement('div','',card);audioOptions.className='manual-audio-options';
+    const autoLabel=playerElement('label','',audioOptions),auto=playerElement('input','',autoLabel);auto.type='checkbox';auto.id='manual-auto-music';
+    autoLabel.append(document.createTextNode(' Автоматический выбор музыки'));
+    const songLabel=playerElement('label','Мелодия ',audioOptions),song=playerElement('select','',songLabel);song.id='manual-song';
+    music.forEach((track,index)=>{playerElement('option',track.name,song).value=index;});
+    auto.onchange=()=>{$('auto-music').checked=auto.checked;$('auto-music').onchange({target:auto});syncAudioUI();};
+    song.onchange=()=>{$('song').value=song.value;$('song').onchange({target:song});};
+    for(const [id,text]of[['music','Музыка'],['fx','Эффекты NES']]){
+      const label=playerElement('label',text+' ',audioOptions),output=playerElement('output','',label),slider=playerElement('input','',label);
+      slider.type='range';slider.min=0;slider.max=100;slider.id='manual-'+id+'-volume';output.id='manual-'+id+'-value';
+      slider.oninput=()=>{const base=$(id+'-volume');base.value=slider.value;base.oninput({target:base});output.textContent=slider.value+'%';unlockAudio();};
+    }
+    const musicLabel=playerElement('label','',audioOptions),musicEnabled=playerElement('input','',musicLabel);musicEnabled.type='checkbox';musicEnabled.id='manual-enable-music';
+    musicLabel.append(document.createTextNode(' Фоновая музыка'));
+    musicEnabled.onchange=()=>{$('enable-music').checked=musicEnabled.checked;$('enable-music').onchange({target:musicEnabled});};
+    playerButton(audioOptions,'♪ Проверить звук',()=>{unlockAudio();sound('jump');}).id='manual-test-sound';
+    function syncAudioUI(){
+      soundButton.textContent=mute?'🔇 Звук выключен':'🔊 Звук включён';soundButton.setAttribute('aria-pressed',String(!mute));
+      auto.checked=autoMusic;song.disabled=autoMusic;song.value=selectedMusic;musicEnabled.checked=enableMusic;
+      for(const id of ['music','fx']){const value=$(id+'-volume').value;$('manual-'+id+'-volume').value=value;$('manual-'+id+'-value').textContent=value+'%';}
+    }
+    syncAudioUI();
+    startButton=playerButton(card,allowed.admin?'▶ Начать игру':allowed.canResume?'▶ Продолжить заработанную игру':'▶ Начать заработанные 10 минут',()=>loadGame());startButton.id='manual-start';
+    closeOptions=playerButton(card,'▶ Вернуться в игру',resume);closeOptions.id='manual-close-settings';closeOptions.hidden=true;
+    // Block text selection/callouts only inside the manual game, not in lessons.
+    panel.oncontextmenu=panel.onselectstart=event=>event.preventDefault();
     bindControls(pad);bindControls(actions);refreshButtons();
   }
 
   document.addEventListener('keydown',event=>{
     if(!screenOpen||['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName))return;
-    if(event.code==='Escape'||event.code==='KeyP'){event.preventDefault();if(!event.repeat){if(playing){pause();saveState();}else resume();}return;}
+    if(event.code==='Escape'&&!options.hidden){event.preventDefault();if(!event.repeat&&runtime&&lease)resume();return;}
+    if(event.target.closest('.manual-options'))return;
+    if(event.code==='Escape'||event.code==='KeyP'||event.code==='Enter'){event.preventDefault();if(!event.repeat){if(playing){pause();saveState();}else resume();}return;}
     const mask={ArrowRight:1,ArrowLeft:2,ArrowDown:4,ArrowUp:8,KeyZ:64,KeyX:128,Space:128}[event.code];
-    if(playing&&mask){event.preventDefault();keys.set(event.code,mask);}
+    if(playing&&mask){event.preventDefault();unlockAudio();keys.set(event.code,mask);pendingPress|=mask;}
   });
   document.addEventListener('keyup',event=>{if(keys.delete(event.code))event.preventDefault();});
-  window.addEventListener('blur',()=>{if(screenOpen){pause('Пауза. Нажми «Продолжить».');saveState();}});
-  window.addEventListener('offline',()=>{if(screenOpen){pause('Нет связи с сервером. Нажми «Продолжить» после восстановления связи.');saveState();}});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&screenOpen){pause('Пауза. Нажми «Продолжить».');saveState();}});
+  window.addEventListener('blur',()=>{if(screenOpen){pause('Пауза. Нажми START.');saveState();}});
+  window.addEventListener('offline',()=>{if(screenOpen){pause('Нет связи с сервером. Нажми START после восстановления связи.');saveState();}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&screenOpen){pause('Пауза. Нажми START.');saveState();}});
   window.addEventListener('pagehide',()=>{if(screenOpen){pause();saveState();}});
   setInterval(()=>{if(screenOpen&&lease)heartbeat();},4000);
   setInterval(updateClock,250);

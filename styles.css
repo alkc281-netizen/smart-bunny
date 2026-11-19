@@ -532,48 +532,89 @@ h1{font-size:26px}
   font-variant-numeric: tabular-nums;
 }
 
-body:has(.manual-playing) { display: block; padding: 0; }
-.console.manual-playing { width: 100%; min-height: 100svh; padding: max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); border-radius: 0; }
+
+/* Manual NES occupies the viewport. Only the emulator's 8px black overscan is
+   cropped; the visible 240x224 game keeps its original square-pixel ratio. */
+body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; background: #10131b; }
+.console.manual-playing, .console.manual-playing.modern {
+  position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh;
+  min-height: 0; padding: 0; border: 0; border-radius: 0; background: #10131b;
+  color: #eef1f7; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
 .manual-playing > .theme-bar, .manual-playing > .rabbit-zone, .manual-playing > .nes-controls,
 .manual-playing > .toolbar, .manual-playing > .track-label,
 .manual-playing .display > h1, .manual-playing .display > .hint, .manual-playing .display > .message { display: none !important; }
-.manual-playing .display { min-height: 0; padding: 8px; }
-.manual-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
-.manual-toolbar button, .manual-toolbar select, #manual-start { min-height: 44px; font: 500 15px system-ui,sans-serif; padding: 7px 10px; }
-.manual-toolbar select { color: var(--text); background: var(--button); border: 2px solid var(--edge); border-radius: 10px; }
-#manual-clock { min-height: 1.3em; margin: 5px; font-variant-numeric: tabular-nums; }
-#manual-status { margin: 8px 0; font-size: 15px; font-weight: 400; }
-.manual-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; max-width: 1100px; margin: 0 auto; }
-.manual-view { grid-column: 1 / -1; }
-.manual-view canvas { display: block; width: min(100%,640px); max-height: 52svh; aspect-ratio: 256 / 240; object-fit: contain; margin: 0 auto; image-rendering: pixelated; background: #14192b; }
+.manual-playing .display {
+  display: block; width: 100%; height: 100%; min-height: 0; padding: 0;
+  border: 0; border-radius: 0; background: transparent;
+}
+.manual-playing #player-panel { height: 100%; }
+.manual-layout {
+  --safe: max(env(safe-area-inset-left),env(safe-area-inset-right));
+  --key: clamp(40px, calc((100vw - 100dvh * 15 / 14 - 2 * var(--safe)) / 6 - 6px), 56px);
+  display: grid; grid-template-columns: minmax(0,1fr) min(107.142857dvh,calc(100vw - 280px - 2 * var(--safe))) minmax(0,1fr);
+  align-items: center; width: 100%; height: 100%; gap: 0; touch-action: none;
+}
+.manual-view { position: relative; width: 100%; aspect-ratio: 240 / 224; overflow: hidden; background: #000; }
+.manual-view canvas {
+  position: absolute; display: block; left: -3.333333%; top: -3.571429%;
+  width: 106.666667%; height: 107.142857%; max-width: none; max-height: none;
+  image-rendering: pixelated; pointer-events: none;
+}
+.manual-side { position: relative; height: 100%; min-width: 0; }
+.manual-left { margin-left: env(safe-area-inset-left); }
+.manual-right { margin-right: env(safe-area-inset-right); }
+.manual-playing button, .manual-playing select { font: 500 15px system-ui,sans-serif; min-height: 44px; }
+.manual-side button {
+  background: #363d4a; color: #fff; border: 2px solid #f7f8fb; box-shadow: none;
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+.manual-top { position: absolute; top: max(16px,env(safe-area-inset-top)); left: 0; right: 0; display: flex; justify-content: center; gap: 6px; padding: 0 4px; }
+.manual-top button { padding: 5px 8px; font-size: 13px; }
+#manual-clock { position: absolute; top: max(18px,env(safe-area-inset-top)); left: 5px; right: 5px; margin: 0; font-size: 14px; line-height: 1.3; font-weight: 400; font-variant-numeric: tabular-nums; }
+#manual-status { position: absolute; top: 64px; left: 6px; right: 6px; margin: 0; font: 400 12px/1.35 system-ui,sans-serif; overflow-wrap: anywhere; }
 .mario-touch-controls { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-.mario-touch-controls button { min-height: 56px; min-width: 48px; font: 500 17px system-ui,sans-serif; touch-action: none; }
-.mario-touch-controls button[aria-pressed=true] { background: var(--accent); color: #fff; }
-.manual-dpad { display: grid; grid-template-columns: repeat(3, minmax(40px,52px)); grid-template-rows: repeat(3,52px); justify-content: center; gap: 3px; }
-.manual-dpad button { min-width: 0; min-height: 0; padding: 0; font-size: 24px; }
+.manual-playing .mario-touch-controls button {
+  width: var(--key); height: var(--key); min-height: 0; min-width: 0; padding: 0;
+  border-radius: 50%; font: 500 23px/1 system-ui,sans-serif; opacity: .8;
+}
+.manual-playing .mario-touch-controls button[aria-pressed=true] { opacity: 1; background: #687996; border-color: #fff; }
+.manual-dpad {
+  position: absolute; left: 50%; bottom: max(28px,env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: grid; grid-template-columns: repeat(3,var(--key)); grid-template-rows: repeat(3,var(--key)); gap: 4px;
+}
 .manual-dpad [data-direction=up] { grid-area: 1 / 2; }
 .manual-dpad [data-direction=left] { grid-area: 2 / 1; }
 .manual-dpad [data-direction=right] { grid-area: 2 / 3; }
 .manual-dpad [data-direction=down] { grid-area: 3 / 2; }
-.manual-action-pad { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.manual-action-pad button { border-radius: 24px; padding: 12px; max-width: 125px; }
-@media (orientation: landscape) and (max-height: 600px) {
-  .manual-playing .display { padding: 4px; }
-  .manual-layout { grid-template-columns: 162px minmax(160px,1fr) 142px; gap: 6px; }
-  .manual-view { grid-column: 2; grid-row: 1; }
-  .manual-dpad { grid-column: 1; grid-row: 1; }
-  .manual-action-pad { grid-column: 3; grid-row: 1; gap: 6px; }
-  .manual-view canvas { max-height: calc(100svh - 150px); }
-  #manual-status { margin: 3px 0; font-size: 12px; }
-  #manual-clock { margin: 2px; }
+.manual-action-pad { position: absolute; left: 50%; bottom: max(45px,env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: start; gap: 10px; }
+.manual-action { display: grid; justify-items: center; gap: 8px; }
+.manual-action-b { padding-top: 28px; }
+.manual-control-note { color: #ccd2df; font: 400 12px/1.2 system-ui,sans-serif; white-space: nowrap; }
+.manual-options { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); background: #060912dc; }
+.manual-options-card { width: min(100%,650px); max-height: 100%; overflow: auto; overscroll-behavior: contain; padding: 16px; border: 1px solid #687996; border-radius: 16px; color: #eef1f7; background: #1b2230; touch-action: pan-y; }
+.manual-options-card h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; }
+.manual-options-card p { font-size: 14px; margin: 6px 0 12px; }
+.manual-options-card button, .manual-options-card select { background: #363d4a; color: #fff; border: 1px solid #91a0b7; border-radius: 10px; padding: 8px 10px; touch-action: manipulation; }
+.manual-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.manual-audio-options { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; padding-block: 16px; text-align: left; font: 400 15px/1.4 system-ui,sans-serif; }
+.manual-audio-options label { min-width: 0; }
+.manual-audio-options input[type=range], .manual-audio-options select { display: block; width: 100%; max-width: 100%; }
+.manual-audio-options input[type=range] { min-height: 40px; touch-action: pan-y; }
+#manual-start, #manual-close-settings { width: 100%; }
+@media (orientation: portrait) {
+  .manual-layout { --key: clamp(40px,12vw,56px); grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0,1fr) minmax(235px,32dvh); }
+  .manual-view { grid-row: 1; grid-column: 1 / -1; justify-self: center; width: min(100vw,calc((100dvh - 235px) * 15 / 14),72.857143dvh); }
+  .manual-left { grid-row: 2; grid-column: 1; }
+  .manual-right { grid-row: 2; grid-column: 2; }
+  #manual-clock { top: 4px; }
+  #manual-status { top: 38px; }
+  .manual-top { top: 0; }
+  .manual-dpad { bottom: max(8px,env(safe-area-inset-bottom)); }
+  .manual-action-pad { bottom: max(35px,env(safe-area-inset-bottom)); }
 }
-@media (max-width: 360px) {
-  .manual-layout { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
-  .manual-dpad { width: min(100%,136px); margin: auto; grid-template-columns: repeat(3,minmax(0,1fr)); grid-template-rows: repeat(3,44px); gap: 2px; }
-  .manual-action-pad button { padding: 8px; font-size: 14px; max-width: 110px; }
-}
-@media (orientation: landscape) and (max-height: 600px) and (max-width: 600px) {
-  .manual-layout { grid-template-columns: 136px minmax(120px,1fr) 110px; gap: 4px; }
-  .manual-dpad { grid-template-columns: repeat(3,44px); grid-template-rows: repeat(3,44px); gap: 2px; }
-  .manual-action-pad button { padding: 8px; font-size: 14px; max-width: 110px; }
+@media (max-width: 380px) {
+  .manual-audio-options { grid-template-columns: minmax(0,1fr); }
+  .manual-control-note { font-size: 11px; }
 }

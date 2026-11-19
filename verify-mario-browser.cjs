@@ -60,6 +60,7 @@ with sqlite3.connect(database) as db:
     return result.result.value;
   };
   await send('Network.enable');
+  await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', {width: 1280, height: 900, deviceScaleFactor: 1, mobile: false});
   await send('Page.navigate', {url: site});
   await until(() => evaluate("typeof authConfigured !== 'undefined' && playerApiReady"));
@@ -78,6 +79,7 @@ with sqlite3.connect(database) as db:
     await send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',buttons:0,clickCount:1});
   };
   await click('#mario-admin-play');await ready("phase==='player-mario'&&document.querySelector('#manual-start')");
+  await evaluate(`window.nesAudio={buffers:0,peak:0};const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.sampleRate===44100&&this.buffer.duration<.04){nesAudio.buffers++;for(const v of this.buffer.getChannelData(0))nesAudio.peak=Math.max(nesAudio.peak,Math.abs(v));}return start.apply(this,args);};`);
   await click('#manual-start');await ready('window.bunnyMario.isPlaying()');
   assert.ok((await evaluate("$('manual-clock').textContent")).includes('без ограничения'));
   await send('Emulation.setDeviceMetricsOverride',{width:844,height:390,deviceScaleFactor:1,mobile:true});
@@ -94,13 +96,44 @@ with sqlite3.connect(database) as db:
   assert.notEqual(await evaluate("$('manual-picture').toDataURL()"),image,'NES must actually render moving gameplay');
   await touch('touchCancel');await delay(100);
   assert.deepEqual(await evaluate(`(()=>{const state=testNES.at(-1).controllers[1].state;return ['RIGHT','B','A'].map(key=>state[jsnes.Controller['BUTTON_'+key]]&1)})()`),[0,0,0]);
+  assert.ok((await evaluate('nesAudio.buffers'))>0,'Actual NES audio buffers must be scheduled');
+  assert.ok((await evaluate('nesAudio.peak'))>.01,'A genuine jump/run gesture must produce audible NES samples');
+  assert.equal(await evaluate('audioCtx.state'),'running');
+  // A/B capture survives slipping a thumb outside the round key.
+  await touch('touchStart',[points[2]]);
+  await touch('touchMove',[{...points[2],x:points[2].x-40,y:points[2].y+10}]);await delay(60);
+  assert.equal(await evaluate('testNES.at(-1).controllers[1].state[jsnes.Controller.BUTTON_A]&1'),1);
+  await touch('touchEnd');await delay(60);
+  assert.equal(await evaluate('testNES.at(-1).controllers[1].state[jsnes.Controller.BUTTON_A]&1'),0);
+  // A sub-frame tap still reaches one emulated frame, then releases normally.
+  await evaluate(`window.buttonEdges=[];const nes=testNES.at(-1),down=nes.buttonDown,up=nes.buttonUp;nes.buttonDown=function(p,b){buttonEdges.push(['down',b]);return down.call(this,p,b);};nes.buttonUp=function(p,b){buttonEdges.push(['up',b]);return up.call(this,p,b);};const b=document.querySelector('.manual-action-pad [data-mask="128"]'),parent=b.closest('.mario-touch-controls');b.setPointerCapture=()=>{};const e={target:b,button:0,pointerId:999,preventDefault(){}};parent.onpointerdown(e);parent.onpointerup({...e,type:'pointerup'});`);
+  await delay(100);
+  assert.deepEqual(await evaluate(`buttonEdges.filter(e=>e[1]===jsnes.Controller.BUTTON_A).map(e=>e[0])`),['down','up']);
+  // Restoring a suspended context is triggered by a real control gesture.
+  await evaluate('audioCtx.suspend()');assert.equal(await evaluate('audioCtx.state'),'suspended');
+  await touch('touchStart',[points[0]]);await ready("audioCtx.state==='running'");await touch('touchEnd');
+  assert.equal(await evaluate("getComputedStyle($('app')).webkitUserSelect"),'none');
   const screenshot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync('/tmp/bunny-manual-mario.png',Buffer.from(screenshot.data,'base64'));
   await evaluate("$('manual-pause').click()");assert.equal(await evaluate('bunnyMario.isPlaying()'),false);
+  assert.equal(await evaluate("$('manual-options').hidden"),true,'START must pause without opening app settings');
   const paused=await evaluate("$('manual-picture').toDataURL()");await delay(180);assert.equal(await evaluate("$('manual-picture').toDataURL()"),paused);
   await evaluate("$('manual-pause').click()");await ready('bunnyMario.isPlaying()');
+  await evaluate("$('manual-settings').click()");assert.equal(await evaluate('bunnyMario.isPlaying()'),false);
+  assert.equal(await evaluate("$('manual-options').hidden"),false);
+  await evaluate(`$('manual-fx-volume').value='30';$('manual-fx-volume').oninput();`);
+  assert.equal(await evaluate('fxVolume'),.3);assert.equal(await evaluate('musicVolume'),.35);
+  await evaluate(`$('manual-music-volume').value='20';$('manual-music-volume').oninput();`);
+  assert.equal(await evaluate('musicVolume'),.2);assert.equal(await evaluate('fxVolume'),.3);
+  await evaluate(`$('manual-auto-music').checked=false;$('manual-auto-music').onchange();$('manual-song').value='2';$('manual-song').onchange();`);
+  assert.equal(await evaluate('selectedMusic'),2);assert.equal(await evaluate('autoMusic'),false);
+  await evaluate("$('manual-close-settings').click()");await ready('bunnyMario.isPlaying()');
+  assert.equal(await evaluate('selectedMusic'),2,'Manual music selection survives pause/resume');
   for(const width of [320,390,568,820,844]){
     await send('Emulation.setDeviceMetricsOverride',{width,height:width===844?390:width===568?320:1180,deviceScaleFactor:1,mobile:true});
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false,'Overflow at '+width);
+    const fit=await evaluate(`(()=>{const v=document.querySelector('.manual-view').getBoundingClientRect();const keys=[...document.querySelectorAll('.manual-side button')].map(b=>b.getBoundingClientRect());return {ratio:v.width/v.height,h:v.height,overlap:keys.some(b=>b.left<v.right&&b.right>v.left&&b.top<v.bottom&&b.bottom>v.top)}})()`);
+    assert.ok(Math.abs(fit.ratio-240/224)<.002,'NES proportions at '+width);assert.equal(fit.overlap,false,'Controls must stay outside game at '+width);
+    if(width===844)assert.ok(Math.abs(fit.h-390)<1,'Landscape iPhone game must fill the available height');
   }
   // Switching to the child stops the parent and hides the unrestricted menu entry.
   await evaluate(`apiRequest('auth/login',{login:'child',password:'Child-test-123'}).then(loadPlayerSession)`);
@@ -151,5 +184,5 @@ with sqlite3.connect(database) as db:
   const ended=await evaluate("$('manual-picture').toDataURL()");await delay(200);assert.equal(await evaluate("$('manual-picture').toDataURL()"),ended);
   assert.equal(await evaluate('JSON.stringify(activePlayer.stickers)'),before);
   await ready("$('manual-start').textContent.includes('К заданиям')");await evaluate("$('manual-start').click()");assert.equal(await evaluate('phase'),'menu');
-  console.log('PASS real Mario: parent-only free entry, child earned after 10 answers, real NES frame output, simultaneous three-touch run/jump, input cancellation, pause/resume, all 3 levels, 390/820/844px, local checkpoints, reload without extended time, offline stop, server expiry and unchanged rewards');
+  console.log('PASS real Mario: parent-only free entry, child earned after 10 answers, real NES frame output, simultaneous three-touch run/jump, sub-frame tap, A/B slip capture, real NES audio samples and suspended-context unlock, independent audio settings, START without menu, separate settings, proportional viewport and controls outside game, input cancellation, pause/resume, all 3 levels, 390/820/844px, local checkpoints, reload without extended time, offline stop, server expiry and unchanged rewards');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>{ws?.close();chrome?.kill();backend?.kill();});
