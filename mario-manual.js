@@ -6,9 +6,9 @@
   const roundButton=playerButton($('finished'),'🎮 Играть в Марио · 10 минут',open);
   adminButton.id='mario-admin-play';earnedButton.id='mario-earned-play';roundButton.id='round-mario';roundButton.className='wide';
   let access=null,accessVersion=0,screenOpen=false,owner=null,generation=0;
-  let runtime=null,loadedLevel=0,level=0,lease=null,deadline=0,verifiedUntil=0;
+  let runtime=null,loadedLevel='original',lease=null,deadline=0,verifiedUntil=0;
   let playing=false,loading=false,frameRequest=0,lastFrame=null,heartbeatFlight=null,heartbeatVersion=-1;
-  let canvas,status,pauseButton,startButton,restartButton,levelSelect,clock,options,closeOptions,soundButton,menuStatus;
+  let canvas,status,pauseButton,startButton,clock;
   let pendingPress=0,audioPrimed=false;
   const pointers=new Map(),keys=new Map(),memory=new Map();
   const frameMs=1000/60.0988138974405;
@@ -67,8 +67,7 @@
   }
 
   function report(text) {
-    if(status&&screenOpen)status.textContent=text;
-    if(menuStatus&&screenOpen)menuStatus.textContent=text;
+    if(status&&screenOpen&&status.textContent!==text)status.textContent=text;
   }
 
   function pause(text='Пауза') {
@@ -157,7 +156,10 @@
       try {for(let i=0;i<count;i++){
         // Even a tap entirely between animation frames reaches one NES frame.
         const mask=heldMask()|pendingPress;pendingPress=0;runtime.step(mask);
-      }}catch{pause('Не удалось продолжить. Попробуй «Заново».');return;}
+      }}catch{pause('Не удалось продолжить. Вернись к заданиям и открой игру ещё раз.');return;}
+      const nativePaused=runtime.isPaused();
+      pauseButton.setAttribute('aria-pressed',String(nativePaused));
+      report(nativePaused?'Пауза NES':'');
     }
     frameRequest=requestAnimationFrame(tick);
   }
@@ -206,7 +208,6 @@
     lease=null;pauseButton.disabled=true;startButton.hidden=false;startButton.disabled=false;
     startButton.textContent='🎮 Следующий заработанный запуск';
     clock.textContent='Время закончилось';
-    options.hidden=false;closeOptions.hidden=true;
     refreshAccess().then(result=>{
       if(!screenOpen||lease)return;
       const more=result&&(result.admin||result.tickets>0);
@@ -215,17 +216,22 @@
     });
   }
 
-  function resume() {
+  async function resume() {
+    if(!screenOpen||!runtime||!lease||loading)return false;
+    unlockAudio();const current=generation,player=owner;
+    const ok=await heartbeat();
+    if(!ok||current!==generation||player!==owner||!screenOpen||!runtime)return false;
+    playing=true;lastFrame=null;clearInput();report('');
+    if(!frameRequest)frameRequest=requestAnimationFrame(tick);
+    return true;
+  }
+
+  async function systemButton(mask) {
     if(!screenOpen||!runtime||!lease||loading)return;
     unlockAudio();
-    heartbeat().then(ok=>{
-      if(!ok||!screenOpen||!runtime)return;
-      playing=true;lastFrame=null;clearInput();options.hidden=true;closeOptions.hidden=false;
-      pauseButton.textContent='START';pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
-      report('');
-      if(autoMusic){selectedMusic=0;$('song').value='0';}
-      startMusic();if(!frameRequest)frameRequest=requestAnimationFrame(tick);
-    });
+    if(!playing&&!await resume())return;
+    pendingPress|=mask;
+    if(mask===16)saveState();
   }
 
   async function loadGame(fresh=false) {
@@ -234,32 +240,31 @@
     loading=true;const current=++generation,player=owner,previousLease=lease;
     await saveState();
     if(current!==generation||!screenOpen||activePlayer?.id!==player)return;
-    levelSelect.disabled=true;startButton.disabled=true;pauseButton.disabled=true;restartButton.disabled=true;
+    startButton.disabled=true;pauseButton.disabled=true;
     try {
       const context=canvas.getContext('2d'),image=context.createImageData(256,240),pixels=new Uint32Array(image.data.buffer);
       const render=buffer=>{for(let i=0;i<pixels.length;i++)pixels[i]=0xff000000|buffer[i];context.putImageData(image,0,0);};
-      const next=await window.bunnyReplay.manual(level,render);
+      const next=await window.bunnyReplay.manual(null,render);
       if(!next||current!==generation||activePlayer?.id!==player||!screenOpen)return;
-      runtime=next;loadedLevel=level;
+      runtime=next;loadedLevel='original';
       if(!fresh){const saved=await checkpoint('get');if(current!==generation)return;
         if(saved?.version===1)try{runtime.restore(saved.state);}catch{}
       }
       const sent=performance.now();
       const result=await apiRequest('mario',previousLease?{action:'heartbeat',id:previousLease}:{action:'start'});
       if(current!==generation||activePlayer?.id!==player||!screenOpen)return;
-      applyLease(result,sent);startButton.hidden=true;pauseButton.disabled=false;restartButton.disabled=false;
-      playing=true;lastFrame=null;report('');options.hidden=true;closeOptions.hidden=false;
-      pauseButton.textContent='START';pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
-      if(autoMusic){selectedMusic=0;$('song').value='0';}startMusic();
+      applyLease(result,sent);startButton.hidden=true;pauseButton.disabled=false;
+      playing=true;lastFrame=null;report('');
+      pauseButton.textContent='START';pauseButton.setAttribute('aria-label','START — начать игру или пауза NES');pauseButton.setAttribute('aria-pressed','false');
       frameRequest=requestAnimationFrame(tick);
       saveState();
     }catch(error){
       if(current===generation&&screenOpen){
         if(error.status===403&&lease)expire();
-        else{pause(error.message||'Не удалось запустить Марио.');options.hidden=false;startButton.hidden=false;startButton.disabled=false;refreshAccess();}
+        else{pause(error.message||'Не удалось запустить Марио.');startButton.hidden=false;startButton.disabled=false;refreshAccess();}
         if(error.status===401)loadPlayerSession().catch(()=>{});
       }
-    }finally{if(current===generation){loading=false;levelSelect.disabled=false;startButton.disabled=false;}}
+    }finally{if(current===generation){loading=false;startButton.disabled=false;}}
   }
 
   async function open() {
@@ -279,10 +284,11 @@
     canvas=playerElement('canvas','',view);canvas.width=256;canvas.height=240;canvas.id='manual-picture';canvas.setAttribute('aria-label','Super Mario Bros.');
     const right=playerElement('div','',layout);right.className='manual-side manual-right';
     const top=playerElement('div','',right);top.className='manual-top';
-    pauseButton=playerButton(top,'START',()=>playing?(pause(),saveState()):resume());pauseButton.disabled=true;pauseButton.id='manual-pause';
-    pauseButton.setAttribute('aria-label','Пауза');pauseButton.setAttribute('aria-pressed','false');
-    const settingsButton=playerButton(top,'⚙',()=>{pause();saveState();syncAudioUI();options.hidden=false;});
-    settingsButton.id='manual-settings';settingsButton.setAttribute('aria-label','Настройки приложения');
+    pauseButton=playerButton(top,'START',()=>systemButton(16));pauseButton.disabled=true;pauseButton.id='manual-pause';
+    pauseButton.setAttribute('aria-label','START — начать игру или пауза NES');pauseButton.setAttribute('aria-pressed','false');
+    const select=playerButton(top,'SELECT',()=>systemButton(32));select.id='manual-select';select.setAttribute('aria-label','SELECT — выбор в оригинальном меню NES');
+    playerButton(left,'← К заданиям',home).id='manual-home';
+    startButton=playerButton(left,'Повторить загрузку',()=>loadGame());startButton.id='manual-start';startButton.hidden=true;
     const pad=playerElement('div','',left);pad.className='manual-dpad mario-touch-controls';pad.setAttribute('role','group');pad.setAttribute('aria-label','Движение Марио');
     for(const [name,mask,direction]of[['↑',8,'up'],['←',2,'left'],['↓',4,'down'],['→',1,'right']]){
       const button=playerButton(pad,name,()=>{});button.dataset.mask=mask;button.dataset.direction=direction;button.setAttribute('aria-label',({up:'Вверх',left:'Влево',down:'Вниз',right:'Вправо'})[direction]);
@@ -293,54 +299,17 @@
       const button=playerButton(action,name,()=>{});button.dataset.mask=mask;button.setAttribute('aria-label',name+' · '+note);
       playerElement('span',note,action).className='manual-control-note';
     }
-    options=playerElement('div','',panel);options.className='manual-options';options.id='manual-options';
-    const card=playerElement('section','',options);card.className='manual-options-card';card.setAttribute('aria-label','Настройки приложения для Марио');
-    playerElement('h2','Марио · настройки приложения',card);
-    menuStatus=playerElement('p','',card);menuStatus.id='manual-menu-status';menuStatus.setAttribute('role','status');
-    playerElement('p',allowed.admin?'Свободная игра администратора.':
-      (allowed.canResume?'Продолжи оставшееся время. ':'')+'Каждый полный раунд даёт 10 минут. Время идёт с запуска, включая паузу. Новых запусков: '+allowed.tickets+'.',card);
-    const toolbar=playerElement('div','',card);toolbar.className='manual-toolbar';
-    const label=playerElement('label','Уровень ',toolbar);levelSelect=playerElement('select','',label);
-    for(let index=0;index<3;index++)playerElement('option','1-'+(index+1),levelSelect).value=index;
-    try{const saved=Number(localStorage.getItem(player+':mario-level')||0);level=[0,1,2].includes(saved)?saved:0;}catch{level=0;}levelSelect.value=level;
-    levelSelect.onchange=()=>{pause();level=Number(levelSelect.value);try{localStorage.setItem(owner+':mario-level',String(level));}catch{}if(runtime)loadGame();};
-    restartButton=playerButton(toolbar,'↻ Заново',()=>loadGame(true));restartButton.disabled=true;restartButton.id='manual-restart';
-    soundButton=playerButton(toolbar,'',()=>{$('mute').click();unlockAudio();syncAudioUI();});soundButton.id='manual-sound';
-    playerButton(toolbar,'← К заданиям',home).id='manual-home';
-    const audioOptions=playerElement('div','',card);audioOptions.className='manual-audio-options';
-    const autoLabel=playerElement('label','',audioOptions),auto=playerElement('input','',autoLabel);auto.type='checkbox';auto.id='manual-auto-music';
-    autoLabel.append(document.createTextNode(' Автоматический выбор музыки'));
-    const songLabel=playerElement('label','Мелодия ',audioOptions),song=playerElement('select','',songLabel);song.id='manual-song';
-    music.forEach((track,index)=>{playerElement('option',track.name,song).value=index;});
-    auto.onchange=()=>{$('auto-music').checked=auto.checked;$('auto-music').onchange({target:auto});syncAudioUI();};
-    song.onchange=()=>{$('song').value=song.value;$('song').onchange({target:song});};
-    for(const [id,text]of[['music','Музыка'],['fx','Эффекты NES']]){
-      const label=playerElement('label',text+' ',audioOptions),output=playerElement('output','',label),slider=playerElement('input','',label);
-      slider.type='range';slider.min=0;slider.max=100;slider.id='manual-'+id+'-volume';output.id='manual-'+id+'-value';
-      slider.oninput=()=>{const base=$(id+'-volume');base.value=slider.value;base.oninput({target:base});output.textContent=slider.value+'%';unlockAudio();};
-    }
-    const musicLabel=playerElement('label','',audioOptions),musicEnabled=playerElement('input','',musicLabel);musicEnabled.type='checkbox';musicEnabled.id='manual-enable-music';
-    musicLabel.append(document.createTextNode(' Фоновая музыка'));
-    musicEnabled.onchange=()=>{$('enable-music').checked=musicEnabled.checked;$('enable-music').onchange({target:musicEnabled});};
-    playerButton(audioOptions,'♪ Проверить звук',()=>{unlockAudio();sound('jump');}).id='manual-test-sound';
-    function syncAudioUI(){
-      soundButton.textContent=mute?'🔇 Звук выключен':'🔊 Звук включён';soundButton.setAttribute('aria-pressed',String(!mute));
-      auto.checked=autoMusic;song.disabled=autoMusic;song.value=selectedMusic;musicEnabled.checked=enableMusic;
-      for(const id of ['music','fx']){const value=$(id+'-volume').value;$('manual-'+id+'-volume').value=value;$('manual-'+id+'-value').textContent=value+'%';}
-    }
-    syncAudioUI();
-    startButton=playerButton(card,allowed.admin?'▶ Начать игру':allowed.canResume?'▶ Продолжить заработанную игру':'▶ Начать заработанные 10 минут',()=>loadGame());startButton.id='manual-start';
-    closeOptions=playerButton(card,'▶ Вернуться в игру',resume);closeOptions.id='manual-close-settings';closeOptions.hidden=true;
     // Block text selection/callouts only inside the manual game, not in lessons.
     panel.oncontextmenu=panel.onselectstart=event=>event.preventDefault();
     bindControls(pad);bindControls(actions);refreshButtons();
+    loadGame();
   }
 
   document.addEventListener('keydown',event=>{
     if(!screenOpen||['INPUT','SELECT','TEXTAREA'].includes(event.target.tagName))return;
-    if(event.code==='Escape'&&!options.hidden){event.preventDefault();if(!event.repeat&&runtime&&lease)resume();return;}
-    if(event.target.closest('.manual-options'))return;
-    if(event.code==='Escape'||event.code==='KeyP'||event.code==='Enter'){event.preventDefault();if(!event.repeat){if(playing){pause();saveState();}else resume();}return;}
+    if(['Escape','KeyP','Enter','ShiftLeft','ShiftRight'].includes(event.code)){
+      event.preventDefault();if(!event.repeat)systemButton(event.code.startsWith('Shift')?32:16);return;
+    }
     const mask={ArrowRight:1,ArrowLeft:2,ArrowDown:4,ArrowUp:8,KeyZ:64,KeyX:128,Space:128}[event.code];
     if(playing&&mask){event.preventDefault();unlockAudio();keys.set(event.code,mask);pendingPress|=mask;}
   });

@@ -85,7 +85,7 @@
     return dependencies;
   }
 
-  function makeSession(engine,rom,render,onAudioSample) {
+  function makeSession(engine,rom,render,onAudioSample,mirrorControls=false) {
     const nes = new engine.NES({onFrame:render,onAudioSample,onStatusUpdate:()=>{},sampleRate:44100});
     nes.loadROM(rom);
     const directions = ['RIGHT','LEFT','DOWN','UP','START','SELECT','B','A']
@@ -97,12 +97,15 @@
         nes.fromJSON(structuredClone(state));
         previous=buttons;
       },
-      release() { for(const button of directions)nes.buttonUp(1,button);previous=0; },
+      release() { for(const button of directions){nes.buttonUp(1,button);if(mirrorControls)nes.buttonUp(2,button);}previous=0; },
       step(buttons) {
         for (let i=0;i<8;i++) {
           const mask=1<<i;
           if ((buttons&mask)===(previous&mask)) continue;
           nes[buttons&mask?'buttonDown':'buttonUp'](1,directions[i]);
+          // In manual two-player mode the same screen pad controls whoever is
+          // taking their turn. The ROM still decides which player is active.
+          if(mirrorControls)nes[buttons&mask?'buttonDown':'buttonUp'](2,directions[i]);
         }
         previous=buttons;
         nes.frame();
@@ -422,14 +425,14 @@
       const gameRom=rom||new Uint8Array(await readHomeRom());
       validateRomHeader(gameRom);
       const engine=await loadReplayEngine();
-      const result=verifiedLevels.get(level)||await verifyRoute(engine,gameRom,level,version);
-      if (!result || version!==loadVersion || !manualActive) return null;
-      rom=gameRom;verifiedLevels.set(level,result);
-      const runtime=makeSession(engine,gameRom,render,recordSample);
-      runtime.restore(result.startState,result.buttons[result.start]);
-      isolateEffects(runtime.nes);render(result.startImage);
+      if (version!==loadVersion || !manualActive) return null;
+      rom=gameRom;
+      // Manual play boots the original ROM and keeps every APU channel. Only
+      // the learning-round replay uses prepared levels and music isolation.
+      const runtime=makeSession(engine,gameRom,render,recordSample,true);
       return {
         step(buttons) {sampleCount=0;runtime.step(buttons);playEffectSamples();},
+        isPaused() {return Boolean(runtime.nes.cpu.mem[0x0776]&1);},
         snapshot() {runtime.release();return runtime.nes.toJSON();},
         restore(state) {runtime.restore(state,0);runtime.release();},
         silence:stopEffectsPlayback,

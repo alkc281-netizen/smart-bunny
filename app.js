@@ -36,7 +36,8 @@ function loadLoops(){if(!loopManifest)loopManifest=fetch('assets/audio/music/loo
 function musicScreen(){return phase==='settings'?settingsSnapshot?.phase:phase}
 function musicAllowed(){
  const screen=musicScreen();
- return (phase==='settings'&&musicPreview)||screen==='player-album'||(screen==='player-mario'&&window.bunnyMario?.isPlaying())||Boolean(game&&!['menu','finished'].includes(screen));
+ if(screen==='player-mario')return false;
+ return (phase==='settings'&&musicPreview)||screen==='player-album'||Boolean(game&&!['menu','finished'].includes(screen));
 }
 function setAudioLevel(){
  window.bunnyReplay?.setEffectsVolume?.(mute?0:fxVolume);
@@ -93,6 +94,7 @@ function playVictory(){
  return player;
 }
 function sound(name){
+ if(phase==='player-mario')return;
  if(mute||!ensureAudio())return;
  if(name==='win')return playVictory();
  if([...players.values()].includes('win'))return;

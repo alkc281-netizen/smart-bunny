@@ -78,15 +78,25 @@ with sqlite3.connect(database) as db:
     await send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',buttons:1,clickCount:1});
     await send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',buttons:0,clickCount:1});
   };
-  await click('#mario-admin-play');await ready("phase==='player-mario'&&document.querySelector('#manual-start')");
   await evaluate(`window.nesAudio={buffers:0,peak:0};const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.sampleRate===44100&&this.buffer.duration<.04){nesAudio.buffers++;for(const v of this.buffer.getChannelData(0))nesAudio.peak=Math.max(nesAudio.peak,Math.abs(v));}return start.apply(this,args);};`);
-  await click('#manual-start');await ready('window.bunnyMario.isPlaying()');
+  await click('#mario-admin-play');await ready("phase==='player-mario'&&bunnyMario.isPlaying()");
+  await ready('testNES.at(-1).cpu.mem[0x0770]===0&&testNES.at(-1).cpu.mem[0x0772]===3');
+  assert.equal(await evaluate("Boolean($('manual-settings')||$('manual-options'))"),false,'No custom menu');
+  assert.equal(await evaluate('musicAllowed()'),false);
+  await evaluate('startMusic()');assert.equal(await evaluate('musicNodes.length'),0,'Bunny soundtrack is forbidden in manual NES');
+  assert.ok(await evaluate('testNES.at(-1).papu.stereoPosLTriangle>0'),'Original NES music channels stay enabled');
   assert.ok((await evaluate("$('manual-clock').textContent")).includes('без ограничения'));
   await send('Emulation.setDeviceMetricsOverride',{width:844,height:390,deviceScaleFactor:1,mobile:true});
   await send('Emulation.setTouchEmulationEnabled',{enabled:true});
   await delay(100);
-  const controls = await Promise.all(['.manual-dpad [data-mask="1"]','.manual-action-pad [data-mask="64"]','.manual-action-pad [data-mask="128"]'].map(position));
   const touch=(type,points=[])=>send('Input.dispatchTouchEvent',{type,touchPoints:points});
+  const tap=async selector=>{const p=await position(selector);await touch('touchStart',[{...p,id:91}]);await touch('touchEnd');};
+  await tap('#manual-select');await ready('testNES.at(-1).cpu.mem[0x077a]===1');
+  await delay(450);await tap('#manual-select');await ready('testNES.at(-1).cpu.mem[0x077a]===0');
+  await tap('#manual-pause');await ready('testNES.at(-1).cpu.mem[0x0770]===1&&testNES.at(-1).cpu.mem[0x0772]===3&&testNES.at(-1).cpu.mem[0x0e]===8');
+  await evaluate('nesAudio.peak=0;nesAudio.buffers=0');await delay(250);
+  assert.ok((await evaluate('nesAudio.peak'))>.01,'Original level music must produce audible PCM without any action');
+  const controls = await Promise.all(['.manual-dpad [data-mask="1"]','.manual-action-pad [data-mask="64"]','.manual-action-pad [data-mask="128"]'].map(position));
   const points=controls.map((point,index)=>({...point,id:index+1}));
   const image=await evaluate("$('manual-picture').toDataURL()");
   for(let i=1;i<=3;i++)await touch('touchStart',points.slice(0,i));
@@ -106,28 +116,20 @@ with sqlite3.connect(database) as db:
   await touch('touchEnd');await delay(60);
   assert.equal(await evaluate('testNES.at(-1).controllers[1].state[jsnes.Controller.BUTTON_A]&1'),0);
   // A sub-frame tap still reaches one emulated frame, then releases normally.
-  await evaluate(`window.buttonEdges=[];const nes=testNES.at(-1),down=nes.buttonDown,up=nes.buttonUp;nes.buttonDown=function(p,b){buttonEdges.push(['down',b]);return down.call(this,p,b);};nes.buttonUp=function(p,b){buttonEdges.push(['up',b]);return up.call(this,p,b);};const b=document.querySelector('.manual-action-pad [data-mask="128"]'),parent=b.closest('.mario-touch-controls');b.setPointerCapture=()=>{};const e={target:b,button:0,pointerId:999,preventDefault(){}};parent.onpointerdown(e);parent.onpointerup({...e,type:'pointerup'});`);
+  await evaluate(`window.buttonEdges=[];const nes=testNES.at(-1),down=nes.buttonDown,up=nes.buttonUp;nes.buttonDown=function(p,b){buttonEdges.push(['down',b,p]);return down.call(this,p,b);};nes.buttonUp=function(p,b){buttonEdges.push(['up',b,p]);return up.call(this,p,b);};const b=document.querySelector('.manual-action-pad [data-mask="128"]'),parent=b.closest('.mario-touch-controls');b.setPointerCapture=()=>{};const e={target:b,button:0,pointerId:999,preventDefault(){}};parent.onpointerdown(e);parent.onpointerup({...e,type:'pointerup'});`);
   await delay(100);
-  assert.deepEqual(await evaluate(`buttonEdges.filter(e=>e[1]===jsnes.Controller.BUTTON_A).map(e=>e[0])`),['down','up']);
+  assert.deepEqual(await evaluate(`buttonEdges.filter(e=>e[1]===jsnes.Controller.BUTTON_A&&e[2]===1).map(e=>e[0])`),['down','up']);
   // Restoring a suspended context is triggered by a real control gesture.
   await evaluate('audioCtx.suspend()');assert.equal(await evaluate('audioCtx.state'),'suspended');
   await touch('touchStart',[points[0]]);await ready("audioCtx.state==='running'");await touch('touchEnd');
   assert.equal(await evaluate("getComputedStyle($('app')).webkitUserSelect"),'none');
   const screenshot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync('/tmp/bunny-manual-mario.png',Buffer.from(screenshot.data,'base64'));
-  await evaluate("$('manual-pause').click()");assert.equal(await evaluate('bunnyMario.isPlaying()'),false);
-  assert.equal(await evaluate("$('manual-options').hidden"),true,'START must pause without opening app settings');
+  await tap('#manual-pause');await ready('Boolean(testNES.at(-1).cpu.mem[0x0776]&1)');
+  assert.equal(await evaluate('bunnyMario.isPlaying()'),true,'Native pause leaves emulator running to process START');
   const paused=await evaluate("$('manual-picture').toDataURL()");await delay(180);assert.equal(await evaluate("$('manual-picture').toDataURL()"),paused);
-  await evaluate("$('manual-pause').click()");await ready('bunnyMario.isPlaying()');
-  await evaluate("$('manual-settings').click()");assert.equal(await evaluate('bunnyMario.isPlaying()'),false);
-  assert.equal(await evaluate("$('manual-options').hidden"),false);
-  await evaluate(`$('manual-fx-volume').value='30';$('manual-fx-volume').oninput();`);
-  assert.equal(await evaluate('fxVolume'),.3);assert.equal(await evaluate('musicVolume'),.35);
-  await evaluate(`$('manual-music-volume').value='20';$('manual-music-volume').oninput();`);
-  assert.equal(await evaluate('musicVolume'),.2);assert.equal(await evaluate('fxVolume'),.3);
-  await evaluate(`$('manual-auto-music').checked=false;$('manual-auto-music').onchange();$('manual-song').value='2';$('manual-song').onchange();`);
-  assert.equal(await evaluate('selectedMusic'),2);assert.equal(await evaluate('autoMusic'),false);
-  await evaluate("$('manual-close-settings').click()");await ready('bunnyMario.isPlaying()');
-  assert.equal(await evaluate('selectedMusic'),2,'Manual music selection survives pause/resume');
+  await delay(800);await tap('#manual-pause');await ready('!(testNES.at(-1).cpu.mem[0x0776]&1)');
+  assert.equal(await evaluate('musicNodes.length'),0);
+  assert.equal(await evaluate('players.size'),0,'No Bunny click effects in manual NES');
   for(const width of [320,390,568,820,844]){
     await send('Emulation.setDeviceMetricsOverride',{width,height:width===844?390:width===568?320:1180,deviceScaleFactor:1,mobile:true});
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false,'Overflow at '+width);
@@ -155,22 +157,19 @@ with sqlite3.connect(database) as db:
   const before = await evaluate('JSON.stringify(activePlayer.stickers)');
   const earned=await evaluate("apiRequest('mario')");assert.equal(earned.tickets,1);assert.equal(earned.admin,false);
   await evaluate("$('round-mario').click()");await ready("phase==='player-mario'&&Boolean($('manual-start'))");
-  await click('#manual-start');await ready('bunnyMario.isPlaying()');
+  await ready('bunnyMario.isPlaying()');
   const grant=await evaluate("apiRequest('mario')");assert.equal(grant.tickets,0);assert.ok(grant.remaining>590&&grant.remaining<=600);
   assert.equal(await evaluate("$('mario-admin-play').hidden"),true);
-  // All three existing real NES start levels remain usable within the same grant.
-  for(const level of [1,2,0]){
-    await evaluate(`document.querySelector('.manual-toolbar select').value='${level}';document.querySelector('.manual-toolbar select').onchange()`);
-    await ready("bunnyMario.isPlaying()&&!document.querySelector('.manual-toolbar select').disabled");
-    assert.equal((await evaluate("apiRequest('mario')")).expires,grant.expires);
-  }
-  await evaluate("$('manual-pause').click()");await delay(250);
-  const checkpointExists=await evaluate(`new Promise(resolve=>{const request=indexedDB.open('bunny-mario-saves',1);request.onsuccess=()=>{const db=request.result,op=db.transaction('states').objectStore('states').get(activePlayer.id+':0');op.onsuccess=()=>{db.close();resolve(Boolean(op.result?.state));};};request.onerror=()=>resolve(false);})`);
+  // A real START from the original title, not a prepared level checkpoint.
+  await ready('testNES.at(-1).cpu.mem[0x0770]===0&&testNES.at(-1).cpu.mem[0x0772]===3');
+  await tap('#manual-pause');await ready('testNES.at(-1).cpu.mem[0x0770]===1&&testNES.at(-1).cpu.mem[0x0772]===3');
+  await evaluate("$('manual-home').click()");await delay(250);
+  const checkpointExists=await evaluate(`new Promise(resolve=>{const request=indexedDB.open('bunny-mario-saves',1);request.onsuccess=()=>{const db=request.result,op=db.transaction('states').objectStore('states').get(activePlayer.id+':original');op.onsuccess=()=>{db.close();resolve(Boolean(op.result?.state));};};request.onerror=()=>resolve(false);})`);
   assert.ok(checkpointExists,'NES checkpoint must be stored locally under the child profile');
   await send('Page.reload');await ready("typeof activePlayer!=='undefined'&&activePlayer?.name==='Ребёнок'");
   await ready("!$('mario-earned-play').hidden");
   assert.equal(await evaluate('JSON.stringify(activePlayer.stickers)'),before);
-  await evaluate("$('mario-earned-play').click()");await ready("phase==='player-mario'");await click('#manual-start');await ready('bunnyMario.isPlaying()');
+  await evaluate("$('mario-earned-play').click()");await ready("phase==='player-mario'");await ready('bunnyMario.isPlaying()');
   assert.equal((await evaluate("apiRequest('mario')")).expires,grant.expires,'Reload must not extend ten minutes');
   // Connectivity failure stops gameplay; reconnect requires a server check.
   await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
@@ -184,5 +183,5 @@ with sqlite3.connect(database) as db:
   const ended=await evaluate("$('manual-picture').toDataURL()");await delay(200);assert.equal(await evaluate("$('manual-picture').toDataURL()"),ended);
   assert.equal(await evaluate('JSON.stringify(activePlayer.stickers)'),before);
   await ready("$('manual-start').textContent.includes('К заданиям')");await evaluate("$('manual-start').click()");assert.equal(await evaluate('phase'),'menu');
-  console.log('PASS real Mario: parent-only free entry, child earned after 10 answers, real NES frame output, simultaneous three-touch run/jump, sub-frame tap, A/B slip capture, real NES audio samples and suspended-context unlock, independent audio settings, START without menu, separate settings, proportional viewport and controls outside game, input cancellation, pause/resume, all 3 levels, 390/820/844px, local checkpoints, reload without extended time, offline stop, server expiry and unchanged rewards');
+  console.log('PASS native Mario: original title, SELECT 1/2 players, START launches original ROM and toggles native pause, full APU music without Bunny soundtrack/clicks, three-touch run/jump, sub-frame tap, slip capture, audio unlock, viewport geometry, earned access, local checkpoints, offline stop, server expiry, unchanged rewards');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>{ws?.close();chrome?.kill();backend?.kill();});

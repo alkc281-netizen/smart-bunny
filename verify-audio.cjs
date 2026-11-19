@@ -42,5 +42,14 @@ function harness(){
  assert.equal(album.run('musicNodes.length'),0);
  const lateAlbum=harness();lateAlbum.run("phase='player-album';startMusic()");await lateAlbum.flush();lateAlbum.run('home()');
  await lateAlbum.resolveAll();assert.equal(lateAlbum.run('musicNodes.length'),0);
- console.log('PASS audio: stale loads/menu/victory/mode switch; six mappings; 44100 loop points in 48000 context; manual/auto; independent volumes; full fanfare and replay; mute; network failure.');
+ const nes=harness();nes.run("begin('add')");await nes.flush();
+ nes.run("stopMusic();phase='player-mario'");await nes.resolveAll();
+ assert.equal(nes.run('musicNodes.length'),0,'Late WAV load cannot play over manual NES');
+ nes.run("startMusic();sound('tap');sound('jump')");await nes.flush();
+ assert.equal(nes.run('musicNodes.length'),0);assert.equal(nes.run('players.size'),0);
+ nes.run("phase='settings';settingsSnapshot={phase:'player-mario'};startMusic(true)");await nes.flush();
+ assert.equal(nes.run('musicNodes.length'),0,'A music preview cannot bypass manual NES exclusion');
+ nes.run("settingsSnapshot=null;phase='menu';begin('add')");await nes.flush();await nes.resolveAll();
+ assert.equal(nes.run('musicNodes.length'),1,'Learning soundtrack still works after leaving NES');
+ console.log('PASS audio: stale loads/menu/victory/mode switch; six mappings; 44100 loop points in 48000 context; manual/auto; independent volumes; full fanfare and replay; mute; network failure; manual NES excludes Bunny music, late loads and interface effects.');
 })().catch(e=>{console.error(e);process.exitCode=1});
