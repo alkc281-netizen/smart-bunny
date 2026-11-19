@@ -531,3 +531,49 @@ h1{font-size:26px}
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+body:has(.manual-playing) { display: block; padding: 0; }
+.console.manual-playing { width: 100%; min-height: 100svh; padding: max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); border-radius: 0; }
+.manual-playing > .theme-bar, .manual-playing > .rabbit-zone, .manual-playing > .nes-controls,
+.manual-playing > .toolbar, .manual-playing > .track-label,
+.manual-playing .display > h1, .manual-playing .display > .hint, .manual-playing .display > .message { display: none !important; }
+.manual-playing .display { min-height: 0; padding: 8px; }
+.manual-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
+.manual-toolbar button, .manual-toolbar select, #manual-start { min-height: 44px; font: 500 15px system-ui,sans-serif; padding: 7px 10px; }
+.manual-toolbar select { color: var(--text); background: var(--button); border: 2px solid var(--edge); border-radius: 10px; }
+#manual-clock { min-height: 1.3em; margin: 5px; font-variant-numeric: tabular-nums; }
+#manual-status { margin: 8px 0; font-size: 15px; font-weight: 400; }
+.manual-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; max-width: 1100px; margin: 0 auto; }
+.manual-view { grid-column: 1 / -1; }
+.manual-view canvas { display: block; width: min(100%,640px); max-height: 52svh; aspect-ratio: 256 / 240; object-fit: contain; margin: 0 auto; image-rendering: pixelated; background: #14192b; }
+.mario-touch-controls { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.mario-touch-controls button { min-height: 56px; min-width: 48px; font: 500 17px system-ui,sans-serif; touch-action: none; }
+.mario-touch-controls button[aria-pressed=true] { background: var(--accent); color: #fff; }
+.manual-dpad { display: grid; grid-template-columns: repeat(3, minmax(40px,52px)); grid-template-rows: repeat(3,52px); justify-content: center; gap: 3px; }
+.manual-dpad button { min-width: 0; min-height: 0; padding: 0; font-size: 24px; }
+.manual-dpad [data-direction=up] { grid-area: 1 / 2; }
+.manual-dpad [data-direction=left] { grid-area: 2 / 1; }
+.manual-dpad [data-direction=right] { grid-area: 2 / 3; }
+.manual-dpad [data-direction=down] { grid-area: 3 / 2; }
+.manual-action-pad { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.manual-action-pad button { border-radius: 24px; padding: 12px; max-width: 125px; }
+@media (orientation: landscape) and (max-height: 600px) {
+  .manual-playing .display { padding: 4px; }
+  .manual-layout { grid-template-columns: 162px minmax(160px,1fr) 142px; gap: 6px; }
+  .manual-view { grid-column: 2; grid-row: 1; }
+  .manual-dpad { grid-column: 1; grid-row: 1; }
+  .manual-action-pad { grid-column: 3; grid-row: 1; gap: 6px; }
+  .manual-view canvas { max-height: calc(100svh - 150px); }
+  #manual-status { margin: 3px 0; font-size: 12px; }
+  #manual-clock { margin: 2px; }
+}
+@media (max-width: 360px) {
+  .manual-layout { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .manual-dpad { width: min(100%,136px); margin: auto; grid-template-columns: repeat(3,minmax(0,1fr)); grid-template-rows: repeat(3,44px); gap: 2px; }
+  .manual-action-pad button { padding: 8px; font-size: 14px; max-width: 110px; }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 600px) {
+  .manual-layout { grid-template-columns: 136px minmax(120px,1fr) 110px; gap: 4px; }
+  .manual-dpad { grid-template-columns: repeat(3,44px); grid-template-rows: repeat(3,44px); gap: 2px; }
+  .manual-action-pad button { padding: 8px; font-size: 14px; max-width: 110px; }
+}

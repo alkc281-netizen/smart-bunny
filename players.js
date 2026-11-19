@@ -575,6 +575,7 @@ async function flushPlayerUpdates() {
         }
         const previous = Object.keys(activePlayer.stickers);
         activePlayer = result;
+        if (data.kind === 'round') window.bunnyMario?.refreshAccess();
         if (phase === 'player-album' && !albumDrag && !['preference', 'sticker', 'album-page', 'album-view'].includes(data.kind)) {
           renderPlayerAlbum();
           if (data.kind === 'redeem') message(Object.hasOwn(result.stickers,data.sticker)
@@ -605,10 +606,12 @@ function refreshPlayerNav() {
   dailyMissionButton.hidden = !activePlayer?.rewards;
   $('logout-player').hidden = !activePlayer;
   $('parent-settings').hidden = !activePlayer || !parentSession;
+  window.bunnyMario?.refreshButtons();
 }
 
 const playerBasePanels = panels;
 panels = function () {
+  window.bunnyMario?.screenChanged();
   stickerDialog?.close();
   playerBasePanels();
   setVisible('player-panel', false);
@@ -665,6 +668,7 @@ function chooseActivePlayer(player) {
     }
   }
   activePlayer = player;
+  window.bunnyMario?.playerChanged();
   $('app').classList.toggle('auth-required', !player);
   loadRussianProgress();
   window.bunnySchool?.load();
