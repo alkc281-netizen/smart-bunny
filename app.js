@@ -197,17 +197,21 @@ for (const button of themeButtons) {
  button.onclick = () => applyTheme(button);
 }
 
-if (typeof Image !== 'undefined') {
+let marioArtReady=false;
+function warmMarioArt() {
+ if (marioArtReady || typeof Image === 'undefined') return;
  const sprites = ['hero', 'mushroom', 'koopa', 'shell', 'goomba'];
  Promise.all(sprites.map(name => new Promise((resolve, reject) => {
   const image = new Image();
   image.onload = resolve;
   image.onerror = reject;
   image.src = 'assets/sprites/mario/drawn/' + name + '.png';
- }))).then(() => setVisible('mario-theme', true)).catch(() => {
+ }))).then(() => {marioArtReady=true;setVisible('mario-theme', true)}).catch(() => {
   // The Nintendo graphics are installed only on the home server.
  });
 }
+window.bunnyAssets={warm:warmMarioArt};
+warmMarioArt();
 $('home').onclick=home;$('math-back').onclick=()=>openMathMenu();$('math-modes-back').onclick=home;$('replay').onclick=()=>game==='russian'?beginRussian(russianTopic):begin(game,mathRoundLength);$('open-settings').onclick=openSettings;$('settings-back').onclick=settingsBack;
 $('auto-music').onchange=e=>{autoMusic=e.target.checked;$('song').disabled=autoMusic;if(autoMusic&&(game||musicScreen()==='player-album')){if(game)selectedMusic=gameMusic[game];$('song').value=String(selectedMusic);startMusic(phase==='settings')}};
 $('song').onchange=e=>{selectedMusic=Number(e.target.value);if(musicWanted||musicNodes.length||phase==='settings')startMusic(phase==='settings')};

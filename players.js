@@ -668,6 +668,7 @@ function chooseActivePlayer(player) {
     }
   }
   activePlayer = player;
+  if(player)window.bunnyAssets?.warm();
   window.bunnyMario?.playerChanged();
   $('app').classList.toggle('auth-required', !player);
   loadRussianProgress();
