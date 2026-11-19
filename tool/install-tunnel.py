@@ -36,7 +36,7 @@ StateDirectory=smart-bunny-tunnel
 StateDirectoryMode=0700
 RuntimeDirectory=smart-bunny-tunnel
 RuntimeDirectoryMode=0700
-ExecStart=/usr/local/lib/smart-bunny-tunnel/tailscaled --tun=userspace-networking --state=/var/lib/smart-bunny-tunnel/tailscaled.state --socket=/run/smart-bunny-tunnel/tailscaled.sock --port=0
+ExecStart=/usr/local/lib/smart-bunny-tunnel/tailscaled --tun=userspace-networking --state=/var/lib/smart-bunny-tunnel/tailscaled.state --statedir=/var/lib/smart-bunny-tunnel --socket=/run/smart-bunny-tunnel/tailscaled.sock --port=0
 Restart=on-failure
 NoNewPrivileges=true
 ProtectSystem=strict
