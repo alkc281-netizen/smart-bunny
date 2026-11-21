@@ -31,11 +31,80 @@ PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "eng
 # BEGIN GENERATED STICKER CATALOG
 REWARD_PRICES = {'mushroom': 5, 'star': 6, 'koopa': 7, 'mario': 10, 'chip': 7, 'dale': 7, 'darkwing': 12, 'gadget': 8, 'monty': 9, 'zipper': 10, 'fatcat': 11, 'wart': 8, 'mole': 9, 'mepps': 10, 'nimnul': 11, 'snout': 12, 'mandy': 8, 'launchpad': 8, 'gosalyn': 9, 'honker': 10, 'morgana': 11, 'gizmoduck': 12, 'stegmutt': 8, 'neptunia': 9, 'negaduck': 10, 'bushroot': 11, 'liquidator': 12, 'megavolt': 8, 'quackerjack': 9, 'steelbeak': 10, 'tuskernini': 11, 'moliarty': 12, 'wolfduck': 8, 'jgander': 9, 'grizzlikoff': 10, 'ammonia': 11, 'splatterphoenix': 12}
 MISSION_REWARDS = ('mushroom', 'koopa', 'mario', 'chip', 'dale', 'darkwing', 'gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
+MISSION_TYPES = {'mushroom': 'russian', 'koopa': 'math', 'mario': 'mixed', 'chip': 'russian', 'dale': 'math', 'darkwing': 'mixed', 'gadget': 'russian', 'monty': 'math', 'zipper': 'mixed', 'fatcat': 'mixed', 'wart': 'russian', 'mole': 'math', 'mepps': 'mixed', 'nimnul': 'math', 'snout': 'russian', 'mandy': 'mixed', 'launchpad': 'math', 'gosalyn': 'russian', 'honker': 'mixed', 'morgana': 'mixed', 'gizmoduck': 'math', 'stegmutt': 'math', 'neptunia': 'mixed', 'negaduck': 'mixed', 'bushroot': 'russian', 'liquidator': 'mixed', 'megavolt': 'math', 'quackerjack': 'mixed', 'steelbeak': 'mixed', 'tuskernini': 'russian', 'moliarty': 'math', 'wolfduck': 'mixed', 'jgander': 'russian', 'grizzlikoff': 'mixed', 'ammonia': 'math', 'splatterphoenix': 'russian'}
 CHARACTER_STICKERS = ('chip', 'dale', 'darkwing', 'gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
 CATALOG_ONLY_STICKERS = ('gadget', 'monty', 'zipper', 'fatcat', 'wart', 'mole', 'mepps', 'nimnul', 'snout', 'mandy', 'launchpad', 'gosalyn', 'honker', 'morgana', 'gizmoduck', 'stegmutt', 'neptunia', 'negaduck', 'bushroot', 'liquidator', 'megavolt', 'quackerjack', 'steelbeak', 'tuskernini', 'moliarty', 'wolfduck', 'jgander', 'grizzlikoff', 'ammonia', 'splatterphoenix')
 # END GENERATED STICKER CATALOG
 DAILY_MISSIONS = ("koopa", "mushroom", "mario")
 PASSWORD_ROUNDS = 600000
+# Kept in sync with the actual Russian curriculum by verify-achievements.cjs.
+REWARD_TOPIC_GRADES = {'capital': 1, 'zhi': 1, 'cha': 1, 'chu': 1, 'chk': 2, 'soft': 2, 'vowels': 2, 'pairs': 2, 'separators': 3, 'silent': 3, 'prefix': 3, 'review': 4, 'nouns': 4, 'adjectives': 4, 'notVerbs': 4, 'sounds1': 1, 'transfer1': 1, 'sounds2': 2, 'transfer2': 2, 'dictionary1': 1, 'dictionary2': 2, 'meaning1': 1, 'meaning2': 2, 'meaning3': 3, 'meaning4': 4, 'roots2': 2, 'roots3': 3, 'speech1': 1, 'speech2': 2, 'forms2': 2, 'nouns3': 3, 'adjectives3': 3, 'verbs3': 3, 'structure3': 3, 'structure4': 4, 'sentence1': 1, 'members3': 3, 'conjugation4': 4, 'tsya4': 4, 'hush4': 4, 'doubles3': 3, 'reading1': 1, 'text2': 2, 'text3': 3, 'text4': 4, 'reading4': 4, 'etiquette3': 3, 'sentence4': 4, 'complex4': 4, 'speech4': 4, 'adverb4': 4, 'cases4': 4, 'declension4': 4, 'stress4': 4, 'homonyms4': 4, 'idioms4': 4, 'dialogue2': 2, 'textParts2': 2, 'alphabet2': 2}
+ALBUM_DECORATIONS = {"dots": {"name": "Горошек", "cost": 5},
+                     "stars": {"name": "Звёздочки", "cost": 8},
+                     "space": {"name": "Космос", "cost": 10}}
+
+
+def junior_rewards(profile):
+    return profile.get("stickerPolicy") == "junior-v1"
+
+
+def mission_condition(profile, key):
+    kind = MISSION_TYPES[key]
+    tier = "special" if kind == "mixed" else "rare" if REWARD_PRICES[key] > 7 else "ordinary"
+    junior = junior_rewards(profile)
+    count = 10 if junior else 30 if tier == "special" else 20
+    required = (8 if tier == "special" else 7) if junior else (27 if tier == "special" else 17 if tier == "rare" else 16)
+    stages = list(dict.fromkeys(profile.get("stickerStages", {}).get(key, [])))[:2]
+    return dict(type=kind, tier=tier, count=count, required=required, stages=2 if tier == "rare" else 1,
+                completedTopics=stages, countCorrections=junior)
+
+
+def reward_russian_topics(profile, grade):
+    if type(grade) is not int or grade not in school_classes(profile):
+        return set()
+    if grade in (2, 4):
+        try:
+            studied = json.loads(profile["preferences"].get("bunny-russian-studied-" + str(grade), "[]"))
+        except (ValueError, TypeError):
+            return set()
+        if not isinstance(studied, list):
+            return set()
+    else:
+        studied = profile["topics"]
+    return {topic for topic in studied if isinstance(topic, str) and REWARD_TOPIC_GRADES.get(topic) == grade}
+
+
+def apply_mission_achievement(profile, data):
+    key = data["mission"]
+    rule = mission_condition(profile, key)
+    # Old/offline tabs keep their academic result, but cannot bypass new rules.
+    valid = data.get("rewardVersion") == 2 and data["total"] == rule["count"]
+    topics = set(data["topics"])
+    russian = reward_russian_topics(profile, data.get("missionClass"))
+    math_topics = {"compare", "add"}
+    if rule["type"] == "math":
+        valid = valid and topics <= math_topics and bool(topics)
+    elif rule["type"] == "russian":
+        valid = valid and topics <= russian and bool(topics)
+    else:
+        valid = valid and bool(topics & math_topics) and bool(topics & russian) and topics <= math_topics | russian
+    if rule["tier"] == "rare":
+        valid = valid and len(topics) == 1
+    solved = data["score"] + (data.get("corrected", 0) if rule["countCorrections"] else 0)
+    passed = bool(valid and solved >= rule["required"])
+    completed = rule["completedTopics"]
+    if passed:
+        if rule["tier"] == "rare":
+            completed = list(dict.fromkeys(completed + sorted(topics)))[:2]
+            profile.setdefault("stickerStages", {})[key] = completed
+            if len(completed) >= 2:
+                award(profile, key)
+        else:
+            award(profile, key)
+    profile["lastMission"] = dict(id=data.get("id"), key=key, passed=passed, solved=solved,
+                                  required=rule["required"], completed=len(completed), stages=rule["stages"],
+                                  awarded=key in profile["stickers"])
+    return passed
 
 
 def normalize_login(value):
@@ -116,7 +185,9 @@ def player_view(player_id, name, avatar, profile, characters=False, catalog=Fals
     prices = {key: cost for key, cost in prices.items() if key not in hidden}
     visible["stickers"] = {key: value for key, value in profile["stickers"].items() if key not in hidden}
     return dict(id=player_id, name=name, avatar=avatar, **visible,
-                rewards=dict(prices=prices, day=day, mission=mission))
+                rewards=dict(prices=prices, day=day, mission=mission, achievementOnly=True,
+                             conditions={key: mission_condition(profile, key) for key in MISSION_REWARDS if key not in hidden},
+                             decorations=ALBUM_DECORATIONS))
 
 
 def initial_profile():
@@ -133,14 +204,15 @@ def apply_round(profile, data):
     corrected = data.get("corrected", 0)
     mission = data.get("mission")
     daily = data.get("daily")
-    if (type(score) is not int or total not in (10, 50, 100) or not 0 <= score <= total
+    if (type(score) is not int or total not in ((10, 20, 30, 50, 100) if mission is not None else (10, 50, 100)) or not 0 <= score <= total
             or not isinstance(topics, list) or not 1 <= len(topics) <= 64
             or not all(isinstance(topic, str) and topic.isascii() and topic.isalnum()
                        and 1 <= len(topic) <= 40 for topic in topics)
             or type(review) is not bool or type(corrected) is not int or not 0 <= corrected <= total - score
-            or (mission is not None and (not isinstance(mission, str) or mission not in MISSION_REWARDS or total != 10 or review))
+            or (mission is not None and (not isinstance(mission, str) or mission not in MISSION_REWARDS or total not in (10, 20, 30) or review))
             or (daily is not None and (mission is None or not isinstance(daily, str) or len(daily) != 10))):
         raise ValueError("Некорректный результат тренировки.")
+    passed = apply_mission_achievement(profile, data) if mission else False
     profile["rounds"] += 1
     profile["correct"] += score
     profile["topics"] = sorted(set(profile["topics"] + topics))[:512]
@@ -148,9 +220,8 @@ def apply_round(profile, data):
     if len(profile["topics"]) >= 3:
         award(profile, "books")
     if mission:
-        award(profile, mission)
         today, offered = daily_mission()
-        if daily == today and mission in (offered, "koopa") and profile["dailyDone"] != today:
+        if passed and daily == today and mission in (offered, "koopa") and profile["dailyDone"] != today:
             profile["dailyDone"] = today
             profile["coins"] += 2
             award(profile, "coin")
@@ -588,10 +659,21 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             sticker = data.get("sticker")
             if not isinstance(sticker, str) or sticker not in REWARD_PRICES:
                 raise ValueError("Выберите наклейку из коллекции.")
-            cost = REWARD_PRICES[sticker]
-            if sticker not in profile["stickers"] and profile["coins"] >= cost:
+            # Old queued exchange requests are harmless no-ops; do not debit coins.
+            return
+        elif kind == "album-decoration":
+            key = data.get("decoration")
+            if key != "default" and key not in ALBUM_DECORATIONS:
+                raise ValueError("Выберите оформление альбома.")
+            owned = set(profile.get("albumDecorations", []))
+            if key != "default" and key not in owned:
+                cost = ALBUM_DECORATIONS[key]["cost"]
+                if profile["coins"] < cost:
+                    return  # A stale tab must not leave an unpayable event blocking its queue.
                 profile["coins"] -= cost
-                award(profile, sticker)
+                owned.add(key)
+                profile["albumDecorations"] = sorted(owned)
+            profile["albumDecoration"] = key
         else:
             raise ValueError("Неизвестное действие.")
 
