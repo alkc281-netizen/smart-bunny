@@ -618,9 +618,9 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 }
 
 /* Album cosmetics affect only the background, never the sticker coordinates. */
-#album-page[data-decoration=dots] { background-color: #f9f5ff; background-image: radial-gradient(#ba9bd9 2px,transparent 2px); background-size: 24px 24px; }
-#album-page[data-decoration=stars] { background-color: #fff5d7; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='m30 13 4 11 12 1-9 8 3 12-10-7-10 7 3-12-9-8 12-1z' fill='%23dfb34d' opacity='.45'/%3E%3C/svg%3E"); }
-#album-page[data-decoration=space] { background-color: #202c52; background-image: radial-gradient(#faf2bd 1px,transparent 2px),radial-gradient(#b4c4ec 1px,transparent 2px); background-size: 38px 38px,67px 67px; background-position: 0 0,17px 19px; }
+#album-page[data-decoration=dots], #album-page[data-decoration=dots] #album-world { background-color: #f9f5ff; background-image: radial-gradient(#ba9bd9 2px,transparent 2px); background-size: 24px 24px; }
+#album-page[data-decoration=stars], #album-page[data-decoration=stars] #album-world { background-color: #fff5d7; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='m30 13 4 11 12 1-9 8 3 12-10-7-10 7 3-12-9-8 12-1z' fill='%23dfb34d' opacity='.45'/%3E%3C/svg%3E"); }
+#album-page[data-decoration=space], #album-page[data-decoration=space] #album-world { background-color: #202c52; background-image: radial-gradient(#faf2bd 1px,transparent 2px),radial-gradient(#b4c4ec 1px,transparent 2px); background-size: 38px 38px,67px 67px; background-position: 0 0,17px 19px; }
 .album-decorations { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .album-decorations h2,.album-decorations p { width: 100%; }
 .album-decorations button { min-height: 44px; padding: 10px; }
