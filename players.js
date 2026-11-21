@@ -381,6 +381,156 @@ const albumStickers = {
     "🦆",
     "Рокердак",
     "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmickey": [
+    "🐭",
+    "Микки Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmminnie": [
+    "🐭",
+    "Минни Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmgoofy": [
+    "🐭",
+    "Гуфи",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpluto": [
+    "🐭",
+    "Плуто",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmclarabelle": [
+    "🐭",
+    "Кларабель",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmhorace": [
+    "🐭",
+    "Гораций",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpete": [
+    "🐭",
+    "Пит",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmtrudy": [
+    "🐭",
+    "Труди",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmscuttle": [
+    "🐭",
+    "Скаттл",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmshyster": [
+    "🐭",
+    "Сильвестр Шистер",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmohara": [
+    "🐭",
+    "Комиссар О’Хара",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmcasey": [
+    "🐭",
+    "Детектив Кейси",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmeega": [
+    "🐭",
+    "Ига Бива",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmindiana": [
+    "🐭",
+    "Индиана Гуф",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmgilbert": [
+    "🐭",
+    "Гилберт",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmortimer": [
+    "🐭",
+    "Мортимер Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmfigaro": [
+    "🐭",
+    "Фигаро",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmatomo": [
+    "🐭",
+    "Атомо",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmellsworth": [
+    "🐭",
+    "Эллсворт",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmbutch": [
+    "🐭",
+    "Бруто",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmfips": [
+    "🐭",
+    "Флип",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmdoberman": [
+    "🐭",
+    "Капитан Доберман",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpowerline": [
+    "🐭",
+    "Пауэрлайн",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmhicksi": [
+    "🐭",
+    "Ведьма Хейзел",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmunclemortimer": [
+    "🐭",
+    "Дядя Мортимер",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmclarice": [
+    "🐭",
+    "Кларисса",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmax": [
+    "🐭",
+    "Макс Гуф",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmoswald": [
+    "🐭",
+    "Освальд",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmroxanne": [
+    "🐭",
+    "Роксана",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmphantom": [
+    "🐭",
+    "Чёрный Призрак",
+    "За учебную миссию. Условия учитывают профиль игрока."
   ]
 };
 const stickerImagePaths = {
@@ -450,7 +600,37 @@ const stickerImagePaths = {
   "ddlittlehelpercutout": "assets/stickers/donald/ddlittlehelpercutout.webp",
   "ddlena": "assets/stickers/donald/ddlena.png",
   "ddviolet": "assets/stickers/donald/ddviolet.webp",
-  "ddrockerduck": "assets/stickers/donald/ddrockerduck.png"
+  "ddrockerduck": "assets/stickers/donald/ddrockerduck.png",
+  "mmmickey": "assets/stickers/mickey/mmmickey.png",
+  "mmminnie": "assets/stickers/mickey/mmminnie.jpg",
+  "mmgoofy": "assets/stickers/mickey/mmgoofy.jpg",
+  "mmpluto": "assets/stickers/mickey/mmpluto.jpg",
+  "mmclarabelle": "assets/stickers/mickey/mmclarabelle.png",
+  "mmhorace": "assets/stickers/mickey/mmhorace.png",
+  "mmpete": "assets/stickers/mickey/mmpete.gif",
+  "mmtrudy": "assets/stickers/mickey/mmtrudy.png",
+  "mmscuttle": "assets/stickers/mickey/mmscuttle.jpg",
+  "mmshyster": "assets/stickers/mickey/mmshyster.gif",
+  "mmohara": "assets/stickers/mickey/mmohara.png",
+  "mmcasey": "assets/stickers/mickey/mmcasey.jpg",
+  "mmeega": "assets/stickers/mickey/mmeega.png",
+  "mmindiana": "assets/stickers/mickey/mmindiana.png",
+  "mmgilbert": "assets/stickers/mickey/mmgilbert.png",
+  "mmmortimer": "assets/stickers/mickey/mmmortimer.png",
+  "mmfigaro": "assets/stickers/mickey/mmfigaro.jpg",
+  "mmatomo": "assets/stickers/mickey/mmatomo.jpg",
+  "mmellsworth": "assets/stickers/mickey/mmellsworth.jpg",
+  "mmbutch": "assets/stickers/mickey/mmbutch.jpg",
+  "mmfips": "assets/stickers/mickey/mmfips.jpg",
+  "mmdoberman": "assets/stickers/mickey/mmdoberman.png",
+  "mmpowerline": "assets/stickers/mickey/mmpowerline.png",
+  "mmhicksi": "assets/stickers/mickey/mmhicksi.jpg",
+  "mmunclemortimer": "assets/stickers/mickey/mmunclemortimer.gif",
+  "mmclarice": "assets/stickers/mickey/mmclarice.png",
+  "mmmax": "assets/stickers/mickey/mmmax.png",
+  "mmoswald": "assets/stickers/mickey/mmoswald.png",
+  "mmroxanne": "assets/stickers/mickey/mmroxanne.jpg",
+  "mmphantom": "assets/stickers/mickey/mmphantom.png"
 };
 const stickerBiographies = {
   "mushroom": {
@@ -1053,7 +1233,37 @@ const stickerMissionTypes = {
   "ddlittlehelpercutout": "math",
   "ddlena": "russian",
   "ddviolet": "mixed",
-  "ddrockerduck": "math"
+  "ddrockerduck": "math",
+  "mmmickey": "math",
+  "mmminnie": "russian",
+  "mmgoofy": "mixed",
+  "mmpluto": "math",
+  "mmclarabelle": "russian",
+  "mmhorace": "mixed",
+  "mmpete": "math",
+  "mmtrudy": "russian",
+  "mmscuttle": "mixed",
+  "mmshyster": "math",
+  "mmohara": "russian",
+  "mmcasey": "mixed",
+  "mmeega": "math",
+  "mmindiana": "russian",
+  "mmgilbert": "mixed",
+  "mmmortimer": "math",
+  "mmfigaro": "russian",
+  "mmatomo": "mixed",
+  "mmellsworth": "math",
+  "mmbutch": "russian",
+  "mmfips": "mixed",
+  "mmdoberman": "math",
+  "mmpowerline": "russian",
+  "mmhicksi": "mixed",
+  "mmunclemortimer": "math",
+  "mmclarice": "russian",
+  "mmmax": "mixed",
+  "mmoswald": "math",
+  "mmroxanne": "russian",
+  "mmphantom": "mixed"
 };
 const stickerCollections = [
   {
@@ -1150,6 +1360,41 @@ const stickerCollections = [
       "ddlena",
       "ddviolet",
       "ddrockerduck"
+    ]
+  },
+  {
+    "name": "Микки Маус",
+    "keys": [
+      "mmmickey",
+      "mmminnie",
+      "mmgoofy",
+      "mmpluto",
+      "mmclarabelle",
+      "mmhorace",
+      "mmpete",
+      "mmtrudy",
+      "mmscuttle",
+      "mmshyster",
+      "mmohara",
+      "mmcasey",
+      "mmeega",
+      "mmindiana",
+      "mmgilbert",
+      "mmmortimer",
+      "mmfigaro",
+      "mmatomo",
+      "mmellsworth",
+      "mmbutch",
+      "mmfips",
+      "mmdoberman",
+      "mmpowerline",
+      "mmhicksi",
+      "mmunclemortimer",
+      "mmclarice",
+      "mmmax",
+      "mmoswald",
+      "mmroxanne",
+      "mmphantom"
     ]
   }
 ];

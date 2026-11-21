@@ -22,7 +22,7 @@ const parent=el(),before=run('JSON.stringify(activePlayer)'),networkBefore=reque
 ctx.parent=parent;run('renderMarioCollection(parent)');
 function descendants(n){return [n,...n.children.flatMap(descendants)]}
 const all=descendants(parent),tabs=all.filter(n=>n.attributes.role==='tab'),panels=all.filter(n=>n.attributes.role==='tabpanel');
-assert.equal(tabs.length,5);assert.equal(panels.length,5);
+assert.equal(tabs.length,6);assert.equal(panels.length,6);
 function visible(i){assert.deepEqual(panels.map(p=>p.hidden),panels.map((_,j)=>j!==i));assert.deepEqual(tabs.map(t=>t.attributes['aria-selected']),tabs.map((_,j)=>String(j===i)))}
 visible(0);
 for(let i=0;i<tabs.length;i++){
@@ -31,10 +31,10 @@ for(let i=0;i<tabs.length;i++){
  const expected=run(`stickerCollections[${i}].keys.filter(k=>Object.hasOwn(activePlayer.rewards.prices,k)).map(k=>albumStickers[k][1])`);
  assert.deepEqual(names,Array.from(expected));
 }
-assert.equal(descendants(panels[3]).filter(n=>n.className==='mario-sticker-card').length,30);
+assert.equal(descendants(panels.at(-1)).filter(n=>n.className==='mario-sticker-card').length,30);
 parent.replaceChildren();run('renderMarioCollection(parent)');
-assert.equal(descendants(parent).find(n=>n.attributes.role==='tabpanel'&&!n.hidden).children[0].textContent,'Дональд Дак · дополнения без фона');
+assert.equal(descendants(parent).find(n=>n.attributes.role==='tabpanel'&&!n.hidden).children[0].textContent,'Микки Маус');
 assert.equal(run('JSON.stringify(activePlayer)'),before);assert.equal(requests,networkBefore);
 const first=descendants(parent).find(n=>n.attributes.role==='tab');let focused=0;first.focus=()=>{focused++};
 first.onkeydown({key:'Home',preventDefault(){}});assert.equal(focused,1);
-console.log('PASS five collection tabs, one visible group, exact membership, all existing cards, selected group retained, keyboard navigation, no progress writes');
+console.log('PASS six collection tabs, one visible group, exact membership, all 30 Mickey cards, selected group retained, keyboard navigation, no progress writes');
