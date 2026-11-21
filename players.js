@@ -1669,6 +1669,8 @@ function renderAlbumDecorations(parent) {
   }
 }
 
+let albumCollectionName = null;
+
 function renderMarioCollection(parent) {
   const collection=playerElement('section','',parent);
   collection.className='mario-collection';
@@ -1676,11 +1678,40 @@ function renderMarioCollection(parent) {
   playerElement('p','🪙 Монеты: '+activePlayer.coins,collection);
   playerElement('p','Персонажи — за достижения. Монеты — на оформление альбома. За обычную тренировку — 1 монета, за успешную миссию дня — 2.',collection);
   playerButton(collection,'Миссия дня',openDailyMission);
+  const tabs=playerElement('div','',collection);tabs.className='sticker-collection-tabs';
+  tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Коллекции наклеек');
+  const views=[];
+  function selectCollection(name) {
+    albumCollectionName=name;
+    for(const view of views) {
+      const selected=view.name===name;
+      view.panel.hidden=!selected;
+      view.tab.setAttribute('aria-selected',String(selected));
+      view.tab.tabIndex=selected?0:-1;
+    }
+  }
   for (const group of stickerCollections) {
     const keys=group.keys.filter(key=>Object.hasOwn(activePlayer.rewards.prices,key));
     if (!keys.length) continue;
-    playerElement('h3',group.name,collection).className='sticker-collection-heading';
-    const grid=playerElement('div','',collection);
+    const index=views.length;
+    const tab=playerButton(tabs,group.name,()=>selectCollection(group.name));
+    tab.id='sticker-collection-tab-'+index;tab.setAttribute('role','tab');
+    tab.setAttribute('aria-controls','sticker-collection-panel-'+index);
+    const groupPanel=playerElement('section','',collection);
+    groupPanel.id='sticker-collection-panel-'+index;groupPanel.setAttribute('role','tabpanel');
+    groupPanel.setAttribute('aria-labelledby',tab.id);
+    views.push({name:group.name,tab,panel:groupPanel});
+    tab.onkeydown=event=>{
+      let next;
+      if(event.key==='ArrowRight')next=(index+1)%views.length;
+      else if(event.key==='ArrowLeft')next=(index+views.length-1)%views.length;
+      else if(event.key==='Home')next=0;
+      else if(event.key==='End')next=views.length-1;
+      else return;
+      event.preventDefault();selectCollection(views[next].name);views[next].tab.focus();
+    };
+    playerElement('h3',group.name,groupPanel).className='sticker-collection-heading';
+    const grid=playerElement('div','',groupPanel);
     grid.className='mario-collection-grid';
     for (const key of keys) {
       const [,title,rule]=albumStickers[key];
@@ -1706,6 +1737,7 @@ function renderMarioCollection(parent) {
 
     }
   }
+  if(views.length)selectCollection(views.some(view=>view.name===albumCollectionName)?albumCollectionName:views[0].name);
 }
 
 function showDailyMission() {
