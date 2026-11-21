@@ -1491,7 +1491,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmmickey.png",
-      "source": "https://de.duckipedia.org/Micky_Maus"
+      "source": "https://de.duckipedia.org/Micky_Maus",
+      "bio": {
+        "intro": "Микки Маус — находчивый мышонок, который помогает друзьям и распутывает загадки.",
+        "traits": "Добрый, смелый, любознательный.",
+        "feature": "Замечает важные детали и не сдаётся перед трудностями.",
+        "fact": "Его верный пёс — Плуто."
+      }
     },
     {
       "id": "mmminnie",
@@ -1503,7 +1509,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmminnie.jpg",
-      "source": "https://de.duckipedia.org/Minnie_Maus"
+      "source": "https://de.duckipedia.org/Minnie_Maus",
+      "bio": {
+        "intro": "Минни Маус — подруга Микки, которая любит музыку, танцы и встречи с друзьями.",
+        "traits": "Заботливая, жизнерадостная, самостоятельная.",
+        "feature": "Умеет поддержать друзей и привнести красоту в обычный день.",
+        "fact": "Её легко узнать по большому банту."
+      }
     },
     {
       "id": "mmgoofy",
@@ -1515,7 +1527,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmgoofy.jpg",
-      "source": "https://de.duckipedia.org/Goofy"
+      "source": "https://de.duckipedia.org/Goofy",
+      "bio": {
+        "intro": "Гуфи — добродушный друг Микки, с которым обычные дела превращаются в приключения.",
+        "traits": "Дружелюбный, искренний, немного рассеянный.",
+        "feature": "Попадает в смешные ситуации, но старается помочь окружающим.",
+        "fact": "У него есть сын Макс."
+      }
     },
     {
       "id": "mmpluto",
@@ -1527,7 +1545,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmpluto.jpg",
-      "source": "https://de.duckipedia.org/Pluto"
+      "source": "https://de.duckipedia.org/Pluto",
+      "bio": {
+        "intro": "Плуто — верный пёс Микки Мауса.",
+        "traits": "Преданный, игривый, любопытный.",
+        "feature": "Пользуется отличным нюхом и выразительно показывает свои чувства.",
+        "fact": "В отличие от Микки и Гуфи, обычно общается лаем и жестами."
+      }
     },
     {
       "id": "mmclarabelle",
@@ -1539,7 +1563,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmclarabelle.png",
-      "source": "https://de.duckipedia.org/Klarabella_Kuh"
+      "source": "https://de.duckipedia.org/Klarabella_Kuh",
+      "bio": {
+        "intro": "Кларабель — общительная корова из круга друзей Микки.",
+        "traits": "Весёлая, разговорчивая, доброжелательная.",
+        "feature": "Любит общение и охотно участвует в затеях друзей.",
+        "fact": "Её часто можно увидеть рядом с Горацием."
+      }
     },
     {
       "id": "mmhorace",
@@ -1551,7 +1581,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmhorace.png",
-      "source": "https://de.duckipedia.org/Rudi_Ross"
+      "source": "https://de.duckipedia.org/Rudi_Ross",
+      "bio": {
+        "intro": "Гораций — конь и давний друг Микки Мауса.",
+        "traits": "Добродушный, старательный, надёжный.",
+        "feature": "Помогает друзьям в повседневных делах и приключениях.",
+        "fact": "Его имя в английских историях — Хорас Хорсколлар."
+      }
     },
     {
       "id": "mmpete",
@@ -1563,7 +1599,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmpete.gif",
-      "source": "https://de.duckipedia.org/Kater_Karlo"
+      "source": "https://de.duckipedia.org/Kater_Karlo",
+      "bio": {
+        "intro": "Пит — крупный кот и один из самых давних соперников Микки.",
+        "traits": "Самоуверенный, упрямый, хитрый.",
+        "feature": "Старается добиться своего силой или обманом.",
+        "fact": "В историях о Гуфи его сын Пи Джей дружит с Максом."
+      }
     },
     {
       "id": "mmtrudy",
@@ -1575,19 +1617,31 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmtrudy.png",
-      "source": "https://de.duckipedia.org/Trudi"
+      "source": "https://de.duckipedia.org/Trudi",
+      "bio": {
+        "intro": "Труди — кошка из комиксов, которая часто действует вместе с Питом.",
+        "traits": "Решительная, хитрая, настойчивая.",
+        "feature": "Помогает Питу придумывать и осуществлять его планы.",
+        "fact": "Её приключения особенно часто встречаются в итальянских комиксах Disney."
+      }
     },
     {
       "id": "mmscuttle",
       "icon": "🐭",
-      "name": "Скаттл",
+      "name": "Плоттигат",
       "collection": "mickey",
       "enabled": true,
       "cost": 10,
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmscuttle.jpg",
-      "source": "https://de.duckipedia.org/Kralle"
+      "source": "https://de.duckipedia.org/Kralle",
+      "bio": {
+        "intro": "Плоттигат — изобретатель и кузен Пита из комиксов о Микки Маусе.",
+        "traits": "Расчётливый, изобретательный, коварный.",
+        "feature": "Придумывает технические устройства для хитрых планов.",
+        "fact": "В немецких изданиях его зовут Кралле, в итальянских — Плоттигат."
+      }
     },
     {
       "id": "mmshyster",
@@ -1599,7 +1653,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmshyster.gif",
-      "source": "https://de.duckipedia.org/Balduin_Beutelschneider"
+      "source": "https://de.duckipedia.org/Balduin_Beutelschneider",
+      "bio": {
+        "intro": "Сильвестр Шистер — нечестный адвокат и противник Микки Мауса.",
+        "traits": "Хитрый, красноречивый, корыстный.",
+        "feature": "Пытается использовать законы и договоры в своих интересах.",
+        "fact": "Часто объединяется с Питом."
+      }
     },
     {
       "id": "mmohara",
@@ -1611,7 +1671,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmohara.png",
-      "source": "https://www.tebeosfera.com/personajes/chief_ohara_1939_disney.html"
+      "source": "https://www.tebeosfera.com/personajes/chief_ohara_1939_disney.html",
+      "bio": {
+        "intro": "Комиссар О’Хара — начальник полиции, которому помогает Микки.",
+        "traits": "Ответственный, серьёзный, справедливый.",
+        "feature": "Руководит расследованиями и обращается к Микки в сложных делах.",
+        "fact": "Работает вместе с детективом Кейси."
+      }
     },
     {
       "id": "mmcasey",
@@ -1623,7 +1689,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmcasey.jpg",
-      "source": "https://de.duckipedia.org/Inspektor_Issel"
+      "source": "https://de.duckipedia.org/Inspektor_Issel",
+      "bio": {
+        "intro": "Детектив Кейси — полицейский из комиксов о Микки Маусе.",
+        "traits": "Старательный, ворчливый, самоуверенный.",
+        "feature": "Участвует в расследованиях, хотя иногда спешит с выводами.",
+        "fact": "Его начальник — комиссар О’Хара."
+      }
     },
     {
       "id": "mmeega",
@@ -1635,7 +1707,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmeega.png",
-      "source": "https://de.duckipedia.org/Gamma"
+      "source": "https://de.duckipedia.org/Gamma",
+      "bio": {
+        "intro": "Ига Бива — необычный друг Микки, пришедший из будущего.",
+        "traits": "Дружелюбный, любознательный, находчивый.",
+        "feature": "Делится знаниями о будущем и помогает в необычных приключениях.",
+        "fact": "Иногда Микки отправляется с ним в будущее."
+      }
     },
     {
       "id": "mmindiana",
@@ -1647,7 +1725,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmindiana.png",
-      "source": "https://de.duckipedia.org/Indiana_Goof"
+      "source": "https://de.duckipedia.org/Indiana_Goof",
+      "bio": {
+        "intro": "Индиана Гуф — путешественник и искатель древних сокровищ.",
+        "traits": "Отважный, любознательный, увлечённый.",
+        "feature": "Исследует загадочные места и разыскивает старинные предметы.",
+        "fact": "Он родственник Гуфи."
+      }
     },
     {
       "id": "mmgilbert",
@@ -1659,7 +1743,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmgilbert.png",
-      "source": "https://de.duckipedia.org/Alfons"
+      "source": "https://de.duckipedia.org/Alfons",
+      "bio": {
+        "intro": "Гилберт — очень умный племянник Гуфи.",
+        "traits": "Любознательный, рассудительный, усердный.",
+        "feature": "Особенно хорошо разбирается в математике и естественных науках.",
+        "fact": "Носит академическую шапочку, похожую на головной убор выпускника."
+      }
     },
     {
       "id": "mmmortimer",
@@ -1671,7 +1761,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmmortimer.png",
-      "source": "https://www.pngaaa.com/detail/2480234"
+      "source": "https://www.pngaaa.com/detail/2480234",
+      "bio": {
+        "intro": "Мортимер Маус — самоуверенный соперник Микки, который старается понравиться Минни.",
+        "traits": "Хвастливый, хитрый, самодовольный.",
+        "feature": "Любит производить впечатление и выставлять себя лучше других.",
+        "fact": "Это другой персонаж, чем дядя Минни с таким же именем."
+      }
     },
     {
       "id": "mmfigaro",
@@ -1683,7 +1779,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmfigaro.jpg",
-      "source": "https://de.duckipedia.org/Figaro"
+      "source": "https://de.duckipedia.org/Figaro",
+      "bio": {
+        "intro": "Фигаро — маленький чёрно-белый котёнок.",
+        "traits": "Игривый, любопытный, немного ревнивый.",
+        "feature": "Своим любопытством часто создаёт смешные хлопоты.",
+        "fact": "Сначала появился в «Пиноккио», а затем стал питомцем Минни."
+      }
     },
     {
       "id": "mmatomo",
@@ -1695,7 +1797,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmatomo.jpg",
-      "source": "https://de.duckipedia.org/At%C3%B6mchen"
+      "source": "https://de.duckipedia.org/At%C3%B6mchen",
+      "bio": {
+        "intro": "Атомо — оживший увеличенный атом и друг Микки Мауса.",
+        "traits": "Дружелюбный, любознательный, необычный.",
+        "feature": "Обладает удивительными способностями, связанными с энергией.",
+        "fact": "Появился благодаря опыту учёного."
+      }
     },
     {
       "id": "mmellsworth",
@@ -1707,7 +1815,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmellsworth.jpg",
-      "source": "https://de.duckipedia.org/Maxi_Smart_%28Ellsworth%29"
+      "source": "https://de.duckipedia.org/Maxi_Smart_%28Ellsworth%29",
+      "bio": {
+        "intro": "Эллсворт — говорящая птица и приятель Гуфи и Микки.",
+        "traits": "Находчивый, разговорчивый, независимый.",
+        "feature": "Умеет разговаривать и любит путешествовать.",
+        "fact": "У него есть приёмный сын Бруто."
+      }
     },
     {
       "id": "mmbutch",
@@ -1719,7 +1833,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmbutch.jpg",
-      "source": "https://de.duckipedia.org/Maxi_Smart_%28Bruto%29"
+      "source": "https://de.duckipedia.org/Maxi_Smart_%28Bruto%29",
+      "bio": {
+        "intro": "Бруто — молодая говорящая птица и приёмный сын Эллсворта.",
+        "traits": "Любознательный, смелый, общительный.",
+        "feature": "Помогает друзьям, в том числе благодаря умению летать.",
+        "fact": "Его можно узнать по красной одежде и зелёной кепке."
+      }
     },
     {
       "id": "mmfips",
@@ -1731,7 +1851,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmfips.jpg",
-      "source": "https://de.duckipedia.org/Fips"
+      "source": "https://de.duckipedia.org/Fips",
+      "bio": {
+        "intro": "Флип — необычный питомец Иги Бивы.",
+        "traits": "Добродушный, преданный, чуткий.",
+        "feature": "Предупреждает хозяина о приближении опасности.",
+        "fact": "Очень чувствителен к обману и не любит ложь."
+      }
     },
     {
       "id": "mmdoberman",
@@ -1743,7 +1869,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmdoberman.png",
-      "source": "https://de.duckipedia.org/K%C3%A4pt%E2%80%99n_Dobermann"
+      "source": "https://de.duckipedia.org/K%C3%A4pt%E2%80%99n_Dobermann",
+      "bio": {
+        "intro": "Капитан Доберман — опытный лётчик и давний друг Микки.",
+        "traits": "Храбрый, ответственный, решительный.",
+        "feature": "Разбирается в самолётах и помогает в воздушных приключениях.",
+        "fact": "Именно он учил Микки управлять самолётом."
+      }
     },
     {
       "id": "mmpowerline",
@@ -1755,7 +1887,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmpowerline.png",
-      "source": "https://www.vhv.rs/viewpic/hbmRmom_transparent-goofy-png-powerline-goofy-movie-png-download/"
+      "source": "https://www.vhv.rs/viewpic/hbmRmom_transparent-goofy-png-powerline-goofy-movie-png-download/",
+      "bio": {
+        "intro": "Пауэрлайн — знаменитый певец из «Каникул Гуфи».",
+        "traits": "Энергичный, уверенный, артистичный.",
+        "feature": "Выступает на сцене, поёт и танцует.",
+        "fact": "Макс мечтает попасть на его концерт."
+      }
     },
     {
       "id": "mmhicksi",
@@ -1767,7 +1905,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmhicksi.jpg",
-      "source": "https://de.duckipedia.org/Hicksi"
+      "source": "https://de.duckipedia.org/Hicksi",
+      "bio": {
+        "intro": "Ведьма Хейзел — волшебница, которая встречается в историях о друзьях Микки.",
+        "traits": "Озорная, настойчивая, изобретательная.",
+        "feature": "Пользуется заклинаниями и летает на метле.",
+        "fact": "В комиксах пытается убедить Гуфи, что волшебство существует."
+      }
     },
     {
       "id": "mmunclemortimer",
@@ -1779,7 +1923,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmunclemortimer.gif",
-      "source": "https://de.duckipedia.org/Onkel_Mortimer"
+      "source": "https://de.duckipedia.org/Onkel_Mortimer",
+      "bio": {
+        "intro": "Дядя Мортимер — родственник Минни, который владеет ранчо.",
+        "traits": "Самостоятельный, деловитый, привязанный к своему хозяйству.",
+        "feature": "Заботится о ранчо и встречается с Микки в приключенческих комиксах.",
+        "fact": "Его не следует путать с Мортимером, соперником Микки."
+      }
     },
     {
       "id": "mmclarice",
@@ -1791,7 +1941,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmclarice.png",
-      "source": "https://www.pngaaa.com/detail/5549413"
+      "source": "https://www.pngaaa.com/detail/5549413",
+      "bio": {
+        "intro": "Кларисса — певица-бурундучок и знакомая Чипа и Дейла.",
+        "traits": "Артистичная, обаятельная, жизнерадостная.",
+        "feature": "Любит выступать и петь.",
+        "fact": "И Чип, и Дейл стараются ей понравиться."
+      }
     },
     {
       "id": "mmmax",
@@ -1803,7 +1959,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmmax.png",
-      "source": "https://www.pinterest.com/pin/max-goof--444167581991113137/"
+      "source": "https://www.pinterest.com/pin/max-goof--444167581991113137/",
+      "bio": {
+        "intro": "Макс Гуф — сын Гуфи, который учится становиться самостоятельным.",
+        "traits": "Энергичный, добрый, немного застенчивый.",
+        "feature": "Любит музыку, друзей и приключения.",
+        "fact": "Его любимый певец — Пауэрлайн."
+      }
     },
     {
       "id": "mmoswald",
@@ -1815,7 +1977,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmoswald.png",
-      "source": "https://www.pinclipart.com/pindetail/ibTToTJ_jump-clipart-mickey-mouse-oswald-the-lucky-rabbit/"
+      "source": "https://www.pinclipart.com/pindetail/ibTToTJ_jump-clipart-mickey-mouse-oswald-the-lucky-rabbit/",
+      "bio": {
+        "intro": "Освальд — удачливый кролик и герой классических мультфильмов.",
+        "traits": "Любознательный, находчивый, озорной.",
+        "feature": "Находит необычные выходы из смешных неприятностей.",
+        "fact": "Появился в мультфильмах раньше Микки Мауса."
+      }
     },
     {
       "id": "mmroxanne",
@@ -1827,7 +1995,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmroxanne.jpg",
-      "source": "https://de.duckipedia.org/Roxanne"
+      "source": "https://de.duckipedia.org/Roxanne",
+      "bio": {
+        "intro": "Роксана — одноклассница Макса из «Каникул Гуфи».",
+        "traits": "Доброжелательная, спокойная, внимательная.",
+        "feature": "Поддерживает Макса и ценит его искренность.",
+        "fact": "Именно ей Макс хочет понравиться в «Каникулах Гуфи»."
+      }
     },
     {
       "id": "mmphantom",
@@ -1839,7 +2013,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/mickey/mmphantom.png",
-      "source": "https://de.duckipedia.org/Das_Schwarze_Phantom"
+      "source": "https://de.duckipedia.org/Das_Schwarze_Phantom",
+      "bio": {
+        "intro": "Чёрный Призрак — таинственный противник Микки Мауса.",
+        "traits": "Хитрый, скрытный, расчётливый.",
+        "feature": "Прячет лицо под чёрным костюмом и придумывает сложные планы.",
+        "fact": "Микки встречается с ним во многих детективных комиксах."
+      }
     }
   ]
 }

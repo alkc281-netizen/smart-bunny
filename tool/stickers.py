@@ -29,6 +29,8 @@ def read_catalog():
         if entry.get('mission') not in (None, 'russian', 'math', 'mixed', 'review'):
             raise ValueError('Unknown mission: ' + key)
         bio = entry.get('bio')
+        if entry['enabled'] and entry['collection'] != 'basic' and bio is None:
+            raise ValueError('Missing character description: ' + key)
         if bio is not None and (not isinstance(bio, dict) or set(bio) != {'intro', 'traits', 'feature', 'fact'} or
                 not all(isinstance(value, str) and 1 <= len(value.strip()) <= 400 for value in bio.values())):
             raise ValueError('Invalid character description: ' + key)

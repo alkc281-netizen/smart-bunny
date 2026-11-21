@@ -15,7 +15,8 @@ for(const file of ['app.js','russian-curriculum.js','russian.js','players.js'])r
 run('stickerArt=()=>{}'); // Image loading is independent of the description dialog.
 const catalog=JSON.parse(fs.readFileSync('sticker-catalog.json','utf8'));
 const described=catalog.stickers.filter(e=>e.enabled&&e.bio);
-assert.equal(described.length,71);
+assert.equal(described.length,catalog.stickers.filter(e=>e.enabled&&e.collection!=='basic').length);
+assert.ok(catalog.stickers.filter(e=>e.enabled&&e.collection!=='basic').every(e=>e.bio),'Every available character must have a description');
 function texts(n){return [n.textContent,...n.children.flatMap(texts)].filter(Boolean)}
 for(const entry of described){
  run(`activePlayer={id:'test',coins:9,stickers:{coin:{boardX:345,boardY:678}},rewards:{conditions:{}}}`);
@@ -44,5 +45,5 @@ const payload='<img src=x onerror=alert(1)>';
 run(`stickerBiographies.ddrockerduck.fact=${JSON.stringify(payload)};showStickerDetail('ddrockerduck')`);
 assert.ok(texts(run('stickerDialog')).includes(payload));
 assert.equal(run("stickerDialog.children.find(n=>n.className==='sticker-bio').children.at(-1).children.at(-1).tagName"),'span');
-run('stickerDialog.close()');assert.ok(focusReturns>=143);
-console.log('PASS 71 biographies: earned/unearned dialogs, separate reward block, safe text, Escape/focus, no network writes or progress changes; basic rewards unchanged');
+run('stickerDialog.close()');assert.ok(focusReturns>=described.length*2+1);
+console.log('PASS '+described.length+' biographies: earned/unearned dialogs, separate reward block, safe text, Escape/focus, no network writes or progress changes; basic rewards unchanged');
