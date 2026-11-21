@@ -49,7 +49,7 @@ def generated(data):
     modern = [e['id'] for e in entries if e['id'] not in {'start','books','detective','rocket','coin','mushroom','star','koopa','mario'}]
     old_characters = {'chip','dale','darkwing'}
     future = [key for key in modern if key not in old_characters]
-    py = ('REWARD_PRICES = ' + repr(prices) + '\nMISSION_REWARDS = ' + repr(tuple(missions)) +
+    py = ('REWARD_PRICES = ' + repr(prices) + '\nMISSION_REWARDS = ' + repr(tuple(missions)) + '\nMISSION_TYPES = ' + repr(missions) +
           '\nCHARACTER_STICKERS = ' + repr(tuple(modern)) + '\nCATALOG_ONLY_STICKERS = ' + repr(tuple(future)) + '\n')
     return [(ROOT/'players.js', '//', js), (ROOT/'tool/bunny-server.py', '#', py)]
 

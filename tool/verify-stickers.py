@@ -61,18 +61,22 @@ with tempfile.TemporaryDirectory(prefix='bunny-catalog-test-') as name:
         assert (pending['id'] in visible['rewards']['prices']) is present
     event = dict(kind='redeem', sticker=pending['id'])
     server.BunnyHandler.update(None, 'test', profile, event)
-    after_purchase = profile['coins']
-    assert after_purchase == 40 - pending['cost']
-    server.BunnyHandler.update(None, 'test', profile, event)
-    assert profile['coins'] == after_purchase, 'Duplicate purchase charged twice'
+    assert profile['coins'] == 40 and pending['id'] not in profile['stickers'], 'Coins cannot unlock characters'
     assert profile['stickers']['chip'] == {'x': 20, 'y': 30}
-    assert profile['stickers'][pending['id']] is None
-    server.BunnyHandler.update(None,'test',profile,dict(kind='sticker',sticker=pending['id'],x=30,y=50))
-    assert profile['stickers'][pending['id']] == {'x': 30, 'y': 50}
     mission_profile = server.initial_profile()
-    server.apply_round(mission_profile,dict(score=8,total=10,topics=['add','compare'],review=False,corrected=2,mission=pending['id']))
+    mission_profile.update(stickerPolicy='junior-v1',schoolClasses=[1,2],topics=['zhi','cha'])
+    mission_profile['preferences']['bunny-russian-studied-2'] = '["chk","soft"]'
+    rule=server.mission_condition(mission_profile,pending['id'])
+    topics={'math':['compare'],'russian':['zhi'],'mixed':['compare','zhi']}[rule['type']]
+    for part in range(rule['stages']):
+        current=topics if part==0 else {'math':['add'],'russian':['cha'],'mixed':['add','cha']}[rule['type']]
+        server.apply_round(mission_profile,dict(score=8,total=10,topics=current,review=False,corrected=0,
+                                              mission=pending['id'],rewardVersion=2,missionClass=1))
     assert pending['id'] in mission_profile['stickers']
-    assert mission_profile['rounds'] == 1
+    assert mission_profile['rounds'] == rule['stages']
+    profile['stickers'][pending['id']] = None
+    server.BunnyHandler.update(None,'test',profile,dict(kind='sticker',sticker=pending['id'],x=30,y=50))
+    assert profile['stickers'][pending['id']] == {'x':30,'y':50}
     assert pending['id'] not in server.player_view('test','Test','🐰',profile,characters=True)['stickers']
     assert pending['id'] in server.player_view('test','Test','🐰',profile,characters=True,catalog=True)['stickers']
     print('PASS isolated import, generated client/server, invalid art, duplicate import/purchase, placement, missions, old-client compatibility and previous stickers')

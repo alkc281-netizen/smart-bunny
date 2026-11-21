@@ -35,7 +35,7 @@ for(const [name,classes] of [['Юля',[1,2]],['Соня',[3,4]]]) {
   assert.equal(run('rewardTopics().every(k=>allowedRussianClasses().includes(russianTopics[k].grade||1))'),true);
   if(allowed){
    for(const key of ['mushroom','mario','chip','darkwing']){
-    run(`startRewardMission('${key}')`);
+    run(`activePlayer.rewards.conditions ||= {}; activePlayer.rewards.conditions['${key}']={type:stickerMissionTypes['${key}'],tier:'ordinary',count:10,required:7,stages:1,completedTopics:[],countCorrections:true};startRewardMission('${key}')`);
     assert.equal(run('game'),'mission');
     assert.equal(run('rewardRound.deck.filter(i=>russianTopics[i.topic]).every(i=>allowedRussianClasses().includes(russianTopics[i.topic].grade||1))'),true);
     run('home()');
