@@ -28,6 +28,10 @@ def read_catalog():
             raise ValueError('Invalid cost: ' + key)
         if entry.get('mission') not in (None, 'russian', 'math', 'mixed', 'review'):
             raise ValueError('Unknown mission: ' + key)
+        bio = entry.get('bio')
+        if bio is not None and (not isinstance(bio, dict) or set(bio) != {'intro', 'traits', 'feature', 'fact'} or
+                not all(isinstance(value, str) and 1 <= len(value.strip()) <= 400 for value in bio.values())):
+            raise ValueError('Invalid character description: ' + key)
         for asset in (entry.get('image'), 'assets/stickers/' + entry['frame']['file'] if 'frame' in entry else None):
             if asset and (not asset.startswith('assets/') or '..' in Path(asset).parts or Path(asset).is_absolute()):
                 raise ValueError('Invalid local image path: ' + key)
@@ -39,10 +43,11 @@ def generated(data):
     labels = {e['id']: [e['icon'], e['name'], e['rule']] for e in entries}
     frames = {e['id']: e['frame'] for e in entries if 'frame' in e}
     images = {e['id']: e['image'] for e in entries if 'image' in e}
+    biographies = {e['id']: e['bio'] for e in entries if 'bio' in e}
     missions = {e['id']: e['mission'] for e in entries if e.get('mission') in ('russian', 'math', 'mixed')}
     groups = [dict(name=group['name'], keys=[e['id'] for e in entries if e['collection'] == group['id']]) for group in data['collections']]
     js = '\n'.join('const ' + name + ' = ' + json.dumps(value, ensure_ascii=False, indent=2) + ';' for name, value in (
-        ('albumStickers', labels), ('stickerImagePaths', images), ('characterStickerFrames', frames),
+        ('albumStickers', labels), ('stickerImagePaths', images), ('stickerBiographies', biographies), ('characterStickerFrames', frames),
         ('stickerMissionTypes', missions), ('stickerCollections', groups))) + '\n'
     prices = {e['id']: e['cost'] for e in entries if 'cost' in e}
     # Old tabs only understand their original sticker IDs.

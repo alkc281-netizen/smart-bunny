@@ -72,7 +72,13 @@
       "enabled": true,
       "cost": 5,
       "mission": "russian",
-      "image": "assets/sprites/mario/drawn/mushroom.png"
+      "image": "assets/sprites/mario/drawn/mushroom.png",
+      "bio": {
+        "intro": "Супергриб — волшебный предмет из приключений Марио, который помогает герою стать больше.",
+        "traits": "Это предмет-помощник, а не персонаж.",
+        "feature": "Даёт Марио силу выдержать столкновение с врагом.",
+        "fact": "В классической игре маленький Марио после него становится Супер-Марио."
+      }
     },
     {
       "id": "star",
@@ -82,7 +88,13 @@
       "collection": "mario",
       "enabled": true,
       "cost": 6,
-      "mission": "review"
+      "mission": "review",
+      "bio": {
+        "intro": "Звезда — особый предмет из мира Марио, который ненадолго делает героя неуязвимым.",
+        "traits": "Это волшебный предмет.",
+        "feature": "Позволяет смелее проходить опасные участки.",
+        "fact": "Её действие ограничено по времени."
+      }
     },
     {
       "id": "koopa",
@@ -93,7 +105,13 @@
       "enabled": true,
       "cost": 7,
       "mission": "math",
-      "image": "assets/sprites/mario/drawn/koopa.png"
+      "image": "assets/sprites/mario/drawn/koopa.png",
+      "bio": {
+        "intro": "Купа — черепашка из мира Марио, которую легко узнать по панцирю.",
+        "traits": "Упрямый и настойчивый противник.",
+        "feature": "После прыжка Марио может спрятаться в панцирь.",
+        "fact": "Пустой панцирь в играх можно отправить скользить по земле."
+      }
     },
     {
       "id": "mario",
@@ -104,7 +122,13 @@
       "enabled": true,
       "cost": 10,
       "mission": "mixed",
-      "image": "assets/sprites/mario/drawn/hero.png"
+      "image": "assets/sprites/mario/drawn/hero.png",
+      "bio": {
+        "intro": "Марио — отважный герой Грибного королевства, который спешит на помощь друзьям.",
+        "traits": "Смелый, добрый, неунывающий.",
+        "feature": "Ловко прыгает и преодолевает препятствия.",
+        "fact": "У Марио есть брат Луиджи."
+      }
     },
     {
       "id": "chip",
@@ -121,6 +145,12 @@
         "y": 110,
         "width": 36,
         "height": 35
+      },
+      "bio": {
+        "intro": "Чип — серьёзный бурундук и руководитель команды спасателей.",
+        "traits": "Внимательный, ответственный, находчивый.",
+        "feature": "Замечает улики и придумывает планы расследований.",
+        "fact": "Его легко отличить от Дейла по чёрному носу."
       }
     },
     {
@@ -138,6 +168,12 @@
         "y": 110,
         "width": 34,
         "height": 35
+      },
+      "bio": {
+        "intro": "Дейл — весёлый бурундук, который помогает друзьям даже в самых запутанных приключениях.",
+        "traits": "Озорной, добродушный, изобретательный.",
+        "feature": "Поднимает настроение команде и находит неожиданные решения.",
+        "fact": "У Дейла красный нос и гавайская рубашка."
       }
     },
     {
@@ -155,6 +191,12 @@
         "y": 297,
         "width": 53,
         "height": 57
+      },
+      "bio": {
+        "intro": "Чёрный Плащ — защитник Сен-Канара, который выходит на борьбу со злодеями.",
+        "traits": "Храбрый, упрямый, немного хвастливый.",
+        "feature": "Использует смекалку, маскировку и необычные устройства.",
+        "fact": "В обычной жизни его зовут Кряк Лапчатый."
       }
     },
     {
@@ -168,7 +210,13 @@
       "rule": "Миссия «Гаечка»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/gadget.png",
       "source": "https://rincondecomiquitas.blogspot.com/2019/09/chip-y-dale-al-rescate-chip-dale-rescue.html",
-      "sourceImage": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5yrS-EbQlla75BV-rmVtmr6YZQc_rPJM1JlLQBl2_p6GPM7NIpJSVG0r9J09JQAYJa3RwiRkgCtuiXubTxUccPqeaIz43G_aFVVt1kLiHsbs2GauuZkVmMOHfwC4WCE32OHmpyn5zGqs/s1600/gadget-coy.png"
+      "sourceImage": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5yrS-EbQlla75BV-rmVtmr6YZQc_rPJM1JlLQBl2_p6GPM7NIpJSVG0r9J09JQAYJa3RwiRkgCtuiXubTxUccPqeaIz43G_aFVVt1kLiHsbs2GauuZkVmMOHfwC4WCE32OHmpyn5zGqs/s1600/gadget-coy.png",
+      "bio": {
+        "intro": "Гаечка — талантливая мышка-изобретательница из команды спасателей.",
+        "traits": "Любознательная, добрая, увлечённая.",
+        "feature": "Собирает полезные машины из самых обычных вещей.",
+        "fact": "Предмет, который кажется мусором, у неё может стать частью изобретения."
+      }
     },
     {
       "id": "monty",
@@ -180,7 +228,13 @@
       "mission": "math",
       "rule": "Миссия «Рокфор»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/monty-illustrated-v1.png",
-      "source": "Generated with OpenAI imagegen for private family use"
+      "source": "Generated with OpenAI imagegen for private family use",
+      "bio": {
+        "intro": "Рокфор — сильный и опытный путешественник, мышь из команды спасателей.",
+        "traits": "Добродушный, смелый, общительный.",
+        "feature": "Помогает команде силой и опытом дальних путешествий.",
+        "fact": "Больше всего он любит сыр и сразу чувствует его запах."
+      }
     },
     {
       "id": "zipper",
@@ -201,6 +255,12 @@
         "width": 109,
         "height": 123,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Вжик — крошечная мушка и полноправный участник команды спасателей.",
+        "traits": "Отважный, преданный, энергичный.",
+        "feature": "Пролетает там, где остальные не могут пройти.",
+        "fact": "Несмотря на размер, он не боится помогать большим друзьям."
       }
     },
     {
@@ -222,6 +282,12 @@
         "width": 207,
         "height": 178,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Толстопуз — хитрый кот и один из главных противников спасателей.",
+        "traits": "Самодовольный, расчётливый, властный.",
+        "feature": "Любит роскошь и поручает помощникам свои коварные планы.",
+        "fact": "В его банде есть крот, ящерица, кот и крыса."
       }
     },
     {
@@ -234,7 +300,13 @@
       "mission": "math",
       "rule": "Миссия «Капоне»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/ratcap.png",
-      "source": "https://www.spriters-resource.com/nes/chipndale/"
+      "source": "https://www.spriters-resource.com/nes/chipndale/",
+      "bio": {
+        "intro": "Капоне — крыса, возглавляющая собственную банду в историях о спасателях.",
+        "traits": "Хитрый, грубый, властный.",
+        "feature": "Старается заставить других выполнять его приказы.",
+        "fact": "Его имя напоминает фамилию известного гангстера Аль Капоне."
+      }
     },
     {
       "id": "wart",
@@ -255,6 +327,12 @@
         "width": 119,
         "height": 137,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Бородавка — ящерица из банды Толстопуза.",
+        "traits": "Суетливый, услужливый, не слишком самостоятельный.",
+        "feature": "Помогает остальным приспешникам выполнять поручения.",
+        "fact": "Среди помощников Толстопуза он выделяется зелёной чешуёй."
       }
     },
     {
@@ -276,6 +354,12 @@
         "width": 164,
         "height": 172,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Крот — один из незадачливых помощников Толстопуза.",
+        "traits": "Простодушный, неповоротливый, доверчивый.",
+        "feature": "Часто оказывается участником чужих хитрых планов.",
+        "fact": "Его имя прямо указывает на то, что он крот."
       }
     },
     {
@@ -297,6 +381,12 @@
         "width": 155,
         "height": 228,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Мяу-Мяу — потрёпанный уличный кот из банды Толстопуза.",
+        "traits": "Ворчливый, ленивый, неуклюжий.",
+        "feature": "Участвует в погонях за спасателями вместе с другими помощниками.",
+        "fact": "Его легко узнать по взъерошенной шерсти."
       }
     },
     {
@@ -318,6 +408,12 @@
         "width": 95,
         "height": 147,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Профессор Нимнул — изобретатель, чьи опасные машины мешают спасателям.",
+        "traits": "Самоуверенный, вспыльчивый, увлечённый техникой.",
+        "feature": "Придумывает необычные устройства ради собственных планов.",
+        "fact": "Спасателям приходится побеждать не только его, но и его изобретения."
       }
     },
     {
@@ -339,6 +435,12 @@
         "width": 124,
         "height": 165,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Сыщик — крыса по имени Snout, один из помощников Толстопуза.",
+        "traits": "Хитрый, осторожный, услужливый.",
+        "feature": "Действует вместе с остальными членами банды.",
+        "fact": "Носит тёмную шляпу, надвинутую на глаза."
       }
     },
     {
@@ -360,6 +462,12 @@
         "width": 260,
         "height": 260,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Мэнди — девочка, которая обращается к спасателям за помощью в поисках котёнка.",
+        "traits": "Заботливая и привязанная к своему питомцу.",
+        "feature": "Её просьба приводит команду к новому расследованию.",
+        "fact": "Поиск её котёнка есть и в истории первой игры о спасателях для NES."
       }
     },
     {
@@ -372,7 +480,13 @@
       "mission": "math",
       "rule": "Миссия «Зигзаг МакКряк»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/launchpad-illustrated-v1.png",
-      "source": "https://www.pngaaa.com/detail/231806"
+      "source": "https://www.pngaaa.com/detail/231806",
+      "bio": {
+        "intro": "Зигзаг МакКряк — отважный пилот и верный помощник друзей.",
+        "traits": "Добродушный, смелый, преданный.",
+        "feature": "Берётся за самые рискованные полёты, хотя посадки бывают неудачными.",
+        "fact": "Он помогает и Скруджу МакДаку, и Чёрному Плащу."
+      }
     },
     {
       "id": "gosalyn",
@@ -385,7 +499,13 @@
       "rule": "Миссия «Гусёна»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/gosalyn.png",
       "source": "https://negaverse.net/the-show/characters/gosalyn-mallard/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2012-05-01-02h35m43s48-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2012-05-01-02h35m43s48-150x150.png",
+      "bio": {
+        "intro": "Гусёна — энергичная приёмная дочь Чёрного Плаща.",
+        "traits": "Смелая, любознательная, озорная.",
+        "feature": "Не любит оставаться в стороне от приключений.",
+        "fact": "Она знает, кто скрывается под маской Чёрного Плаща."
+      }
     },
     {
       "id": "honker",
@@ -398,7 +518,13 @@
       "rule": "Миссия «Гонкер»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/honker.png",
       "source": "https://negaverse.net/the-show/characters/honker-muddlefoot/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-509665-150x150.jpg"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-509665-150x150.jpg",
+      "bio": {
+        "intro": "Гонкер — умный и немного застенчивый друг Гусёны.",
+        "traits": "Вежливый, наблюдательный, рассудительный.",
+        "feature": "Помогает друзьям знаниями и вниманием к деталям.",
+        "fact": "Он живёт по соседству с семьёй Чёрного Плаща."
+      }
     },
     {
       "id": "morgana",
@@ -411,7 +537,13 @@
       "rule": "Миссия «Моргана»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/morgana.png",
       "source": "https://negaverse.net/the-show/characters/morgana-macawber/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2025/11/vlcsnap-2018-10-22-22h58m46s472-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2025/11/vlcsnap-2018-10-22-22h58m46s472-150x150.png",
+      "bio": {
+        "intro": "Моргана — волшебница, которая становится союзницей Чёрного Плаща.",
+        "traits": "Загадочная, самостоятельная, решительная.",
+        "feature": "Владеет магией и помогает в необычных приключениях.",
+        "fact": "Её фамилия МакКабр связана с её таинственным образом."
+      }
     },
     {
       "id": "gizmoduck",
@@ -424,7 +556,13 @@
       "rule": "Миссия «Гизмо»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/gizmoduck.png",
       "source": "https://negaverse.net/the-show/characters/gizmoduck/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-04h50m10s106-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-04h50m10s106-150x150.png",
+      "bio": {
+        "intro": "Гизмо — супергерой в мощном механическом костюме.",
+        "traits": "Добросовестный, храбрый, ответственный.",
+        "feature": "Использует возможности брони, чтобы защищать других.",
+        "fact": "В классических историях под бронёй скрывается Фэнтон Крякшелл."
+      }
     },
     {
       "id": "stegmutt",
@@ -437,7 +575,13 @@
       "rule": "Миссия «Стегмут»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/stegmutt.png",
       "source": "https://negaverse.net/the-show/characters/stegmutt/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h34m15s182-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h34m15s182-150x150.png",
+      "bio": {
+        "intro": "Стегмут — добродушный силач с обликом динозавра.",
+        "traits": "Дружелюбный, доверчивый, готовый помочь.",
+        "feature": "Его огромная сила помогает команде героев.",
+        "fact": "Раньше он был обычной уткой, но изменился после опыта доктора Фоссила."
+      }
     },
     {
       "id": "neptunia",
@@ -450,7 +594,13 @@
       "rule": "Миссия «Нептуния»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/neptunia.png",
       "source": "https://negaverse.net/the-show/characters/neptunia-2/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h14m26s72-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-19-05h14m26s72-150x150.png",
+      "bio": {
+        "intro": "Нептуния — защитница моря и союзница Чёрного Плаща.",
+        "traits": "Решительная, смелая, заботливая к морским обитателям.",
+        "feature": "Умеет общаться с морскими существами.",
+        "fact": "Она входит в команду «Утки справедливости»."
+      }
     },
     {
       "id": "negaduck",
@@ -463,7 +613,13 @@
       "rule": "Миссия «Антиплащ»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/negaduck.png",
       "source": "https://negaverse.net/the-show/characters/negaduck/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/negs.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/negs.png",
+      "bio": {
+        "intro": "Антиплащ — опасный двойник и противник Чёрного Плаща.",
+        "traits": "Злой, вспыльчивый, властолюбивый.",
+        "feature": "Похож на героя внешне, но выбирает совсем другие поступки.",
+        "fact": "Его жёлто-красный костюм отличается от фиолетового костюма Чёрного Плаща."
+      }
     },
     {
       "id": "bushroot",
@@ -476,7 +632,13 @@
       "rule": "Миссия «Бушрут»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/bushroot.png",
       "source": "https://negaverse.net/the-show/characters/bushroot-2/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/bushroot.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/bushroot.png",
+      "bio": {
+        "intro": "Бушрут — учёный, превратившийся в необычное растение.",
+        "traits": "Ранимый, одинокий, увлечённый ботаникой.",
+        "feature": "Может управлять растениями.",
+        "fact": "До превращения он был доктором Реджинальдом Бушрутом."
+      }
     },
     {
       "id": "liquidator",
@@ -489,7 +651,13 @@
       "rule": "Миссия «Ликвидатор»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/liquidator.png",
       "source": "https://negaverse.net/the-show/characters/the-liquidator/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/licky.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/licky.png",
+      "bio": {
+        "intro": "Ликвидатор — противник Чёрного Плаща, чьё тело состоит из воды.",
+        "traits": "Хитрый, самоуверенный, разговорчивый.",
+        "feature": "Меняет форму водяного тела.",
+        "fact": "Он часто говорит так, словно рекламирует товар."
+      }
     },
     {
       "id": "megavolt",
@@ -502,7 +670,13 @@
       "rule": "Миссия «Мегавольт»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/megavolt.png",
       "source": "https://negaverse.net/the-show/characters/megavolt-2/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/megavolt.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/megavolt.png",
+      "bio": {
+        "intro": "Мегавольт — злодей, управляющий электричеством.",
+        "traits": "Вспыльчивый, рассеянный, непредсказуемый.",
+        "feature": "Создаёт электрические разряды и взаимодействует с приборами.",
+        "fact": "Его необычный головной убор напоминает электрическую вилку."
+      }
     },
     {
       "id": "quackerjack",
@@ -515,7 +689,13 @@
       "rule": "Миссия «Квага»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/quackerjack.png",
       "source": "https://negaverse.net/the-show/characters/quackerjack/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/template.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/template.png",
+      "bio": {
+        "intro": "Квага — опасный мастер игрушек в костюме шута.",
+        "traits": "Шумный, изобретательный, непредсказуемый.",
+        "feature": "Превращает игрушки в хитрые ловушки.",
+        "fact": "Он носит с собой игрушечного мистера Банановую Голову."
+      }
     },
     {
       "id": "steelbeak",
@@ -528,7 +708,13 @@
       "rule": "Миссия «Стальной Клюв»: 5 заданий по математике и 5 по русскому.",
       "image": "assets/stickers/steelbeak.png",
       "source": "https://negaverse.net/the-show/characters/steelbeak-2/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/steelbeak.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/steelbeak.png",
+      "bio": {
+        "intro": "Стальной Клюв — самоуверенный агент преступной организации.",
+        "traits": "Хитрый, надменный, расчётливый.",
+        "feature": "Пользуется техникой и помощью подчинённых.",
+        "fact": "Его легко узнать по металлическому клюву."
+      }
     },
     {
       "id": "tuskernini",
@@ -541,7 +727,13 @@
       "rule": "Миссия «Таскернини»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/tuskernini.png",
       "source": "https://negaverse.net/the-show/characters/tuskerninni-2/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/tuskerninni.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/tuskerninni.png",
+      "bio": {
+        "intro": "Таскернини — морж-злодей, увлечённый кино.",
+        "traits": "Театральный, самодовольный, хитрый.",
+        "feature": "Строит преступные планы как постановщик фильма.",
+        "fact": "Ему помогают пингвины, похожие на съёмочную группу."
+      }
     },
     {
       "id": "moliarty",
@@ -554,7 +746,13 @@
       "rule": "Миссия «Молиарти»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/moliarty.png",
       "source": "https://negaverse.net/the-show/characters/professor-moliarty/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/moliarty.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/moliarty.png",
+      "bio": {
+        "intro": "Профессор Молиарти — коварный учёный из подземного мира кротов.",
+        "traits": "Расчётливый, властолюбивый, жадный.",
+        "feature": "Пытается подчинить себе мир на поверхности.",
+        "fact": "Яркий солнечный свет неприятен ему, поэтому днём он носит тёмные очки."
+      }
     },
     {
       "id": "wolfduck",
@@ -575,6 +773,12 @@
         "width": 46,
         "height": 41,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Волкоутка — противник из классической игры о Чёрном Плаще для NES.",
+        "traits": "Свирепый и настойчивый.",
+        "feature": "При полной луне превращается в сильного волкоподобного врага.",
+        "fact": "Этот персонаж появился в игре, а не в оригинальном мультсериале."
       }
     },
     {
@@ -588,7 +792,13 @@
       "rule": "Миссия «Дж. Гандер Гутер»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/jgander.png",
       "source": "https://negaverse.net/the-show/characters/j-gander-hooter/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-21-02h08m14s211-150x150.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/vlcsnap-2015-04-21-02h08m14s211-150x150.png",
+      "bio": {
+        "intro": "Дж. Гандер Гутер — руководитель секретной организации ШУШУ.",
+        "traits": "Спокойный, опытный, предусмотрительный.",
+        "feature": "Поручает агентам важные задания.",
+        "fact": "Он сотрудничает с Чёрным Плащом, хотя герой любит действовать по-своему."
+      }
     },
     {
       "id": "grizzlikoff",
@@ -609,6 +819,12 @@
         "width": 116,
         "height": 155,
         "removeBackground": false
+      },
+      "bio": {
+        "intro": "Гризликов — строгий медведь и агент ШУШУ.",
+        "traits": "Дисциплинированный, серьёзный, упрямый.",
+        "feature": "Предпочитает инструкции и чёткий порядок.",
+        "fact": "Из-за разных методов он часто спорит с Чёрным Плащом."
       }
     },
     {
@@ -622,7 +838,13 @@
       "rule": "Миссия «Аммония Пайн»: 5 сравнений чисел и 5 заданий на сложение.",
       "image": "assets/stickers/ammonia.png",
       "source": "https://negaverse.net/the-show/characters/ammonia-pine/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/ammonia.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/ammonia.png",
+      "bio": {
+        "intro": "Аммония Пайн — злодейка, одержимая чистотой.",
+        "traits": "Педантичная, властная, нетерпеливая.",
+        "feature": "Превращает уборочную технику в опасные устройства.",
+        "fact": "Даже её имя связано с чистящими средствами."
+      }
     },
     {
       "id": "splatterphoenix",
@@ -635,7 +857,13 @@
       "rule": "Миссия «Сплаттер Феникс»: 10 заданий по двум пройденным темам русского.",
       "image": "assets/stickers/splatterphoenix.png",
       "source": "https://negaverse.net/the-show/characters/splatter-phoenix/",
-      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/splatter.png"
+      "sourceImage": "https://negaverse.net/wp-content/uploads/2015/04/splatter.png",
+      "bio": {
+        "intro": "Сплаттер Феникс — художница, использующая необычные краски для злых планов.",
+        "traits": "Самоуверенная, театральная, изобретательная.",
+        "feature": "Может оживлять рисунки и менять изображения.",
+        "fact": "В одной из историй она пытается украсть улыбку Моны Лизы."
+      }
     },
     {
       "id": "dddonald",
@@ -647,7 +875,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/dddonald.png",
-      "source": "https://www.pngaaa.com/detail/55192"
+      "source": "https://www.pngaaa.com/detail/55192",
+      "bio": {
+        "intro": "Дональд Дак — заботливый дядя трёх утят, который постоянно попадает в приключения.",
+        "traits": "Вспыльчивый, упорный, преданный близким.",
+        "feature": "Может рассердиться, но не бросает друзей в беде.",
+        "fact": "Его племянников зовут Билли, Вилли и Дилли."
+      }
     },
     {
       "id": "dddaisy",
@@ -659,7 +893,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/dddaisy.png",
-      "source": "https://www.pngaaa.com/detail/1578567"
+      "source": "https://www.pngaaa.com/detail/1578567",
+      "bio": {
+        "intro": "Дейзи Дак — подруга Дональда, которая умеет отстаивать своё мнение.",
+        "traits": "Самостоятельная, решительная, общительная.",
+        "feature": "Любит красивые наряды, но ценит и хорошие поступки.",
+        "fact": "Её часто можно узнать по большому банту."
+      }
     },
     {
       "id": "ddscrooge",
@@ -671,7 +911,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddscrooge.png",
-      "source": "https://www.pngaaa.com/detail/231685"
+      "source": "https://www.pngaaa.com/detail/231685",
+      "bio": {
+        "intro": "Скрудж МакДак — богатый искатель приключений и старший родственник утят.",
+        "traits": "Бережливый, смелый, настойчивый.",
+        "feature": "Ищет сокровища и умеет находить выход из трудностей.",
+        "fact": "Особенно дорожит первой заработанной монетой."
+      }
     },
     {
       "id": "ddhuey",
@@ -683,7 +929,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddhuey.png",
-      "source": "https://nickjrcharacters.blogspot.com/2018/06/ducktales-pngs.html"
+      "source": "https://nickjrcharacters.blogspot.com/2018/06/ducktales-pngs.html",
+      "bio": {
+        "intro": "Билли — один из трёх племянников Дональда, которого легко узнать по красной одежде.",
+        "traits": "Ответственный, любознательный, организованный.",
+        "feature": "В новых «Утиных историях» любит знания и порядок.",
+        "fact": "Он пользуется справочником Юных сурков."
+      }
     },
     {
       "id": "dddewey",
@@ -695,7 +947,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/dddewey.png",
-      "source": "https://www.pngitem.com/middle/TRRixTT_which-ducktales-character-are-you-dewey-duck-tales/"
+      "source": "https://www.pngitem.com/middle/TRRixTT_which-ducktales-character-are-you-dewey-duck-tales/",
+      "bio": {
+        "intro": "Вилли — один из трёх племянников Дональда, любящий яркие приключения.",
+        "traits": "Смелый, энергичный, любопытный.",
+        "feature": "В новых историях охотно берётся за рискованные затеи.",
+        "fact": "Его цвет — синий."
+      }
     },
     {
       "id": "ddlouie",
@@ -707,7 +965,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddlouie.png",
-      "source": "https://www.pngitem.com/middle/TbJwhhx_louie-ducktales-hd-png-download/"
+      "source": "https://www.pngitem.com/middle/TbJwhhx_louie-ducktales-hd-png-download/",
+      "bio": {
+        "intro": "Дилли — находчивый племянник Дональда в зелёной одежде.",
+        "traits": "Хитроватый, наблюдательный, предприимчивый.",
+        "feature": "В новых историях ищет способы добиться цели с меньшими усилиями.",
+        "fact": "Его братья — Билли и Вилли."
+      }
     },
     {
       "id": "ddwebby",
@@ -719,7 +983,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddwebby.png",
-      "source": "https://www.pngkit.com/bigpic/u2w7i1w7e6i1y3a9/"
+      "source": "https://www.pngkit.com/bigpic/u2w7i1w7e6i1y3a9/",
+      "bio": {
+        "intro": "Поночка — смелая подруга утят, которой хочется узнавать мир.",
+        "traits": "Любознательная, дружелюбная, решительная.",
+        "feature": "Не боится загадок и охотно помогает друзьям.",
+        "fact": "В классических «Утиных историях» миссис Клювдия — её бабушка."
+      }
     },
     {
       "id": "ddbeakley",
@@ -731,7 +1001,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddbeakley.png",
-      "source": "https://nickjrcharacters.blogspot.com/2018/06/ducktales-pngs.html"
+      "source": "https://nickjrcharacters.blogspot.com/2018/06/ducktales-pngs.html",
+      "bio": {
+        "intro": "Миссис Клювдия заботится о доме и семье Скруджа МакДака.",
+        "traits": "Строгая, надёжная, заботливая.",
+        "feature": "Умеет навести порядок и поддержать близких.",
+        "fact": "В классических историях она приходится Поночке бабушкой."
+      }
     },
     {
       "id": "ddduckworth",
@@ -743,7 +1019,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddduckworth.webp",
-      "source": "https://ducktales.fandom.com/wiki/Duckworth_(1987)"
+      "source": "https://ducktales.fandom.com/wiki/Duckworth_(1987)",
+      "bio": {
+        "intro": "Дакворт — невозмутимый дворецкий Скруджа МакДака.",
+        "traits": "Вежливый, терпеливый, ответственный.",
+        "feature": "Следит за порядком в доме и помогает хозяину.",
+        "fact": "Несмотря на утиную фамилию, Дакворт — пёс."
+      }
     },
     {
       "id": "ddgyro",
@@ -755,7 +1037,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddgyro.png",
-      "source": "https://www.pngitem.com/middle/TRiJbJx_thumb-image-duck-tales-gyro-gearloose-hd-png/"
+      "source": "https://www.pngitem.com/middle/TRiJbJx_thumb-image-duck-tales-gyro-gearloose-hd-png/",
+      "bio": {
+        "intro": "Винт Разболтайло — изобретатель, чьи идеи часто опережают время.",
+        "traits": "Увлечённый, любознательный, находчивый.",
+        "feature": "Создаёт удивительные машины и приспособления.",
+        "fact": "Ему помогает маленький робот Лампочка."
+      }
     },
     {
       "id": "ddlittlehelper",
@@ -767,7 +1055,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddlittlehelper.webp",
-      "source": "https://darkwingduck.fandom.com/wiki/Little_Helper"
+      "source": "https://darkwingduck.fandom.com/wiki/Little_Helper",
+      "bio": {
+        "intro": "Лампочка — маленький робот и помощник Винта Разболтайло.",
+        "traits": "Смышлёный, старательный, отзывчивый.",
+        "feature": "Помогает изобретателю и замечает важные мелочи.",
+        "fact": "Вместо головы у него электрическая лампочка."
+      }
     },
     {
       "id": "dddoofus",
@@ -779,7 +1073,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/dddoofus.png",
-      "source": "https://www.deviantart.com/keanny/art/Doofus-Drake-834794641"
+      "source": "https://www.deviantart.com/keanny/art/Doofus-Drake-834794641",
+      "bio": {
+        "intro": "Пупс — приятель утят из классических «Утиных историй».",
+        "traits": "Добродушный, доверчивый, дружелюбный.",
+        "feature": "Старается помогать друзьям и участвует в их приключениях.",
+        "fact": "В классическом мультсериале он состоит в Юных сурках."
+      }
     },
     {
       "id": "ddgladstone",
@@ -791,7 +1091,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddgladstone.png",
-      "source": "https://www.clipartkey.com/view/xxxJR_gladstone-gander-hat/"
+      "source": "https://www.clipartkey.com/view/xxxJR_gladstone-gander-hat/",
+      "bio": {
+        "intro": "Глэдстоун Гусак — родственник Дональда, которому удивительно часто везёт.",
+        "traits": "Самоуверенный, беззаботный, довольный собой.",
+        "feature": "Выигрывает и находит удачные возможности почти без усилий.",
+        "fact": "Его невероятное везение особенно раздражает невезучего Дональда."
+      }
     },
     {
       "id": "ddfethry",
@@ -803,7 +1109,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddfethry.png",
-      "source": "https://www.pngaaa.com/detail/66009"
+      "source": "https://www.pngaaa.com/detail/66009",
+      "bio": {
+        "intro": "Фетри Дак — необычный родственник Дональда с множеством увлечений.",
+        "traits": "Увлечённый, доверчивый, добродушный.",
+        "feature": "С энтузиазмом берётся за новые идеи.",
+        "fact": "Его легко узнать по длинной красной шапочке."
+      }
     },
     {
       "id": "ddgrandma",
@@ -815,7 +1127,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddgrandma.png",
-      "source": "https://www.clipartkey.com/view/iiTbRJR_grandma-duck-coloring-pages/"
+      "source": "https://www.clipartkey.com/view/iiTbRJR_grandma-duck-coloring-pages/",
+      "bio": {
+        "intro": "Бабушка Дак — заботливая хозяйка фермы и старшая родственница Дональда.",
+        "traits": "Трудолюбивая, добрая, практичная.",
+        "feature": "Заботится о хозяйстве и гостеприимно встречает семью.",
+        "fact": "Её настоящее имя — Эльвира Дак."
+      }
     },
     {
       "id": "ddludwig",
@@ -827,7 +1145,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddludwig.png",
-      "source": "https://www.pngaaa.com/detail/1535513"
+      "source": "https://www.pngaaa.com/detail/1535513",
+      "bio": {
+        "intro": "Людвиг фон Дрейк — учёный, любящий объяснять самые разные явления.",
+        "traits": "Любознательный, разговорчивый, увлечённый.",
+        "feature": "Берётся рассказывать о науке, музыке и истории.",
+        "fact": "Его образ часто связан с лекциями и научными опытами."
+      }
     },
     {
       "id": "ddgoldie",
@@ -839,7 +1163,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddgoldie.png",
-      "source": "https://www.pngaaa.com/detail/231782"
+      "source": "https://www.pngaaa.com/detail/231782",
+      "bio": {
+        "intro": "Голди — давняя знакомая Скруджа, умеющая постоять за себя.",
+        "traits": "Находчивая, самостоятельная, хитрая.",
+        "feature": "Любит приключения и не уступает Скруджу в смекалке.",
+        "fact": "Их знакомство связано с золотой лихорадкой на Клондайке."
+      }
     },
     {
       "id": "dddella",
@@ -851,7 +1181,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/dddella.png",
-      "source": "https://www.deviantart.com/disneycrossover143/art/The-Adventures-of-Mickey-Mouse-56-Della-Duck-1044848011"
+      "source": "https://www.deviantart.com/disneycrossover143/art/The-Adventures-of-Mickey-Mouse-56-Della-Duck-1044848011",
+      "bio": {
+        "intro": "Делла Дак — отважная лётчица и мама Билли, Вилли и Дилли.",
+        "traits": "Смелая, энергичная, заботливая.",
+        "feature": "Не сдаётся перед трудностями и любит полёты.",
+        "fact": "Дональд Дак — её брат-близнец."
+      }
     },
     {
       "id": "ddgandra",
@@ -863,7 +1199,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddgandra.webp",
-      "source": "https://disney.fandom.com/wiki/Gandra_Dee"
+      "source": "https://disney.fandom.com/wiki/Gandra_Dee",
+      "bio": {
+        "intro": "Гэндра Ди — талантливая исследовательница из мира «Утиных историй».",
+        "traits": "Умная, самостоятельная, изобретательная.",
+        "feature": "Интересуется наукой и необычными технологиями.",
+        "fact": "В разных версиях мультсериала её история заметно отличается."
+      }
     },
     {
       "id": "ddmagica",
@@ -875,7 +1217,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddmagica.png",
-      "source": "https://de.duckipedia.org/Gundel_Gaukeley"
+      "source": "https://de.duckipedia.org/Gundel_Gaukeley",
+      "bio": {
+        "intro": "Магика де Гипноз — колдунья, мечтающая завладеть монетой Скруджа.",
+        "traits": "Хитрая, упрямая, властолюбивая.",
+        "feature": "Использует заклинания и волшебные превращения.",
+        "fact": "Её главная цель — первая заработанная монета Скруджа."
+      }
     },
     {
       "id": "ddpoe",
@@ -887,7 +1235,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddpoe.webp",
-      "source": "https://deweydewnight.fandom.com/wiki/Poe_De_Spell"
+      "source": "https://deweydewnight.fandom.com/wiki/Poe_De_Spell",
+      "bio": {
+        "intro": "По — ворон и помощник Магики в классических «Утиных историях».",
+        "traits": "Ворчливый, наблюдательный, разговорчивый.",
+        "feature": "Сопровождает колдунью в её затеях.",
+        "fact": "В классической истории он её брат, превращённый в ворона."
+      }
     },
     {
       "id": "ddglomgold",
@@ -899,7 +1253,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddglomgold.png",
-      "source": "https://www.pngaaa.com/detail/231727"
+      "source": "https://www.pngaaa.com/detail/231727",
+      "bio": {
+        "intro": "Флинтхарт Гломгольд — богатый соперник Скруджа МакДака.",
+        "traits": "Завистливый, самоуверенный, хитрый.",
+        "feature": "Стремится превзойти Скруджа и доказать своё превосходство.",
+        "fact": "В мультсериале его легко узнать по бороде и клетчатому килту."
+      }
     },
     {
       "id": "ddmabeagle",
@@ -911,7 +1271,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddmabeagle.webp",
-      "source": "https://ducktales.fandom.com/wiki/Ma_Beagle_(1987)"
+      "source": "https://ducktales.fandom.com/wiki/Ma_Beagle_(1987)",
+      "bio": {
+        "intro": "Мамаша Гавс — предводительница преступного семейства Гавс.",
+        "traits": "Властная, хитрая, решительная.",
+        "feature": "Командует сыновьями и составляет планы ограблений.",
+        "fact": "Даже Главарь Гавс обычно слушается её указаний."
+      }
     },
     {
       "id": "ddbigtime",
@@ -923,7 +1289,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddbigtime.png",
-      "source": "https://www.pngaaa.com/detail/177344"
+      "source": "https://www.pngaaa.com/detail/177344",
+      "bio": {
+        "intro": "Главарь Гавс — один из руководителей братьев Гавс.",
+        "traits": "Хитрый, деловитый, самоуверенный.",
+        "feature": "Придумывает планы и раздаёт поручения братьям.",
+        "fact": "В классическом мультсериале он заметно ниже многих братьев."
+      }
     },
     {
       "id": "ddburger",
@@ -935,7 +1307,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddburger.webp",
-      "source": "https://ducktales.fandom.com/wiki/Beagle_Boys_(1987)"
+      "source": "https://ducktales.fandom.com/wiki/Beagle_Boys_(1987)",
+      "bio": {
+        "intro": "Обжора Гавс — участник банды братьев Гавс, постоянно думающий о еде.",
+        "traits": "Простодушный, рассеянный, прожорливый.",
+        "feature": "Легко отвлекается, если рядом оказывается что-нибудь вкусное.",
+        "fact": "Его английское имя Burger напоминает слово «бургер»."
+      }
     },
     {
       "id": "ddbouncer",
@@ -947,7 +1325,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddbouncer.png",
-      "source": "https://www.pngkit.com/bigpic/u2q8y3w7e6q8t4w7/"
+      "source": "https://www.pngkit.com/bigpic/u2q8y3w7e6q8t4w7/",
+      "bio": {
+        "intro": "Вышибала Гавс — сильный участник семейства Гавс.",
+        "traits": "Грубоватый, упрямый, исполнительный.",
+        "feature": "Часто полагается на физическую силу.",
+        "fact": "В банде братья отличаются не только внешностью, но и привычками."
+      }
     },
     {
       "id": "ddbubba",
@@ -959,7 +1343,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddbubba.webp",
-      "source": "https://ducktales.fandom.com/wiki/Bubba_Duck_(1987)"
+      "source": "https://ducktales.fandom.com/wiki/Bubba_Duck_(1987)",
+      "bio": {
+        "intro": "Бабба — пещерный утёнок, попавший в современный мир.",
+        "traits": "Смелый, простодушный, любознательный.",
+        "feature": "С готовностью знакомится с новым и привязывается к друзьям.",
+        "fact": "В классических историях его сопровождает маленький трицератопс."
+      }
     },
     {
       "id": "ddmerlock",
@@ -971,7 +1361,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddmerlock.webp",
-      "source": "https://ducktales.fandom.com/wiki/Merlock_(1987)"
+      "source": "https://ducktales.fandom.com/wiki/Merlock_(1987)",
+      "bio": {
+        "intro": "Мерлок — могущественный колдун из полнометражных «Утиных историй».",
+        "traits": "Коварный, властолюбивый, настойчивый.",
+        "feature": "Может принимать облик разных животных.",
+        "fact": "Ему помогает волшебный талисман."
+      }
     },
     {
       "id": "ddjose",
@@ -983,7 +1379,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddjose.png",
-      "source": "https://www.pinclipart.com/pindetail/ioRmiwT_jos-carioca-disney-png-clipart/"
+      "source": "https://www.pinclipart.com/pindetail/ioRmiwT_jos-carioca-disney-png-clipart/",
+      "bio": {
+        "intro": "Хосе Кариока — весёлый бразильский попугай и друг Дональда.",
+        "traits": "Общительный, музыкальный, жизнерадостный.",
+        "feature": "Любит музыку и знакомит друзей со своей культурой.",
+        "fact": "Вместе с Дональдом и Панчито входит в тройку кабальеро."
+      }
     },
     {
       "id": "ddpanchito",
@@ -995,7 +1397,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddpanchito.png",
-      "source": "https://www.clipartkey.com/view/ohmwoR_clipart-panchito-panchito-the-three-caballeros/"
+      "source": "https://www.clipartkey.com/view/ohmwoR_clipart-panchito-panchito-the-three-caballeros/",
+      "bio": {
+        "intro": "Панчито — энергичный мексиканский петух и друг Дональда.",
+        "traits": "Шумный, весёлый, дружелюбный.",
+        "feature": "Любит песни, музыку и яркие выступления.",
+        "fact": "Он один из героев мультфильма «Три кабальеро»."
+      }
     },
     {
       "id": "ddlittlehelpercutout",
@@ -1007,7 +1415,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddlittlehelpercutout.webp",
-      "source": "https://darkwingduck.fandom.com/wiki/Little_Helper"
+      "source": "https://darkwingduck.fandom.com/wiki/Little_Helper",
+      "bio": {
+        "intro": "Лампочка — маленький робот и помощник Винта Разболтайло.",
+        "traits": "Смышлёный, старательный, отзывчивый.",
+        "feature": "Помогает изобретателю и замечает важные мелочи.",
+        "fact": "Вместо головы у него электрическая лампочка."
+      }
     },
     {
       "id": "ddlena",
@@ -1019,7 +1433,13 @@
       "mission": "russian",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddlena.png",
-      "source": "https://www.pinterest.com/pin/439875088611134786/"
+      "source": "https://www.pinterest.com/pin/439875088611134786/",
+      "bio": {
+        "intro": "Лена — подруга Поночки, связанная с необычной магией.",
+        "traits": "Смелая, самостоятельная, преданная друзьям.",
+        "feature": "Учится владеть своими силами и выбирать собственный путь.",
+        "fact": "Дружит с Поночкой и Вайолет в новых «Утиных историях»."
+      }
     },
     {
       "id": "ddviolet",
@@ -1031,7 +1451,13 @@
       "mission": "mixed",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddviolet.webp",
-      "source": "https://ducktales.fandom.com/wiki/File:Violet_Sabrewing_Front.png"
+      "source": "https://ducktales.fandom.com/wiki/File:Violet_Sabrewing_Front.png",
+      "bio": {
+        "intro": "Вайолет — любознательная подруга Поночки и Лены.",
+        "traits": "Спокойная, рассудительная, начитанная.",
+        "feature": "Любит книги, исследования и поиск объяснений.",
+        "fact": "В новых «Утиных историях» она участвует в движении Юных сурков."
+      }
     },
     {
       "id": "ddrockerduck",
@@ -1043,7 +1469,13 @@
       "mission": "math",
       "rule": "За учебную миссию. Условия учитывают профиль игрока.",
       "image": "assets/stickers/donald/ddrockerduck.png",
-      "source": "https://de.duckipedia.org/Klaas_Klever"
+      "source": "https://de.duckipedia.org/Klaas_Klever",
+      "bio": {
+        "intro": "Рокердак — богатый предприниматель и соперник Скруджа МакДака.",
+        "traits": "Самоуверенный, хитрый, азартный.",
+        "feature": "Постоянно соревнуется со Скруджем и любит роскошь.",
+        "fact": "В комиксах после поражения иногда съедает собственную шляпу."
+      }
     }
   ]
 }
