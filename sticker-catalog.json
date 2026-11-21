@@ -24,6 +24,21 @@
     {
       "id": "mickey",
       "name": "Микки Маус"
+    },
+    {
+      "id": "looney-tunes",
+      "name": "Луни Тюнз",
+      "uniqueCharacters": 30
+    },
+    {
+      "id": "tom-and-jerry",
+      "name": "Том и Джерри",
+      "uniqueCharacters": 30
+    },
+    {
+      "id": "woody-woodpecker",
+      "name": "Вуди Вудпекер и друзья",
+      "uniqueCharacters": 30
     }
   ],
   "stickers": [
@@ -2020,6 +2035,1780 @@
         "feature": "Прячет лицо под чёрным костюмом и придумывает сложные планы.",
         "fact": "Микки встречается с ним во многих детективных комиксах."
       }
+    },
+    {
+      "id": "ltbugs",
+      "icon": "🐰",
+      "name": "Багз Банни",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltbugs.png",
+      "source": "https://www.pngaaa.com/detail/1378545",
+      "bio": {
+        "intro": "Багз Банни — находчивый кролик из «Луни Тюнз».",
+        "traits": "Спокойный, остроумный, уверенный в себе.",
+        "feature": "Побеждает соперников смекалкой и неожиданными уловками.",
+        "fact": "Его знаменитое приветствие — «В чём дело, док?»."
+      },
+      "character": "looney-tunes/bugs"
+    },
+    {
+      "id": "ltdaffy",
+      "icon": "🐰",
+      "name": "Даффи Дак",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltdaffy.png",
+      "source": "https://www.pngaaa.com/detail/3256976",
+      "bio": {
+        "intro": "Даффи Дак — шумный и очень эмоциональный утёнок из «Луни Тюнз».",
+        "traits": "Самоуверенный, вспыльчивый, изобретательный.",
+        "feature": "Любит быть в центре внимания и часто спорит с друзьями.",
+        "fact": "Часто появляется рядом с Багзом Банни и Порки Пигом."
+      },
+      "character": "looney-tunes/daffy"
+    },
+    {
+      "id": "ltporky",
+      "icon": "🐰",
+      "name": "Порки Пиг",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltporky.png",
+      "source": "https://www.pngaaa.com/detail/3719510",
+      "bio": {
+        "intro": "Порки Пиг — добродушный поросёнок из «Луни Тюнз».",
+        "traits": "Вежливый, терпеливый, старательный.",
+        "feature": "Продолжает действовать, даже когда вокруг начинается неразбериха.",
+        "fact": "Его часто можно услышать в финальном прощании мультфильма."
+      },
+      "character": "looney-tunes/porky"
+    },
+    {
+      "id": "lttweety",
+      "icon": "🐰",
+      "name": "Твити",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/lttweety.png",
+      "source": "https://www.pngaaa.com/detail/125210",
+      "bio": {
+        "intro": "Твити — маленькая жёлтая канарейка.",
+        "traits": "Сообразительный, наблюдательный, внешне безобидный.",
+        "feature": "Ускользает от кота Сильвестра с помощью смекалки.",
+        "fact": "О нём заботится Бабуля."
+      },
+      "character": "looney-tunes/tweety"
+    },
+    {
+      "id": "ltsylvester",
+      "icon": "🐰",
+      "name": "Сильвестр",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltsylvester.png",
+      "source": "https://www.pngaaa.com/detail/1965022",
+      "bio": {
+        "intro": "Сильвестр — кот, который постоянно пытается поймать Твити.",
+        "traits": "Упрямый, азартный, изобретательный.",
+        "feature": "Придумывает всё новые способы добраться до хитрой канарейки.",
+        "fact": "Его легко узнать по чёрно-белой шерсти и красному носу."
+      },
+      "character": "looney-tunes/sylvester"
+    },
+    {
+      "id": "ltelmer",
+      "icon": "🐰",
+      "name": "Элмер Фадд",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltelmer.png",
+      "source": "https://www.pngaaa.com/detail/1213606",
+      "bio": {
+        "intro": "Элмер Фадд — незадачливый охотник из историй о Багзе Банни.",
+        "traits": "Настойчивый, доверчивый, вспыльчивый.",
+        "feature": "Старается перехитрить Багза, но часто сам попадается на его уловки.",
+        "fact": "Часто носит большую охотничью шляпу."
+      },
+      "character": "looney-tunes/elmer"
+    },
+    {
+      "id": "ltsam",
+      "icon": "🐰",
+      "name": "Йосемити Сэм",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltsam.png",
+      "source": "https://www.pngaaa.com/detail/4383632",
+      "bio": {
+        "intro": "Йосемити Сэм — вспыльчивый соперник Багза Банни.",
+        "traits": "Горячий, упрямый, самоуверенный.",
+        "feature": "Берётся за самые разные роли и не любит проигрывать.",
+        "fact": "Его узнают по огромным рыжим усам."
+      },
+      "character": "looney-tunes/sam"
+    },
+    {
+      "id": "ltspeedy",
+      "icon": "🐰",
+      "name": "Спиди Гонзалес",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltspeedy.png",
+      "source": "https://www.pngaaa.com/detail/1179256",
+      "bio": {
+        "intro": "Спиди Гонзалес — невероятно быстрый мышонок.",
+        "traits": "Весёлый, смелый, отзывчивый.",
+        "feature": "Мчится так быстро, что соперникам трудно его догнать.",
+        "fact": "Обычно носит большое жёлтое сомбреро."
+      },
+      "character": "looney-tunes/speedy"
+    },
+    {
+      "id": "ltcoyote",
+      "icon": "🐰",
+      "name": "Вайл И. Койот",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltcoyote.png",
+      "source": "https://www.pngaaa.com/detail/579691",
+      "bio": {
+        "intro": "Койот постоянно пытается поймать Дорожного бегуна.",
+        "traits": "Упорный, изобретательный, неунывающий.",
+        "feature": "Строит сложные ловушки и испытывает необычные устройства.",
+        "fact": "В его планах часто появляются устройства марки ACME."
+      },
+      "character": "looney-tunes/coyote"
+    },
+    {
+      "id": "ltroadrunner",
+      "icon": "🐰",
+      "name": "Дорожный бегун",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltroadrunner.png",
+      "source": "https://www.pngaaa.com/detail/406404",
+      "bio": {
+        "intro": "Дорожный бегун — стремительная птица, которую постоянно пытается поймать Койот.",
+        "traits": "Проворный, беззаботный, внимательный.",
+        "feature": "Мгновенно ускользает от ловушек и продолжает свой путь.",
+        "fact": "Его узнаваемый сигнал — «Бип-бип!»."
+      },
+      "character": "looney-tunes/roadrunner"
+    },
+    {
+      "id": "ltmarvin",
+      "icon": "🐰",
+      "name": "Марвин Марсианин",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltmarvin.png",
+      "source": "https://www.pngaaa.com/detail/7086665",
+      "bio": {
+        "intro": "Марвин — маленький марсианин из «Луни Тюнз».",
+        "traits": "Спокойный, настойчивый, серьёзный.",
+        "feature": "Пользуется фантастическими космическими устройствами.",
+        "fact": "Его зелёный шлем напоминает шлем древнего воина."
+      },
+      "character": "looney-tunes/marvin"
+    },
+    {
+      "id": "lttaz",
+      "icon": "🐰",
+      "name": "Тасманский дьявол",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/lttaz.png",
+      "source": "https://www.pngaaa.com/detail/348236",
+      "bio": {
+        "intro": "Тасманский дьявол, или Таз, — неугомонный герой «Луни Тюнз».",
+        "traits": "Энергичный, нетерпеливый, прожорливый.",
+        "feature": "Мчится вперёд, закручиваясь в настоящий вихрь.",
+        "fact": "Его прозвище Таз — короткая форма имени Tasmanian Devil."
+      },
+      "character": "looney-tunes/taz"
+    },
+    {
+      "id": "ltpepe",
+      "icon": "🐰",
+      "name": "Пепе Ле Пью",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltpepe.png",
+      "source": "https://www.pngaaa.com/detail/314173",
+      "bio": {
+        "intro": "Пепе Ле Пью — скунс, который уверен в своём обаянии.",
+        "traits": "Романтичный, самоуверенный, настойчивый.",
+        "feature": "Любит красивые жесты и эффектные появления.",
+        "fact": "Часто принимает кошку Пенелопу за скунсиху."
+      },
+      "character": "looney-tunes/pepe"
+    },
+    {
+      "id": "ltpenelope",
+      "icon": "🐰",
+      "name": "Пенелопа",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltpenelope.png",
+      "source": "https://www.pngaaa.com/detail/1213736",
+      "bio": {
+        "intro": "Пенелопа — кошка из историй о Пепе Ле Пью.",
+        "traits": "Осторожная, проворная, самостоятельная.",
+        "feature": "Находит способы ускользнуть от слишком настойчивого скунса.",
+        "fact": "Белая полоска на её спине нередко становится причиной путаницы."
+      },
+      "character": "looney-tunes/penelope"
+    },
+    {
+      "id": "ltgranny",
+      "icon": "🐰",
+      "name": "Бабуля",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltgranny.jpg",
+      "source": "https://www.pinterest.com/pin/granny--586453182698598822/",
+      "bio": {
+        "intro": "Бабуля — заботливая хозяйка Твити и Сильвестра.",
+        "traits": "Добрая, решительная, наблюдательная.",
+        "feature": "Поддерживает порядок и защищает своих питомцев.",
+        "fact": "Её легко узнать по очкам и седым волосам, собранным в пучок."
+      },
+      "character": "looney-tunes/granny"
+    },
+    {
+      "id": "ltpete",
+      "icon": "🐰",
+      "name": "Пит Пума",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltpete.png",
+      "source": "https://www.pngaaa.com/detail/79645",
+      "bio": {
+        "intro": "Пит Пума — незадачливый соперник Багза Банни.",
+        "traits": "Самоуверенный, простодушный, неуклюжий.",
+        "feature": "Старается поймать кролика, но часто уступает ему в хитрости.",
+        "fact": "Его смех — одна из узнаваемых особенностей персонажа."
+      },
+      "character": "looney-tunes/pete"
+    },
+    {
+      "id": "ltfoghorn",
+      "icon": "🐰",
+      "name": "Фогхорн Легхорн",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltfoghorn.jpg",
+      "source": "https://pnghut.com/png/Pp3x1TLyE8/foghorn-leghorn-chicken-henery-hawk-barnyard-dawg-miss-prissy-the-boss-baby-transparent-png",
+      "bio": {
+        "intro": "Фогхорн Легхорн — большой белый петух из «Луни Тюнз».",
+        "traits": "Разговорчивый, самоуверенный, любит поучать.",
+        "feature": "Его легко узнать по громкому голосу и длинным речам.",
+        "fact": "Он часто спорит с дворовым псом и встречается с маленьким ястребом Хенери."
+      },
+      "character": "looney-tunes/foghorn"
+    },
+    {
+      "id": "ltbarnyard",
+      "icon": "🐰",
+      "name": "Дворовый пёс",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltbarnyard.png",
+      "source": "https://www.pngkey.com/maxpic/u2y3q8u2e6u2w7a9/",
+      "bio": {
+        "intro": "Дворовый пёс охраняет ферму, где живёт Фогхорн.",
+        "traits": "Упрямый, находчивый, не любит чужие проделки.",
+        "feature": "Его соперничество с петухом превращается в цепочку розыгрышей.",
+        "fact": "В оригинале его зовут Barnyard Dawg."
+      },
+      "character": "looney-tunes/barnyard"
+    },
+    {
+      "id": "lthenery",
+      "icon": "🐰",
+      "name": "Хенери Хоук",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/lthenery.jpg",
+      "source": "https://www.clipartmax.com/middle/m2H7H7A0i8Z5d3N4_henry-hawk-by-zacktv321-chicken-hawk-looney-toons/",
+      "bio": {
+        "intro": "Хенери Хоук — маленький ястреб, который хочет охотиться на кур.",
+        "traits": "Решительный, смелый, очень настойчивый.",
+        "feature": "Несмотря на маленький рост, уверен в своих силах.",
+        "fact": "Фогхорн пытается запутать его объяснениями, кто же на ферме курица."
+      },
+      "character": "looney-tunes/henery"
+    },
+    {
+      "id": "ltralph",
+      "icon": "🐰",
+      "name": "Волк Ральф",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltralph.png",
+      "source": "https://looneytuneswiki.com/wiki/Ralph_Wolf",
+      "bio": {
+        "intro": "Волк Ральф пытается добраться до овец, которых охраняет Сэм.",
+        "traits": "Изобретательный, настойчивый, любит хитрые планы.",
+        "feature": "Похож на Вайл И. Койота, но это другой персонаж.",
+        "fact": "Ральф и овчарка Сэм начинают свой рабочий день с отметки на часах."
+      },
+      "character": "looney-tunes/ralph"
+    },
+    {
+      "id": "ltsheepdog",
+      "icon": "🐰",
+      "name": "Овчарка Сэм",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltsheepdog.jpg",
+      "source": "https://leagueofcomicgeeks.com/character/28838/sam-sheepdog",
+      "bio": {
+        "intro": "Овчарка Сэм охраняет стадо от волка Ральфа.",
+        "traits": "Спокойный, сильный, внимательный.",
+        "feature": "Длинная рыжая чёлка закрывает ему глаза.",
+        "fact": "Даже самая хитрая попытка Ральфа обычно не ускользает от Сэма."
+      },
+      "character": "looney-tunes/sheepdog"
+    },
+    {
+      "id": "ltgossamer",
+      "icon": "🐰",
+      "name": "Госсамер",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltgossamer.png",
+      "source": "https://toppng.com/show_download/465784/gossamer-logo-vector-download-free",
+      "bio": {
+        "intro": "Госсамер — большой рыжий мохнатый монстр из «Луни Тюнз».",
+        "traits": "Внушительный, немного наивный, порой застенчивый.",
+        "feature": "Из-под его шерсти видны большие кроссовки.",
+        "fact": "За грозным обликом скрывается персонаж, которого Багз умеет перехитрить."
+      },
+      "character": "looney-tunes/gossamer"
+    },
+    {
+      "id": "lthazel",
+      "icon": "🐰",
+      "name": "Ведьма Хейзел",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/lthazel.png",
+      "source": "https://www.kindpng.com/imgv/JJTooT_cartoon-witch-png-witch-hazel-looney-tunes-png/",
+      "bio": {
+        "intro": "Ведьма Хейзел варит зелья и летает на метле.",
+        "traits": "Хитрая, вспыльчивая, любит колдовство.",
+        "feature": "Её узнают по зелёному лицу, острому носу и чёрной шляпе.",
+        "fact": "Она встречается с Багзом Банни в историях о волшебстве и Хэллоуине."
+      },
+      "character": "looney-tunes/hazel"
+    },
+    {
+      "id": "lthippety",
+      "icon": "🐰",
+      "name": "Хиппети Хоппер",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/lthippety.jpg",
+      "source": "https://imgbin.com/png/M2dhTZTJ/hippety-hopper-kangaroo-cartoon-illustration-png",
+      "bio": {
+        "intro": "Хиппети Хоппер — маленький кенгуру, попадающий в приключения Сильвестра.",
+        "traits": "Любопытный, дружелюбный, очень прыгучий.",
+        "feature": "Передвигается большими прыжками и умеет постоять за себя.",
+        "fact": "Сильвестр нередко принимает кенгурёнка за огромную мышь."
+      },
+      "character": "looney-tunes/hippety"
+    },
+    {
+      "id": "ltsylvesterjr",
+      "icon": "🐰",
+      "name": "Сильвестр-младший",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltsylvesterjr.jpg",
+      "source": "https://www.imdb.com/title/tt0050729/",
+      "bio": {
+        "intro": "Сильвестр-младший — сын кота Сильвестра.",
+        "traits": "Впечатлительный, гордый, чувствительный к неудачам отца.",
+        "feature": "Похож на папу, но гораздо меньше ростом.",
+        "fact": "Он сопровождает Сильвестра в историях с кенгурёнком Хиппети Хоппером."
+      },
+      "character": "looney-tunes/sylvester-jr"
+    },
+    {
+      "id": "ltmarcantony",
+      "icon": "🐰",
+      "name": "Марк Энтони",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltmarcantony.png",
+      "source": "https://www.pngaaa.com/detail/888210",
+      "bio": {
+        "intro": "Марк Энтони — большой бульдог, который заботится о котёнке Пуссифут.",
+        "traits": "Сильный, нежный, преданный.",
+        "feature": "Его суровый вид совсем не мешает дружбе с маленьким котёнком.",
+        "fact": "Он старается спрятать Пуссифут от хозяйки и защитить от неприятностей."
+      },
+      "character": "looney-tunes/marcantony"
+    },
+    {
+      "id": "ltpussyfoot",
+      "icon": "🐰",
+      "name": "Пуссифут",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltpussyfoot.png",
+      "source": "https://www.deviantart.com/disneycrossover143/art/Looney-Tunes-Cartoons-34-Pussyfoot-1071648667",
+      "bio": {
+        "intro": "Пуссифут — крошечный чёрно-белый котёнок, друг Марка Энтони.",
+        "traits": "Ласковая, доверчивая, игривая.",
+        "feature": "Любит удобно устраиваться на спине большого бульдога.",
+        "fact": "История их знакомства называется «Feed the Kitty»."
+      },
+      "character": "looney-tunes/pussyfoot"
+    },
+    {
+      "id": "ltcecil",
+      "icon": "🐰",
+      "name": "Сесил Черепаха",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltcecil.png",
+      "source": "https://www.pngaaa.com/detail/1213669",
+      "bio": {
+        "intro": "Сесил — спокойная черепаха, которая соперничает с Багзом в беге.",
+        "traits": "Невозмутимый, хитрый, уверенный в себе.",
+        "feature": "Побеждает не скоростью, а продуманным планом.",
+        "fact": "Его истории обыгрывают знакомое соревнование зайца и черепахи."
+      },
+      "character": "looney-tunes/cecil"
+    },
+    {
+      "id": "ltslowpoke",
+      "icon": "🐰",
+      "name": "Слоупок Родригес",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltslowpoke.jpg",
+      "source": "https://www.johndalybooks.com/the-appeal-of-pop-retro-obscurity/",
+      "bio": {
+        "intro": "Слоупок Родригес — неторопливый мышонок, родственник Спиди Гонзалеса.",
+        "traits": "Спокойный, рассудительный, находчивый.",
+        "feature": "Двигается медленно, зато быстро соображает.",
+        "fact": "В одной семье оказались и стремительный Спиди, и совсем неторопливый Слоупок."
+      },
+      "character": "looney-tunes/slowpoke"
+    },
+    {
+      "id": "ltclaude",
+      "icon": "🐰",
+      "name": "Кот Клод",
+      "collection": "looney-tunes",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/ltclaude.jpg",
+      "source": "https://cinemacats.com/twos-a-crowd-1950/",
+      "bio": {
+        "intro": "Клод — жёлто-рыжий кот из классических мультфильмов «Луни Тюнз».",
+        "traits": "Нервный, осторожный, легко пугается.",
+        "feature": "Часто попадает в неприятности из-за маленьких мышей.",
+        "fact": "Его соперниками становятся мыши Хьюби и Берти."
+      },
+      "character": "looney-tunes/claude"
+    },
+    {
+      "id": "tjtom",
+      "icon": "🐭",
+      "name": "Том",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjtom.png",
+      "source": "https://www.pngaaa.com/detail/1663924",
+      "bio": {
+        "intro": "Том — кот, который постоянно устраивает погони за Джерри.",
+        "traits": "Настойчивый, изобретательный, эмоциональный.",
+        "feature": "Придумывает хитрые ловушки, но нередко сам в них попадается.",
+        "fact": "Иногда Том и Джерри объединяются ради общей цели."
+      },
+      "character": "tom-and-jerry/tom"
+    },
+    {
+      "id": "tjjerry",
+      "icon": "🐭",
+      "name": "Джерри",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjjerry.png",
+      "source": "https://www.pngaaa.com/detail/1663881",
+      "bio": {
+        "intro": "Джерри — маленький мышонок, способный перехитрить большого кота.",
+        "traits": "Смелый, находчивый, озорной.",
+        "feature": "Быстро находит выход из трудных ситуаций.",
+        "fact": "Одно из его любимых лакомств — сыр."
+      },
+      "character": "tom-and-jerry/jerry"
+    },
+    {
+      "id": "tjspike",
+      "icon": "🐭",
+      "name": "Спайк",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjspike.png",
+      "source": "https://www.pngaaa.com/detail/1664074",
+      "bio": {
+        "intro": "Спайк — сильный бульдог из историй о Томе и Джерри.",
+        "traits": "Серьёзный, защитный, заботливый.",
+        "feature": "Охраняет покой своего маленького сына.",
+        "fact": "Его щенка зовут Тайк."
+      },
+      "character": "tom-and-jerry/spike"
+    },
+    {
+      "id": "tjtyke",
+      "icon": "🐭",
+      "name": "Тайк",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjtyke.png",
+      "source": "https://www.pngaaa.com/detail/1876928",
+      "bio": {
+        "intro": "Тайк — маленький щенок и сын Спайка.",
+        "traits": "Доверчивый, любознательный, игривый.",
+        "feature": "Исследует мир рядом с заботливым папой.",
+        "fact": "Как и Спайк, носит красный ошейник."
+      },
+      "character": "tom-and-jerry/tyke"
+    },
+    {
+      "id": "tjbutch",
+      "icon": "🐭",
+      "name": "Бутч",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjbutch.png",
+      "source": "https://www.pngaaa.com/detail/1876897",
+      "bio": {
+        "intro": "Бутч — уличный кот и соперник Тома.",
+        "traits": "Самоуверенный, хитрый, независимый.",
+        "feature": "Старается обойти Тома и получить желаемое первым.",
+        "fact": "Его легко отличить от Тома по чёрной шерсти."
+      },
+      "character": "tom-and-jerry/butch"
+    },
+    {
+      "id": "tjtuffy",
+      "icon": "🐭",
+      "name": "Таффи",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjtuffy.jpg",
+      "source": "https://www.pngkey.com/detail/u2t4o0y3t4u2w7w7_tom-and-jerry-clipart-tuffy-tom-and-jerry/",
+      "bio": {
+        "intro": "Таффи — маленький серый мышонок, который гостит у Джерри.",
+        "traits": "Любопытный, прожорливый, бесстрашный.",
+        "feature": "Обычно носит белый подгузник.",
+        "fact": "Таффи также известен под именем Нибблз: это один персонаж."
+      },
+      "character": "tom-and-jerry/tuffy"
+    },
+    {
+      "id": "tjquacker",
+      "icon": "🐭",
+      "name": "Квакер",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjquacker.jpg",
+      "source": "https://www.imdb.com/title/tt0042682/mediaviewer/rm3497358848/",
+      "bio": {
+        "intro": "Квакер — маленький утёнок, которому помогают Джерри и его друзья.",
+        "traits": "Доверчивый, дружелюбный, впечатлительный.",
+        "feature": "Часто принимает окружающих за свою семью.",
+        "fact": "В мультфильме «That's My Mommy» он считает Тома своей мамой."
+      },
+      "character": "tom-and-jerry/quacker"
+    },
+    {
+      "id": "tjtoodles",
+      "icon": "🐭",
+      "name": "Тудлз",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjtoodles.png",
+      "source": "https://www.pngwing.com/en/free-png-qmsab",
+      "bio": {
+        "intro": "Тудлз — изящная белая кошка, которой старается понравиться Том.",
+        "traits": "Спокойная, самостоятельная, разборчивая.",
+        "feature": "Её узнают по белой шерсти и выразительным ресницам.",
+        "fact": "Из-за её внимания Том нередко соперничает с другими котами."
+      },
+      "character": "tom-and-jerry/toodles"
+    },
+    {
+      "id": "tjlightning",
+      "icon": "🐭",
+      "name": "Лайтнинг",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjlightning.webp",
+      "source": "https://tomandjerry.fandom.com/wiki/Lightning_Cat",
+      "bio": {
+        "intro": "Лайтнинг — рыжий кот и один из соперников Тома.",
+        "traits": "Ловкий, самоуверенный, энергичный.",
+        "feature": "Его имя связано с молниеносной скоростью.",
+        "fact": "Впервые он появился в истории «Old Rockin' Chair Tom»."
+      },
+      "character": "tom-and-jerry/lightning"
+    },
+    {
+      "id": "tjtopsy",
+      "icon": "🐭",
+      "name": "Топси",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjtopsy.png",
+      "source": "https://www.pngwing.com/en/free-png-aaymt",
+      "bio": {
+        "intro": "Топси — маленький котёнок из компании знакомых Тома.",
+        "traits": "Любопытный, озорной, подражает старшим.",
+        "feature": "Меньше ростом, чем взрослые уличные коты.",
+        "fact": "В «Professor Tom» Том пытается научить его ловить мышей."
+      },
+      "character": "tom-and-jerry/topsy"
+    },
+    {
+      "id": "tjmeathead",
+      "icon": "🐭",
+      "name": "Митхед",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjmeathead.jpg",
+      "source": "https://www.mycast.io/talent/meathead-cat",
+      "bio": {
+        "intro": "Митхед — лохматый уличный кот, знакомый Тома.",
+        "traits": "Неуклюжий, вспыльчивый, любит соперничать.",
+        "feature": "Обычно его узнают по растрёпанному чубу.",
+        "fact": "Он появился в мультфильме «Sufferin' Cats!»."
+      },
+      "character": "tom-and-jerry/meathead"
+    },
+    {
+      "id": "tjmuscles",
+      "icon": "🐭",
+      "name": "Мускул",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjmuscles.jpg",
+      "source": "https://www.imdb.com/title/tt0043685/mediaviewer/rm484537344/",
+      "bio": {
+        "intro": "Мускул — сильный родственник Джерри, который приходит ему на помощь.",
+        "traits": "Уверенный, смелый, решительный.",
+        "feature": "Не боится котов и умеет защитить мышей.",
+        "fact": "История о его приезде называется «Jerry's Cousin»."
+      },
+      "character": "tom-and-jerry/muscles"
+    },
+    {
+      "id": "tjpecos",
+      "icon": "🐭",
+      "name": "Дядюшка Пекос",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjpecos.jpg",
+      "source": "https://favpng.com/png_view/tom-and-jerry-uncle-pecos-cartoon-tom-and-jerry-deviantart-png/n3Mz9fzB",
+      "bio": {
+        "intro": "Дядюшка Пекос — родственник Джерри и музыкант с гитарой.",
+        "traits": "Упорный, общительный, любит выступать.",
+        "feature": "Носит большую ковбойскую шляпу.",
+        "fact": "Когда у него рвутся струны, он находит замену в усах Тома."
+      },
+      "character": "tom-and-jerry/pecos"
+    },
+    {
+      "id": "tjgeorgecat",
+      "icon": "🐭",
+      "name": "Кузен Джордж",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjgeorgecat.jpg",
+      "source": "https://www.imdb.com/title/tt0051086/",
+      "bio": {
+        "intro": "Кузен Джордж — родственник Тома, который боится мышей.",
+        "traits": "Робкий, осторожный, впечатлительный.",
+        "feature": "Очень похож на Тома, но реагирует на Джерри совсем иначе.",
+        "fact": "Он появляется в мультфильме «Timid Tabby»."
+      },
+      "character": "tom-and-jerry/george-cat"
+    },
+    {
+      "id": "tjcuckoo",
+      "icon": "🐭",
+      "name": "Канарейка Куку",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjcuckoo.jpg",
+      "source": "https://www.dailymotion.com/video/x2umeov",
+      "bio": {
+        "intro": "Куку — маленькая канарейка и друг Джерри.",
+        "traits": "Смелый, отзывчивый, находчивый.",
+        "feature": "Помогает мышонку справляться с проделками Тома.",
+        "fact": "Впервые Куку появился в мультфильме «Kitty Foiled»."
+      },
+      "character": "tom-and-jerry/cuckoo"
+    },
+    {
+      "id": "tjlion",
+      "icon": "🐭",
+      "name": "Лев",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjlion.jpg",
+      "source": "https://www.1stdibs.com/furniture/wall-decorations/posters/tom-jerry-jerry-lion-1950/id-f_44728552/",
+      "bio": {
+        "intro": "Лев — большой знакомый Джерри, которому иногда нужна помощь.",
+        "traits": "Сильный, эмоциональный, способен на дружбу.",
+        "feature": "Даже огромный лев может довериться маленькому мышонку.",
+        "fact": "Он встречается с Джерри в мультфильме «Jerry and the Lion»."
+      },
+      "character": "tom-and-jerry/lion"
+    },
+    {
+      "id": "tjjumbo",
+      "icon": "🐭",
+      "name": "Джамбо",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjjumbo.jpg",
+      "source": "https://vegalleries.com/art/mgm/1479/tom-and-jerry-1940-1962/jerry-and-jumbo-production-cel-idaprtomjerry5513",
+      "bio": {
+        "intro": "Джамбо — слонёнок, которого встречает Джерри.",
+        "traits": "Дружелюбный, доверчивый, игривый.",
+        "feature": "Умеет помогать Джерри в его хитростях против Тома.",
+        "fact": "Их история называется «Jerry and Jumbo»."
+      },
+      "character": "tom-and-jerry/jumbo"
+    },
+    {
+      "id": "tjjumbomother",
+      "icon": "🐭",
+      "name": "Мама Джамбо",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjjumbomother.jpg",
+      "source": "https://www.pinterest.com/pin/dumbo-mrs-jumbo-dumbo-1941--258534834837267306/",
+      "bio": {
+        "intro": "Мама Джамбо ищет своего слонёнка и заботится о нём.",
+        "traits": "Заботливая, сильная, решительная.",
+        "feature": "Её появление заметно меняет планы Тома.",
+        "fact": "Она и Джамбо участвуют в одной истории со слонёнком и Джерри."
+      },
+      "character": "tom-and-jerry/jumbo-mother"
+    },
+    {
+      "id": "tjpenguin",
+      "icon": "🐭",
+      "name": "Пингвинёнок",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjpenguin.jpg",
+      "source": "https://www.imdb.com/title/tt1136567/",
+      "bio": {
+        "intro": "Пингвинёнок из «Тома и Джерри» находит друзей вдали от холодного дома.",
+        "traits": "Дружелюбный, игривый, любопытный.",
+        "feature": "Любит холод и зимние забавы.",
+        "fact": "Он появляется в мультфильме «Little Runaway»."
+      },
+      "character": "tom-and-jerry/penguin"
+    },
+    {
+      "id": "tjwoodpecker",
+      "icon": "🐭",
+      "name": "Дятел-малыш",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjwoodpecker.jpg",
+      "source": "https://tv.apple.com/gb/episode/the-egg-and-jerry/umc.cmc.2udllzs876hp8wjxw7f9n0ldt?showId=umc.cmc.4cn8ixz0zpcr6n93cygbmauac",
+      "bio": {
+        "intro": "Дятел-малыш вылупляется из яйца и привязывается к Джерри.",
+        "traits": "Доверчивый, активный, настойчивый.",
+        "feature": "Сильным клювом может продолбить почти что угодно.",
+        "fact": "Его истории — «Hatch Up Your Troubles» и «The Egg and Jerry»."
+      },
+      "character": "tom-and-jerry/woodpecker"
+    },
+    {
+      "id": "tjmotherduck",
+      "icon": "🐭",
+      "name": "Мама-утка",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjmotherduck.jpg",
+      "source": "https://tv.apple.com/jp/episode/%E3%81%8A%E3%81%8B%E3%81%97%E3%81%AA%E3%82%A2%E3%83%92%E3%83%AB%E3%81%AE%E5%AD%90/umc.cmc.5fuefu11jgv17uejq6jvy0spp?showId=umc.cmc.4cn8ixz0zpcr6n93cygbmauac",
+      "bio": {
+        "intro": "Мама-утка заботится о своих утятах.",
+        "traits": "Ласковая, внимательная, защищает малышей.",
+        "feature": "Ведёт утят за собой и помогает им не потеряться.",
+        "fact": "Она появляется в историях о маленьком Квакере."
+      },
+      "character": "tom-and-jerry/mother-duck"
+    },
+    {
+      "id": "tjgeorgeowner",
+      "icon": "🐭",
+      "name": "Хозяин Джордж",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjgeorgeowner.jpg",
+      "source": "https://www.dailymotion.com/video/x6v261f",
+      "bio": {
+        "intro": "Джордж — хозяин дома, где живут Том и Спайк.",
+        "traits": "Практичный, хозяйственный, любит спокойствие.",
+        "feature": "Часто отдыхает с газетой и считает домашние расходы.",
+        "fact": "Его жену зовут Джоан; это другой Джордж, не кот-кузен Тома."
+      },
+      "character": "tom-and-jerry/george-owner"
+    },
+    {
+      "id": "tjjoan",
+      "icon": "🐭",
+      "name": "Джоан",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjjoan.jpg",
+      "source": "https://twitter.com/tooninwithmetv/status/1604813799185256451",
+      "bio": {
+        "intro": "Джоан — хозяйка дома и жена Джорджа.",
+        "traits": "Заботливая, аккуратная, любит домашний уют.",
+        "feature": "Том нередко проводит время рядом с ней.",
+        "fact": "Джоан и Джордж появились в мультфильме «Pet Peeve»."
+      },
+      "character": "tom-and-jerry/joan"
+    },
+    {
+      "id": "tjmammy",
+      "icon": "🐭",
+      "name": "Мамочка Два Тапочка",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjmammy.webp",
+      "source": "https://rozrywka.spidersweb.pl/tom-jerry-sa-rasistowska-kreskowka-wedlug-amazonu-apple-pewnoscia",
+      "bio": {
+        "intro": "Мамочка Два Тапочка следит за порядком в доме Тома.",
+        "traits": "Строгая, хозяйственная, не любит беспорядок.",
+        "feature": "Тому приходится отвечать перед ней за домашние разрушения.",
+        "fact": "В классических историях её часто показывают лишь частично."
+      },
+      "character": "tom-and-jerry/mammy"
+    },
+    {
+      "id": "tjjeannie",
+      "icon": "🐭",
+      "name": "Джинни",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjjeannie.jpg",
+      "source": "https://www.pinterest.com/pin/busy-buddies-tom-and-jerry-and-baby-and-jeannie--25473554127826663/",
+      "bio": {
+        "intro": "Джинни — няня, которой поручают присматривать за малышом.",
+        "traits": "Общительная, рассеянная, легко отвлекается.",
+        "feature": "Пока она разговаривает по телефону, Том и Джерри следят за ребёнком.",
+        "fact": "Она появляется в историях «Busy Buddies» и «Tot Watchers»."
+      },
+      "character": "tom-and-jerry/jeannie"
+    },
+    {
+      "id": "tjbaby",
+      "icon": "🐭",
+      "name": "Малыш",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjbaby.jpg",
+      "source": "https://watch.plex.tv/show/mgm-cartoons-1/season/1956/episode/3",
+      "bio": {
+        "intro": "Малыш — любопытный ребёнок из приключений Тома и Джерри.",
+        "traits": "Бесстрашный, подвижный, любознательный.",
+        "feature": "Постоянно отправляется исследовать мир вокруг себя.",
+        "fact": "Тому и Джерри приходится объединяться, чтобы вернуть его в безопасность."
+      },
+      "character": "tom-and-jerry/baby"
+    },
+    {
+      "id": "tjrobyn",
+      "icon": "🐭",
+      "name": "Робин Старлинг",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjrobyn.webp",
+      "source": "https://tomandjerry.wikia.com/wiki/Robyn_Starling",
+      "bio": {
+        "intro": "Робин Старлинг — девочка, которой помогают Том и Джерри.",
+        "traits": "Добрая, смелая, любит свою семью.",
+        "feature": "Не теряет надежду снова найти отца.",
+        "fact": "Она — героиня полнометражного «Тома и Джерри» 1992 года."
+      },
+      "character": "tom-and-jerry/robyn"
+    },
+    {
+      "id": "tjpristine",
+      "icon": "🐭",
+      "name": "Тётушка Фигг",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjpristine.webp",
+      "source": "https://hanna-barbera.fandom.com/wiki/Aunt_Pristine_Figg",
+      "bio": {
+        "intro": "Тётушка Фигг — опекунша Робин и противница её друзей.",
+        "traits": "Жадная, властная, хитрая.",
+        "feature": "Старается распоряжаться состоянием семьи Старлинг.",
+        "fact": "В её планах участвует адвокат Ликбут."
+      },
+      "character": "tom-and-jerry/pristine"
+    },
+    {
+      "id": "tjlickboot",
+      "icon": "🐭",
+      "name": "Ликбут",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjlickboot.jpg",
+      "source": "https://clip.cafe/tom-jerry-the-movie-1992/aha-of-course/",
+      "bio": {
+        "intro": "Ликбут — адвокат, который помогает тётушке Фигг.",
+        "traits": "Расчётливый, хитрый, корыстный.",
+        "feature": "Пытается извлечь выгоду из истории с Робин.",
+        "fact": "Он участвует в событиях полнометражного мультфильма 1992 года."
+      },
+      "character": "tom-and-jerry/lickboot"
+    },
+    {
+      "id": "tjkiddie",
+      "icon": "🐭",
+      "name": "Капитан Кидди",
+      "collection": "tom-and-jerry",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/tjkiddie.jpg",
+      "source": "https://clip.cafe/tom-jerry-the-movie-1992/you-are-the-lucky-guest-of-capn-kiddie/",
+      "bio": {
+        "intro": "Капитан Кидди — бывший ведущий детской передачи.",
+        "traits": "Театральный, самоуверенный, корыстный.",
+        "feature": "Ему помогает кукла-попугай Сквок.",
+        "fact": "Он встречает Робин, Тома и Джерри в полнометражном мультфильме."
+      },
+      "character": "tom-and-jerry/kiddie"
+    },
+    {
+      "id": "wwwoody",
+      "icon": "🐦",
+      "name": "Вуди Вудпекер",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwwoody.png",
+      "source": "https://www.pngaaa.com/detail/3943235",
+      "bio": {
+        "intro": "Вуди Вудпекер — неугомонный дятел и любитель розыгрышей.",
+        "traits": "Озорной, находчивый, самоуверенный.",
+        "feature": "Превращает обычные дела в невероятные приключения.",
+        "fact": "Его визитная карточка — громкий узнаваемый смех."
+      },
+      "character": "woody-woodpecker/woody"
+    },
+    {
+      "id": "wwwinnie",
+      "icon": "🐦",
+      "name": "Винни Вудпекер",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwwinnie.jpg",
+      "source": "https://www.clipartmax.com/middle/m2i8b1K9i8b1A0N4_winnie-woodpecker-with-lipstick-by-marcospower1996-woodpecker/",
+      "bio": {
+        "intro": "Винни Вудпекер — подруга Вуди.",
+        "traits": "Общительная, самостоятельная, находчивая.",
+        "feature": "Разделяет с Вуди приключения, но умеет настоять на своём.",
+        "fact": "Она появилась ещё в классических коротких мультфильмах о Вуди."
+      },
+      "character": "woody-woodpecker/winnie"
+    },
+    {
+      "id": "wwknothead",
+      "icon": "🐦",
+      "name": "Кнотхед",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwknothead.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5146&shot=10",
+      "bio": {
+        "intro": "Кнотхед — племянник Вуди и брат Сплинтер.",
+        "traits": "Озорной, любопытный, смелый.",
+        "feature": "Обычно приключается вместе с сестрой.",
+        "fact": "Кнотхед и Сплинтер появились в мультфильме «Get Lost»."
+      },
+      "character": "woody-woodpecker/knothead",
+      "frame": {
+        "file": "classics/wwknothead.jpg",
+        "x": 50,
+        "y": 80,
+        "width": 255,
+        "height": 450,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwsplinter",
+      "icon": "🐦",
+      "name": "Сплинтер",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwsplinter.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5146&shot=10",
+      "bio": {
+        "intro": "Сплинтер — племянница Вуди и сестра Кнотхеда.",
+        "traits": "Находчивая, энергичная, любознательная.",
+        "feature": "Помогает брату выбираться из неприятностей.",
+        "fact": "Племянники Вуди участвуют в сказочном приключении «Get Lost»."
+      },
+      "character": "woody-woodpecker/splinter",
+      "frame": {
+        "file": "classics/wwsplinter.jpg",
+        "x": 425,
+        "y": 145,
+        "width": 255,
+        "height": 380,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwbuzz",
+      "icon": "🐦",
+      "name": "Базз Баззард",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwbuzz.png",
+      "source": "https://www.pngaaa.com/detail/3943221",
+      "bio": {
+        "intro": "Базз Баззард — хитрый стервятник и противник Вуди.",
+        "traits": "Корыстный, самоуверенный, изобретательный.",
+        "feature": "Ищет лёгкую выгоду и придумывает всевозможные аферы.",
+        "fact": "Вуди нередко срывает его планы."
+      },
+      "character": "woody-woodpecker/buzz"
+    },
+    {
+      "id": "wwwally",
+      "icon": "🐦",
+      "name": "Морж Уолли",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwwally.jpg",
+      "source": "https://ca.pinterest.com/pin/wally-walrus--943715296900363819/",
+      "bio": {
+        "intro": "Морж Уолли — герой, которому часто достаётся от проказ Вуди.",
+        "traits": "Основательный, вспыльчивый, любящий порядок.",
+        "feature": "Старается спокойно заниматься своими делами, несмотря на выходки дятла.",
+        "fact": "Его легко узнать по длинным клыкам и усам."
+      },
+      "character": "woody-woodpecker/wally"
+    },
+    {
+      "id": "wwgabby",
+      "icon": "🐦",
+      "name": "Гэбби Гатор",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwgabby.jpg",
+      "source": "https://www.deviantart.com/mwtoon1996/art/Gabby-Gator-1062762009",
+      "bio": {
+        "intro": "Гэбби Гатор — хитрый аллигатор из приключений Вуди.",
+        "traits": "Настойчивый, коварный, изобретательный.",
+        "feature": "Пытается заманить Вуди в ловушку, но дятел находит выход.",
+        "fact": "Его истории часто разворачиваются на болоте."
+      },
+      "character": "woody-woodpecker/gabby"
+    },
+    {
+      "id": "wwdooley",
+      "icon": "🐦",
+      "name": "Дули",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwdooley.png",
+      "source": "https://www.deviantart.com/camerontheone/art/Dapper-Denver-Dooley-1189201836",
+      "bio": {
+        "intro": "Дули — усатый противник Вуди из историй о Диком Западе.",
+        "traits": "Хитрый, вспыльчивый, самоуверенный.",
+        "feature": "Любит перехитрить окружающих, но Вуди обычно оказывается ловчее.",
+        "fact": "Его полное английское имя — Dapper Denver Dooley."
+      },
+      "character": "woody-woodpecker/dooley"
+    },
+    {
+      "id": "wwmeany",
+      "icon": "🐦",
+      "name": "Мисс Мини",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwmeany.jpg",
+      "source": "https://www.opovo.com.br/agencia/flipar/2025/03/29/viloes-de-desenhos-animados-que-deixaram-uma-marca.html",
+      "bio": {
+        "intro": "Мисс Мини — строгая соседка и противница проделок Вуди.",
+        "traits": "Вспыльчивая, упрямая, любит порядок.",
+        "feature": "Не даёт Вуди спокойно разгуляться.",
+        "fact": "Она встречается и в классических историях, и в более позднем сериале о Вуди."
+      },
+      "character": "woody-woodpecker/meany"
+    },
+    {
+      "id": "wwchilly",
+      "icon": "🐦",
+      "name": "Чилли Вилли",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwchilly.png",
+      "source": "https://www.pngaaa.com/detail/1584687",
+      "bio": {
+        "intro": "Чилли Вилли — маленький пингвин, который любит тепло и вкусную еду.",
+        "traits": "Смышлёный, настойчивый, любопытный.",
+        "feature": "Находит неожиданные способы согреться и поесть.",
+        "fact": "Обычно носит красную шапочку."
+      },
+      "character": "woody-woodpecker/chilly"
+    },
+    {
+      "id": "wwsmedley",
+      "icon": "🐦",
+      "name": "Смедли",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwsmedley.png",
+      "source": "https://www.cartonionline.com/en/wordpress/chilly-willy/",
+      "bio": {
+        "intro": "Смедли — пёс из приключений пингвинёнка Чилли Вилли.",
+        "traits": "Старательный, терпеливый, временами ворчливый.",
+        "feature": "Часто охраняет еду или выполняет порученную работу.",
+        "fact": "Чилли умеет превратить даже его обычный рабочий день в приключение."
+      },
+      "character": "woody-woodpecker/smedley"
+    },
+    {
+      "id": "wwmaxie",
+      "icon": "🐦",
+      "name": "Белый медведь Макси",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwmaxie.jpg",
+      "source": "https://www.pinterest.com/pin/maxie-the-polar-bear-01-in-2025--576883033556724652/",
+      "bio": {
+        "intro": "Макси — большой белый медведь из историй Чилли Вилли.",
+        "traits": "Дружелюбный, спокойный, любит поесть.",
+        "feature": "Составляет компанию маленькому пингвинёнку.",
+        "fact": "Разница в росте не мешает Макси и Чилли быть друзьями."
+      },
+      "character": "woody-woodpecker/maxie"
+    },
+    {
+      "id": "wwgooney",
+      "icon": "🐦",
+      "name": "Альбатрос Гуни",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwgooney.jpg",
+      "source": "https://www.thetvdb.com/series/chilly-willy/episodes/4121189",
+      "bio": {
+        "intro": "Гуни — альбатрос из приключений Чилли Вилли.",
+        "traits": "Весёлый, шумный, общительный.",
+        "feature": "Своими проделками способен устроить немалую суматоху.",
+        "fact": "Он относится к компании друзей и знакомых Чилли Вилли."
+      },
+      "character": "woody-woodpecker/gooney"
+    },
+    {
+      "id": "wwandy",
+      "icon": "🐦",
+      "name": "Энди Панда",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwandy.jpg",
+      "source": "https://www.tvtime.com/de/show/255893",
+      "bio": {
+        "intro": "Энди Панда — герой классических мультфильмов студии Уолтера Ланца.",
+        "traits": "Любопытный, добродушный, находчивый.",
+        "feature": "Попадает в приключения сам и вместе с другими героями студии.",
+        "fact": "Первое появление Вуди произошло в мультфильме с Энди Пандой."
+      },
+      "character": "woody-woodpecker/andy"
+    },
+    {
+      "id": "wwmiranda",
+      "icon": "🐦",
+      "name": "Миранда Панда",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwmiranda.jpg",
+      "source": "https://www.dailymotion.com/video/x2b25zv",
+      "bio": {
+        "intro": "Миранда Панда — подруга Энди Панды.",
+        "traits": "Добрая, внимательная, общительная.",
+        "feature": "Появляется рядом с Энди в историях о пандах.",
+        "fact": "Она — самостоятельный персонаж мира Уолтера Ланца."
+      },
+      "character": "woody-woodpecker/miranda"
+    },
+    {
+      "id": "wwpoppa",
+      "icon": "🐦",
+      "name": "Папа Панда",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwpoppa.png",
+      "source": "https://www.clipartmax.com/max/m2i8d3H7Z5G6N4Z5/",
+      "bio": {
+        "intro": "Папа Панда — отец Энди.",
+        "traits": "Заботливый, серьёзный, временами ворчливый.",
+        "feature": "Старается воспитывать сына и справляться с неожиданностями.",
+        "fact": "Он участвует в ранних мультфильмах об Энди Панде."
+      },
+      "character": "woody-woodpecker/poppa",
+      "frame": {
+        "file": "classics/wwpoppa.png",
+        "x": 0,
+        "y": 0,
+        "width": 355,
+        "height": 450,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwcharliechicken",
+      "icon": "🐦",
+      "name": "Чарли Цыплёнок",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwcharliechicken.png",
+      "source": "https://knowyourmeme.com/photos/1356469-reaction-images",
+      "bio": {
+        "intro": "Чарли Цыплёнок — знакомый Энди Панды.",
+        "traits": "Озорной, деятельный, находчивый.",
+        "feature": "Его узнают по яркому гребню и длинному клюву.",
+        "fact": "Он появляется в историях и комиксах с героями Уолтера Ланца."
+      },
+      "character": "woody-woodpecker/charlie-chicken"
+    },
+    {
+      "id": "wwwilloughby",
+      "icon": "🐦",
+      "name": "Инспектор Уиллоуби",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwwilloughby.jpg",
+      "source": "https://watch.plex.tv/show/inspector-willoughby",
+      "bio": {
+        "intro": "Инспектор Уиллоуби расследует необычные преступления.",
+        "traits": "Спокойный, терпеливый, наблюдательный.",
+        "feature": "Сохраняет невозмутимость даже в самых странных ситуациях.",
+        "fact": "Он — герой собственной серии коротких мультфильмов студии Ланца."
+      },
+      "character": "woody-woodpecker/willoughby"
+    },
+    {
+      "id": "wwsugarfoot",
+      "icon": "🐦",
+      "name": "Шугарфут",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwsugarfoot.jpg",
+      "source": "https://3863-21905.el-alt.com/iad_entries/screenshots?shortID=5119",
+      "bio": {
+        "intro": "Шугарфут — лошадь из приключений Вуди.",
+        "traits": "Сообразительный, упрямый, выразительный.",
+        "feature": "Часто оказывается участником историй о Диком Западе.",
+        "fact": "В некоторых историях ему приходится путешествовать вместе с Вуди."
+      },
+      "character": "woody-woodpecker/sugarfoot"
+    },
+    {
+      "id": "wwhomer",
+      "icon": "🐦",
+      "name": "Голубь Гомер",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwhomer.png",
+      "source": "https://www.looneydatabase.com/year.php?year=1944",
+      "bio": {
+        "intro": "Гомер — голубь из классических мультфильмов Уолтера Ланца.",
+        "traits": "Смелый, добродушный, порой неловкий.",
+        "feature": "Его приключения начинаются в «Pigeon Patrol».",
+        "fact": "Гомер появляется не только в мультфильмах, но и в комиксах."
+      },
+      "character": "woody-woodpecker/homer"
+    },
+    {
+      "id": "wwcarrie",
+      "icon": "🐦",
+      "name": "Кэрри Пиджен",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwcarrie.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5034&shot=6",
+      "bio": {
+        "intro": "Кэрри — голубка из историй о Гомере.",
+        "traits": "Общительная, самостоятельная, обаятельная.",
+        "feature": "В мультфильмах её также называют Дейзи Мэй.",
+        "fact": "Она и Гомер встречаются в мультфильме «Pigeon Patrol»."
+      },
+      "character": "woody-woodpecker/carrie",
+      "frame": {
+        "file": "classics/wwcarrie.jpg",
+        "x": 105,
+        "y": 120,
+        "width": 220,
+        "height": 370,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwcharliebeary",
+      "icon": "🐦",
+      "name": "Чарли Бири",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwcharliebeary.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5234&shot=7",
+      "bio": {
+        "intro": "Чарли Бири — папа в медвежьей семье Бири.",
+        "traits": "Упрямый, старательный, часто неуклюжий.",
+        "feature": "Берётся за домашние дела, которые быстро выходят из-под контроля.",
+        "fact": "Его жена — Бесси, а дети — Джуниор и Сьюзи."
+      },
+      "character": "woody-woodpecker/charlie-beary",
+      "frame": {
+        "file": "classics/wwcharliebeary.jpg",
+        "x": 270,
+        "y": 130,
+        "width": 175,
+        "height": 240,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwbessie",
+      "icon": "🐦",
+      "name": "Бесси Бири",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwbessie.jpg",
+      "source": "https://vegalleries.com/art/walter-lantz/6884/the-beary-family-1962-1972/the-beary-family-production-cel-id-wlc13bear5",
+      "bio": {
+        "intro": "Бесси Бири — мама медвежьего семейства.",
+        "traits": "Хозяйственная, решительная, требовательная.",
+        "feature": "Следит за домом и старается организовать всю семью.",
+        "fact": "Она — жена Чарли Бири."
+      },
+      "character": "woody-woodpecker/bessie"
+    },
+    {
+      "id": "wwjunior",
+      "icon": "🐦",
+      "name": "Джуниор Бири",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwjunior.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5234&shot=8",
+      "bio": {
+        "intro": "Джуниор Бири — старший сын Чарли и Бесси.",
+        "traits": "Добродушный, непоседливый, немного неловкий.",
+        "feature": "Пытается помогать отцу, но часто всё запутывает.",
+        "fact": "Джуниор и его младшая сестра Сьюзи — разные персонажи одной семьи."
+      },
+      "character": "woody-woodpecker/junior",
+      "frame": {
+        "file": "classics/wwjunior.jpg",
+        "x": 245,
+        "y": 115,
+        "width": 310,
+        "height": 295,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwsuzy",
+      "icon": "🐦",
+      "name": "Сьюзи Бири",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwsuzy.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5234&shot=9",
+      "bio": {
+        "intro": "Сьюзи Бири — младшая дочь Чарли и Бесси.",
+        "traits": "Добрая, любознательная, живая.",
+        "feature": "Её узнают по хвостику и маленькому платью.",
+        "fact": "Она появляется вместе с семьёй в «Fowled-Up Birthday»."
+      },
+      "character": "woody-woodpecker/suzy",
+      "frame": {
+        "file": "classics/wwsuzy.jpg",
+        "x": 285,
+        "y": 130,
+        "width": 195,
+        "height": 245,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwdoc",
+      "icon": "🐦",
+      "name": "Док",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwdoc.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshots?shortID=5226",
+      "bio": {
+        "intro": "Док — кот из классических мультфильмов Уолтера Ланца.",
+        "traits": "Самоуверенный, предприимчивый, хитрый.",
+        "feature": "Любит представляться важной и успешной персоной.",
+        "fact": "В его историях встречается большой пёс Сесил."
+      },
+      "character": "woody-woodpecker/doc"
+    },
+    {
+      "id": "wwduffy",
+      "icon": "🐦",
+      "name": "Пёс Даффи",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 7,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwduffy.jpg",
+      "source": "https://www.pinterest.com/pin/duffy-dog-19631972--763641680570807471/",
+      "bio": {
+        "intro": "Пёс Даффи — герой коротких мультфильмов студии Ланца.",
+        "traits": "Добродушный, находчивый, выразительный.",
+        "feature": "Попадает в комические неприятности и ищет из них выход.",
+        "fact": "Даффи также известен под именем Альфи и бывает питомцем Вуди."
+      },
+      "character": "woody-woodpecker/duffy"
+    },
+    {
+      "id": "wwfink",
+      "icon": "🐦",
+      "name": "Лис Финк",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "math",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwfink.jpg",
+      "source": "https://www.imdb.com/title/tt0150419/",
+      "bio": {
+        "intro": "Лис Финк — противник Вуди из классических коротких историй.",
+        "traits": "Хитрый, настойчивый, любит строить планы.",
+        "feature": "Старается добиться своего с помощью уловок.",
+        "fact": "Одно из его приключений с Вуди называется «Dumb Like a Fox»."
+      },
+      "character": "woody-woodpecker/fink"
+    },
+    {
+      "id": "wwcuddles",
+      "icon": "🐦",
+      "name": "Дог Каддлз",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 8,
+      "mission": "russian",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwcuddles.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshot.aspx?shortid=5121&shot=11",
+      "bio": {
+        "intro": "Каддлз — большой дог из мультфильмов студии Ланца.",
+        "traits": "Энергичный, любопытный, порой неуклюжий.",
+        "feature": "Из-за своих размеров легко оказывается в центре суматохи.",
+        "fact": "Он — герой мультфильма «Dig That Dog»."
+      },
+      "character": "woody-woodpecker/cuddles",
+      "frame": {
+        "file": "classics/wwcuddles.jpg",
+        "x": 160,
+        "y": 35,
+        "width": 460,
+        "height": 410,
+        "removeBackground": false
+      }
+    },
+    {
+      "id": "wwfatso",
+      "icon": "🐦",
+      "name": "Медведь Фэтсо",
+      "collection": "woody-woodpecker",
+      "enabled": true,
+      "cost": 10,
+      "mission": "mixed",
+      "rule": "За учебную миссию. Условия учитывают профиль игрока.",
+      "image": "assets/stickers/classics/wwfatso.jpg",
+      "source": "https://www.intanibase.com/iad_entries/screenshots?shortID=5207",
+      "bio": {
+        "intro": "Фэтсо — медведь из классических историй Уолтера Ланца.",
+        "traits": "Упрямый, деятельный, любит отстаивать своё.",
+        "feature": "Часто превращает обычное дело в комическую борьбу.",
+        "fact": "Его истории входят в классический каталог студии Уолтера Ланца."
+      },
+      "character": "woody-woodpecker/fatso"
     }
   ]
 }
