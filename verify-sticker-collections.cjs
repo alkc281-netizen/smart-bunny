@@ -5,7 +5,7 @@ function el(tag='div'){
  append(...items){for(const item of items){this.children.push(item);item.parent=this}},replaceChildren(){this.children=[]},
  remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this)},setAttribute(k,v){this.attributes[k]=v},
  addEventListener(){},querySelector(){return null},closest(){return null},showModal(){this.open=true},close(){this.open=false;this.onclose?.()},
- getBoundingClientRect(){return {left:0,top:0,right:400,bottom:600}}};
+ focus(){this.focused=true},getBoundingClientRect(){return {left:0,top:0,right:400,bottom:600}}};
 }
 const opener={isConnected:true,focus(){focusReturns++}};
 const document={activeElement:opener,getElementById(id){if(!elements.has(id))elements.set(id,el());return elements.get(id)},createElement:el,createTextNode:text=>({textContent:text,children:[]}),querySelectorAll:()=>[],addEventListener(){}};
@@ -21,20 +21,22 @@ run('stickerArt=(parent,key)=>{const img=playerElement("span",key,parent);img.cl
 const parent=el(),before=run('JSON.stringify(activePlayer)'),networkBefore=requests;
 ctx.parent=parent;run('renderMarioCollection(parent)');
 function descendants(n){return [n,...n.children.flatMap(descendants)]}
-const all=descendants(parent),tabs=all.filter(n=>n.attributes.role==='tab'),panels=all.filter(n=>n.attributes.role==='tabpanel');
-assert.equal(tabs.length,6);assert.equal(panels.length,6);
-function visible(i){assert.deepEqual(panels.map(p=>p.hidden),panels.map((_,j)=>j!==i));assert.deepEqual(tabs.map(t=>t.attributes['aria-selected']),tabs.map((_,j)=>String(j===i)))}
-visible(0);
-for(let i=0;i<tabs.length;i++){
- tabs[i].onclick();visible(i);
- const names=descendants(panels[i]).filter(n=>n.tagName==='h4').map(n=>n.textContent);
- const expected=run(`stickerCollections[${i}].keys.filter(k=>Object.hasOwn(activePlayer.rewards.prices,k)).map(k=>albumStickers[k][1])`);
- assert.deepEqual(names,Array.from(expected));
+function find(cls){return descendants(parent).find(n=>n.className===cls)}
+const groups=run('stickerCollections'),expectedGroups=[];
+for(const group of groups){const keys=Array.from(group.keys).filter(k=>Object.hasOwn(prices,k));if(!keys.length)continue;const cover=['mario','chip','darkwing','dddonald','mmmickey'].find(k=>group.keys.includes(k))||(keys.some(k=>k.startsWith('dd'))?'dddonald':keys[0]);let family=expectedGroups.find(f=>f.cover===cover);if(!family){family={cover,keys:[]};expectedGroups.push(family)}family.keys.push(...keys)}
+const gallery=find('sticker-collection-covers'),content=find('sticker-collection-content');
+assert.equal(gallery.children.length,expectedGroups.length);assert.equal(content.hidden,true);assert.equal(descendants(parent).filter(n=>n.className==='mario-sticker-card').length,0);
+const snapshots=new Map();
+function snapshot(n){return {tag:n.tagName,cls:n.className,text:n.textContent,children:n.children.map(snapshot)}}
+for(let i=0;i<gallery.children.length;i++){
+ const cover=gallery.children[i];cover.onclick();assert.equal(gallery.hidden,true);assert.equal(content.hidden,false);
+ const cards=descendants(content).filter(n=>n.className==='mario-sticker-card');assert.equal(cards.length,expectedGroups[i].keys.length);
+ assert.deepEqual(cards.map(card=>card.children.find(n=>n.tagName==='h4').textContent),expectedGroups[i].keys.map(k=>catalog.stickers.find(s=>s.id===k).name));
+ cards.forEach((card,j)=>snapshots.set(expectedGroups[i].keys[j],snapshot(card)));
+ if(expectedGroups[i].cover==='chip')assert.equal(cover.children[0].children.length,2);
+ content.children[0].onclick();assert.equal(gallery.hidden,false);assert.equal(content.hidden,true);assert.equal(content.children.length,0);assert.equal(cover.focused,true);
 }
-assert.equal(descendants(panels.at(-1)).filter(n=>n.className==='mario-sticker-card').length,30);
-parent.replaceChildren();run('renderMarioCollection(parent)');
-assert.equal(descendants(parent).find(n=>n.attributes.role==='tabpanel'&&!n.hidden).children[0].textContent,'Микки Маус');
+// Selected collection survives a profile refresh, without a server write.
+gallery.children.at(-1).onclick();parent.replaceChildren();run('renderMarioCollection(parent)');assert.equal(find('sticker-collection-covers').hidden,true);assert.equal(descendants(find('sticker-collection-content')).filter(n=>n.className==='mario-sticker-card').length,expectedGroups.at(-1).keys.length);
 assert.equal(run('JSON.stringify(activePlayer)'),before);assert.equal(requests,networkBefore);
-const first=descendants(parent).find(n=>n.attributes.role==='tab');let focused=0;first.focus=()=>{focused++};
-first.onkeydown({key:'Home',preventDefault(){}});assert.equal(focused,1);
-console.log('PASS six collection tabs, one visible group, exact membership, all 30 Mickey cards, selected group retained, keyboard navigation, no progress writes');
+console.log('PASS hero covers, paired Chip/Dale, Donald extras together, lazy rendering, open/back/focus, refresh, no progress writes');
