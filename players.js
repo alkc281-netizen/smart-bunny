@@ -211,6 +211,176 @@ const albumStickers = {
     "🦆",
     "Сплаттер Феникс",
     "Миссия «Сплаттер Феникс»: 10 заданий по двум пройденным темам русского."
+  ],
+  "dddonald": [
+    "🦆",
+    "Дональд Дак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "dddaisy": [
+    "🦆",
+    "Дейзи Дак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddscrooge": [
+    "🦆",
+    "Скрудж МакДак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddhuey": [
+    "🦆",
+    "Билли",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "dddewey": [
+    "🦆",
+    "Вилли",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddlouie": [
+    "🦆",
+    "Дилли",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddwebby": [
+    "🦆",
+    "Поночка",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddbeakley": [
+    "🦆",
+    "Миссис Клювдия",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddduckworth": [
+    "🦆",
+    "Дакворт",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddgyro": [
+    "🦆",
+    "Винт Разболтайло",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddlittlehelper": [
+    "🦆",
+    "Лампочка",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "dddoofus": [
+    "🦆",
+    "Пупс",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddgladstone": [
+    "🦆",
+    "Глэдстоун Гусак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddfethry": [
+    "🦆",
+    "Фетри Дак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddgrandma": [
+    "🦆",
+    "Бабушка Дак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddludwig": [
+    "🦆",
+    "Людвиг фон Дрейк",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddgoldie": [
+    "🦆",
+    "Голди",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "dddella": [
+    "🦆",
+    "Делла Дак",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddgandra": [
+    "🦆",
+    "Гэндра Ди",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddmagica": [
+    "🦆",
+    "Магика де Гипноз",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddpoe": [
+    "🦆",
+    "По де Гипноз",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddglomgold": [
+    "🦆",
+    "Флинтхарт Гломгольд",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddmabeagle": [
+    "🦆",
+    "Мамаша Гавс",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddbigtime": [
+    "🦆",
+    "Главарь Гавс",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddburger": [
+    "🦆",
+    "Обжора Гавс",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddbouncer": [
+    "🦆",
+    "Вышибала Гавс",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddbubba": [
+    "🦆",
+    "Бабба",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddmerlock": [
+    "🦆",
+    "Мерлок",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddjose": [
+    "🦆",
+    "Хосе Кариока",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddpanchito": [
+    "🦆",
+    "Панчито",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddlittlehelpercutout": [
+    "🦆",
+    "Лампочка · без фона",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddlena": [
+    "🦆",
+    "Лена",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddviolet": [
+    "🦆",
+    "Вайолет",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "ddrockerduck": [
+    "🦆",
+    "Рокердак",
+    "За учебную миссию. Условия учитывают профиль игрока."
   ]
 };
 const stickerImagePaths = {
@@ -246,7 +416,41 @@ const stickerImagePaths = {
   "jgander": "assets/stickers/jgander.png",
   "grizzlikoff": "assets/stickers/grizzlikoff.png",
   "ammonia": "assets/stickers/ammonia.png",
-  "splatterphoenix": "assets/stickers/splatterphoenix.png"
+  "splatterphoenix": "assets/stickers/splatterphoenix.png",
+  "dddonald": "assets/stickers/donald/dddonald.png",
+  "dddaisy": "assets/stickers/donald/dddaisy.png",
+  "ddscrooge": "assets/stickers/donald/ddscrooge.png",
+  "ddhuey": "assets/stickers/donald/ddhuey.png",
+  "dddewey": "assets/stickers/donald/dddewey.png",
+  "ddlouie": "assets/stickers/donald/ddlouie.png",
+  "ddwebby": "assets/stickers/donald/ddwebby.png",
+  "ddbeakley": "assets/stickers/donald/ddbeakley.png",
+  "ddduckworth": "assets/stickers/donald/ddduckworth.webp",
+  "ddgyro": "assets/stickers/donald/ddgyro.png",
+  "ddlittlehelper": "assets/stickers/donald/ddlittlehelper.webp",
+  "dddoofus": "assets/stickers/donald/dddoofus.png",
+  "ddgladstone": "assets/stickers/donald/ddgladstone.png",
+  "ddfethry": "assets/stickers/donald/ddfethry.png",
+  "ddgrandma": "assets/stickers/donald/ddgrandma.png",
+  "ddludwig": "assets/stickers/donald/ddludwig.png",
+  "ddgoldie": "assets/stickers/donald/ddgoldie.png",
+  "dddella": "assets/stickers/donald/dddella.png",
+  "ddgandra": "assets/stickers/donald/ddgandra.webp",
+  "ddmagica": "assets/stickers/donald/ddmagica.png",
+  "ddpoe": "assets/stickers/donald/ddpoe.webp",
+  "ddglomgold": "assets/stickers/donald/ddglomgold.png",
+  "ddmabeagle": "assets/stickers/donald/ddmabeagle.webp",
+  "ddbigtime": "assets/stickers/donald/ddbigtime.png",
+  "ddburger": "assets/stickers/donald/ddburger.webp",
+  "ddbouncer": "assets/stickers/donald/ddbouncer.png",
+  "ddbubba": "assets/stickers/donald/ddbubba.webp",
+  "ddmerlock": "assets/stickers/donald/ddmerlock.webp",
+  "ddjose": "assets/stickers/donald/ddjose.png",
+  "ddpanchito": "assets/stickers/donald/ddpanchito.png",
+  "ddlittlehelpercutout": "assets/stickers/donald/ddlittlehelpercutout.webp",
+  "ddlena": "assets/stickers/donald/ddlena.png",
+  "ddviolet": "assets/stickers/donald/ddviolet.webp",
+  "ddrockerduck": "assets/stickers/donald/ddrockerduck.png"
 };
 const characterStickerFrames = {
   "chip": {
@@ -387,7 +591,41 @@ const stickerMissionTypes = {
   "jgander": "russian",
   "grizzlikoff": "mixed",
   "ammonia": "math",
-  "splatterphoenix": "russian"
+  "splatterphoenix": "russian",
+  "dddonald": "math",
+  "dddaisy": "russian",
+  "ddscrooge": "mixed",
+  "ddhuey": "math",
+  "dddewey": "russian",
+  "ddlouie": "mixed",
+  "ddwebby": "math",
+  "ddbeakley": "russian",
+  "ddduckworth": "mixed",
+  "ddgyro": "math",
+  "ddlittlehelper": "russian",
+  "dddoofus": "mixed",
+  "ddgladstone": "math",
+  "ddfethry": "russian",
+  "ddgrandma": "mixed",
+  "ddludwig": "math",
+  "ddgoldie": "russian",
+  "dddella": "mixed",
+  "ddgandra": "math",
+  "ddmagica": "russian",
+  "ddpoe": "mixed",
+  "ddglomgold": "math",
+  "ddmabeagle": "russian",
+  "ddbigtime": "mixed",
+  "ddburger": "math",
+  "ddbouncer": "russian",
+  "ddbubba": "mixed",
+  "ddmerlock": "math",
+  "ddjose": "russian",
+  "ddpanchito": "mixed",
+  "ddlittlehelpercutout": "math",
+  "ddlena": "russian",
+  "ddviolet": "mixed",
+  "ddrockerduck": "math"
 };
 const stickerCollections = [
   {
@@ -440,6 +678,50 @@ const stickerCollections = [
       "grizzlikoff",
       "ammonia",
       "splatterphoenix"
+    ]
+  },
+  {
+    "name": "Дональд Дак · 30 персонажей",
+    "keys": [
+      "dddonald",
+      "dddaisy",
+      "ddscrooge",
+      "ddhuey",
+      "dddewey",
+      "ddlouie",
+      "ddwebby",
+      "ddbeakley",
+      "ddduckworth",
+      "ddgyro",
+      "ddlittlehelper",
+      "dddoofus",
+      "ddgladstone",
+      "ddfethry",
+      "ddgrandma",
+      "ddludwig",
+      "ddgoldie",
+      "dddella",
+      "ddgandra",
+      "ddmagica",
+      "ddpoe",
+      "ddglomgold",
+      "ddmabeagle",
+      "ddbigtime",
+      "ddburger",
+      "ddbouncer",
+      "ddbubba",
+      "ddmerlock",
+      "ddjose",
+      "ddpanchito"
+    ]
+  },
+  {
+    "name": "Дональд Дак · дополнения без фона",
+    "keys": [
+      "ddlittlehelpercutout",
+      "ddlena",
+      "ddviolet",
+      "ddrockerduck"
     ]
   }
 ];
