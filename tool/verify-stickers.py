@@ -30,6 +30,17 @@ with tempfile.TemporaryDirectory(prefix='bunny-catalog-test-') as name:
         shutil.copy2(ROOT/file, root/file)
     manager = module(root/'tool/stickers.py', 'test_stickers')
     catalog = manager.read_catalog()
+    invalid_catalog = json.loads(json.dumps(catalog))
+    next(e for e in invalid_catalog['stickers'] if e['enabled'] and e['collection'] != 'basic').pop('bio')
+    original_text = (root/'sticker-catalog.json').read_text()
+    (root/'sticker-catalog.json').write_text(json.dumps(invalid_catalog))
+    try:
+        manager.read_catalog()
+        raise AssertionError('Character without description accepted')
+    except ValueError as error:
+        assert 'Missing character description' in str(error)
+    finally:
+        (root/'sticker-catalog.json').write_text(original_text)
     before = manager.generated(catalog)
     assert all(path.read_text() == text for path, text in manager.render_outputs(catalog))
     original_labels = {e['id'] for e in catalog['stickers'] if e['enabled']}
