@@ -381,6 +381,156 @@ const albumStickers = {
     "🦆",
     "Рокердак",
     "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmickey": [
+    "🐭",
+    "Микки Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmminnie": [
+    "🐭",
+    "Минни Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmgoofy": [
+    "🐭",
+    "Гуфи",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpluto": [
+    "🐭",
+    "Плуто",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmclarabelle": [
+    "🐭",
+    "Кларабель",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmhorace": [
+    "🐭",
+    "Гораций",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpete": [
+    "🐭",
+    "Пит",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmtrudy": [
+    "🐭",
+    "Труди",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmscuttle": [
+    "🐭",
+    "Скаттл",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmshyster": [
+    "🐭",
+    "Сильвестр Шистер",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmohara": [
+    "🐭",
+    "Комиссар О’Хара",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmcasey": [
+    "🐭",
+    "Детектив Кейси",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmeega": [
+    "🐭",
+    "Ига Бива",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmindiana": [
+    "🐭",
+    "Индиана Гуф",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmgilbert": [
+    "🐭",
+    "Гилберт",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmortimer": [
+    "🐭",
+    "Мортимер Маус",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmfigaro": [
+    "🐭",
+    "Фигаро",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmatomo": [
+    "🐭",
+    "Атомо",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmellsworth": [
+    "🐭",
+    "Эллсворт",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmbutch": [
+    "🐭",
+    "Бруто",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmfips": [
+    "🐭",
+    "Флип",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmdoberman": [
+    "🐭",
+    "Капитан Доберман",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmpowerline": [
+    "🐭",
+    "Пауэрлайн",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmhicksi": [
+    "🐭",
+    "Ведьма Хейзел",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmunclemortimer": [
+    "🐭",
+    "Дядя Мортимер",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmclarice": [
+    "🐭",
+    "Кларисса",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmmax": [
+    "🐭",
+    "Макс Гуф",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmoswald": [
+    "🐭",
+    "Освальд",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmroxanne": [
+    "🐭",
+    "Роксана",
+    "За учебную миссию. Условия учитывают профиль игрока."
+  ],
+  "mmphantom": [
+    "🐭",
+    "Чёрный Призрак",
+    "За учебную миссию. Условия учитывают профиль игрока."
   ]
 };
 const stickerImagePaths = {
@@ -450,7 +600,37 @@ const stickerImagePaths = {
   "ddlittlehelpercutout": "assets/stickers/donald/ddlittlehelpercutout.webp",
   "ddlena": "assets/stickers/donald/ddlena.png",
   "ddviolet": "assets/stickers/donald/ddviolet.webp",
-  "ddrockerduck": "assets/stickers/donald/ddrockerduck.png"
+  "ddrockerduck": "assets/stickers/donald/ddrockerduck.png",
+  "mmmickey": "assets/stickers/mickey/mmmickey.png",
+  "mmminnie": "assets/stickers/mickey/mmminnie.jpg",
+  "mmgoofy": "assets/stickers/mickey/mmgoofy.jpg",
+  "mmpluto": "assets/stickers/mickey/mmpluto.jpg",
+  "mmclarabelle": "assets/stickers/mickey/mmclarabelle.png",
+  "mmhorace": "assets/stickers/mickey/mmhorace.png",
+  "mmpete": "assets/stickers/mickey/mmpete.gif",
+  "mmtrudy": "assets/stickers/mickey/mmtrudy.png",
+  "mmscuttle": "assets/stickers/mickey/mmscuttle.jpg",
+  "mmshyster": "assets/stickers/mickey/mmshyster.gif",
+  "mmohara": "assets/stickers/mickey/mmohara.png",
+  "mmcasey": "assets/stickers/mickey/mmcasey.jpg",
+  "mmeega": "assets/stickers/mickey/mmeega.png",
+  "mmindiana": "assets/stickers/mickey/mmindiana.png",
+  "mmgilbert": "assets/stickers/mickey/mmgilbert.png",
+  "mmmortimer": "assets/stickers/mickey/mmmortimer.png",
+  "mmfigaro": "assets/stickers/mickey/mmfigaro.jpg",
+  "mmatomo": "assets/stickers/mickey/mmatomo.jpg",
+  "mmellsworth": "assets/stickers/mickey/mmellsworth.jpg",
+  "mmbutch": "assets/stickers/mickey/mmbutch.jpg",
+  "mmfips": "assets/stickers/mickey/mmfips.jpg",
+  "mmdoberman": "assets/stickers/mickey/mmdoberman.png",
+  "mmpowerline": "assets/stickers/mickey/mmpowerline.png",
+  "mmhicksi": "assets/stickers/mickey/mmhicksi.jpg",
+  "mmunclemortimer": "assets/stickers/mickey/mmunclemortimer.gif",
+  "mmclarice": "assets/stickers/mickey/mmclarice.png",
+  "mmmax": "assets/stickers/mickey/mmmax.png",
+  "mmoswald": "assets/stickers/mickey/mmoswald.png",
+  "mmroxanne": "assets/stickers/mickey/mmroxanne.jpg",
+  "mmphantom": "assets/stickers/mickey/mmphantom.png"
 };
 const stickerBiographies = {
   "mushroom": {
@@ -1053,7 +1233,37 @@ const stickerMissionTypes = {
   "ddlittlehelpercutout": "math",
   "ddlena": "russian",
   "ddviolet": "mixed",
-  "ddrockerduck": "math"
+  "ddrockerduck": "math",
+  "mmmickey": "math",
+  "mmminnie": "russian",
+  "mmgoofy": "mixed",
+  "mmpluto": "math",
+  "mmclarabelle": "russian",
+  "mmhorace": "mixed",
+  "mmpete": "math",
+  "mmtrudy": "russian",
+  "mmscuttle": "mixed",
+  "mmshyster": "math",
+  "mmohara": "russian",
+  "mmcasey": "mixed",
+  "mmeega": "math",
+  "mmindiana": "russian",
+  "mmgilbert": "mixed",
+  "mmmortimer": "math",
+  "mmfigaro": "russian",
+  "mmatomo": "mixed",
+  "mmellsworth": "math",
+  "mmbutch": "russian",
+  "mmfips": "mixed",
+  "mmdoberman": "math",
+  "mmpowerline": "russian",
+  "mmhicksi": "mixed",
+  "mmunclemortimer": "math",
+  "mmclarice": "russian",
+  "mmmax": "mixed",
+  "mmoswald": "math",
+  "mmroxanne": "russian",
+  "mmphantom": "mixed"
 };
 const stickerCollections = [
   {
@@ -1150,6 +1360,41 @@ const stickerCollections = [
       "ddlena",
       "ddviolet",
       "ddrockerduck"
+    ]
+  },
+  {
+    "name": "Микки Маус",
+    "keys": [
+      "mmmickey",
+      "mmminnie",
+      "mmgoofy",
+      "mmpluto",
+      "mmclarabelle",
+      "mmhorace",
+      "mmpete",
+      "mmtrudy",
+      "mmscuttle",
+      "mmshyster",
+      "mmohara",
+      "mmcasey",
+      "mmeega",
+      "mmindiana",
+      "mmgilbert",
+      "mmmortimer",
+      "mmfigaro",
+      "mmatomo",
+      "mmellsworth",
+      "mmbutch",
+      "mmfips",
+      "mmdoberman",
+      "mmpowerline",
+      "mmhicksi",
+      "mmunclemortimer",
+      "mmclarice",
+      "mmmax",
+      "mmoswald",
+      "mmroxanne",
+      "mmphantom"
     ]
   }
 ];
@@ -1678,41 +1923,33 @@ function renderMarioCollection(parent) {
   playerElement('p','🪙 Монеты: '+activePlayer.coins,collection);
   playerElement('p','Персонажи — за достижения. Монеты — на оформление альбома. За обычную тренировку — 1 монета, за успешную миссию дня — 2.',collection);
   playerButton(collection,'Миссия дня',openDailyMission);
-  const tabs=playerElement('div','',collection);tabs.className='sticker-collection-tabs';
-  tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Коллекции наклеек');
-  const views=[];
-  function selectCollection(name) {
-    albumCollectionName=name;
-    for(const view of views) {
-      const selected=view.name===name;
-      view.panel.hidden=!selected;
-      view.tab.setAttribute('aria-selected',String(selected));
-      view.tab.tabIndex=selected?0:-1;
-    }
-  }
-  for (const group of stickerCollections) {
+  const gallery=playerElement('div','',collection);gallery.className='sticker-collection-covers';
+  gallery.setAttribute('role','group');gallery.setAttribute('aria-label','Выбрать коллекцию');
+  const content=playerElement('section','',collection);content.className='sticker-collection-content';
+  content.id='sticker-collection-content';content.hidden=true;
+  const families=[];
+  for(const group of stickerCollections) {
     const keys=group.keys.filter(key=>Object.hasOwn(activePlayer.rewards.prices,key));
-    if (!keys.length) continue;
-    const index=views.length;
-    const tab=playerButton(tabs,group.name,()=>selectCollection(group.name));
-    tab.id='sticker-collection-tab-'+index;tab.setAttribute('role','tab');
-    tab.setAttribute('aria-controls','sticker-collection-panel-'+index);
-    const groupPanel=playerElement('section','',collection);
-    groupPanel.id='sticker-collection-panel-'+index;groupPanel.setAttribute('role','tabpanel');
-    groupPanel.setAttribute('aria-labelledby',tab.id);
-    views.push({name:group.name,tab,panel:groupPanel});
-    tab.onkeydown=event=>{
-      let next;
-      if(event.key==='ArrowRight')next=(index+1)%views.length;
-      else if(event.key==='ArrowLeft')next=(index+views.length-1)%views.length;
-      else if(event.key==='Home')next=0;
-      else if(event.key==='End')next=views.length-1;
-      else return;
-      event.preventDefault();selectCollection(views[next].name);views[next].tab.focus();
-    };
-    playerElement('h3',group.name,groupPanel).className='sticker-collection-heading';
-    const grid=playerElement('div','',groupPanel);
-    grid.className='mario-collection-grid';
+    if(!keys.length)continue;
+    const cover=['mario','chip','darkwing','dddonald','mmmickey'].find(key=>group.keys.includes(key))
+      ||(keys.some(key=>key.startsWith('dd'))?'dddonald':keys[0]);
+    let family=families.find(item=>item.cover===cover);
+    if(!family){
+      const name={mario:'Марио',chip:'Чип и Дейл',darkwing:'Чёрный Плащ',dddonald:'Дональд Дак',mmmickey:'Микки Маус'}[cover]||group.name;
+      family={cover,name,groups:[]};families.push(family);
+    }
+    family.groups.push({name:group.name,keys});
+  }
+  function openCollection(family) {
+    albumCollectionName=family.cover;gallery.hidden=true;content.hidden=false;content.replaceChildren();
+    playerButton(content,'← Все коллекции',()=>{
+      albumCollectionName=null;content.hidden=true;content.replaceChildren();gallery.hidden=false;
+      family.button?.focus({preventScroll:true});
+    }).className='sticker-collections-back';
+    for(const group of family.groups) {
+      playerElement('h3',group.name,content).className='sticker-collection-heading';
+      const grid=playerElement('div','',content);grid.className='mario-collection-grid';
+      const keys=group.keys;
     for (const key of keys) {
       const [,title,rule]=albumStickers[key];
       const card=playerElement('div','',grid);
@@ -1736,8 +1973,21 @@ function renderMarioCollection(parent) {
       }
 
     }
+    }
   }
-  if(views.length)selectCollection(views.some(view=>view.name===albumCollectionName)?albumCollectionName:views[0].name);
+  for(const family of families) {
+    const button=playerButton(gallery,'',()=>openCollection(family));button.className='sticker-collection-cover';
+    button.setAttribute('aria-label','Открыть коллекцию «'+family.name+'»');
+    button.setAttribute('aria-controls',content.id);
+    family.button=button;
+    const art=playerElement('span','',button);art.className='sticker-collection-cover-art';
+    if(family.cover==='chip')art.className+=' sticker-collection-cover-pair';
+    for(const key of family.cover==='chip'?['chip','dale']:[family.cover])stickerArt(art,key);
+    playerElement('span',family.name,button);
+  }
+  const selected=families.find(family=>family.cover===albumCollectionName);
+  if(selected)openCollection(selected);
+
 }
 
 function showDailyMission() {
