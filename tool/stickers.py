@@ -37,6 +37,17 @@ def read_catalog():
         for asset in (entry.get('image'), 'assets/stickers/' + entry['frame']['file'] if 'frame' in entry else None):
             if asset and (not asset.startswith('assets/') or '..' in Path(asset).parts or Path(asset).is_absolute()):
                 raise ValueError('Invalid local image path: ' + key)
+    # Explicitly sized collections represent different identities, never alternate poses.
+    for group in data['collections']:
+        required = group.get('uniqueCharacters')
+        if required is None:
+            continue
+        members = [entry for entry in data['stickers'] if entry['enabled'] and entry['collection'] == group['id']]
+        characters = [entry.get('character') for entry in members]
+        if type(required) is not int or not 1 <= required <= 100 or len(members) != required:
+            raise ValueError('Incomplete unique-character collection: ' + group['id'])
+        if any(not isinstance(key, str) or not key.strip() for key in characters) or len(set(characters)) != required:
+            raise ValueError('Missing or duplicate character identity: ' + group['id'])
     return data
 
 
