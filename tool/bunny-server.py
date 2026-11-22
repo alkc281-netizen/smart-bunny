@@ -28,6 +28,7 @@ PREFERENCES = {
 }
 PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "english", "world")
                 for setting in ("class", "count", "studied2", "studied4", "mistakes")}
+PREFERENCES |= {'bunny-school-english-selection2', 'bunny-school-english-selection4'}
 AUDIO_PREFERENCES = {
     'autoMusic': 'bool', 'selectedMusic': 'track', 'enableMusic': 'bool',
     'enableVictory': 'bool', 'mute': 'bool', 'musicVolume': 'volume',

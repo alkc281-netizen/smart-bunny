@@ -1,0 +1,1576 @@
+[
+  {
+    "key": "en2lessongo",
+    "grade": 2,
+    "code": "go",
+    "unit": "go",
+    "pages": "4–5",
+    "focus": "Приветствие, прощание, имя.",
+    "words": [
+      [
+        "Hello",
+        "Привет"
+      ],
+      [
+        "Goodbye",
+        "До свидания"
+      ],
+      [
+        "My name is",
+        "Меня зовут"
+      ]
+    ],
+    "questions": 12
+  },
+  {
+    "key": "en2lessona",
+    "grade": 2,
+    "code": "a",
+    "unit": "letters",
+    "pages": "6–7",
+    "focus": "Буквы и слова этого урока.",
+    "words": [
+      [
+        "ant",
+        "муравей"
+      ],
+      [
+        "bed",
+        "кровать"
+      ],
+      [
+        "cat",
+        "кошка"
+      ],
+      [
+        "dog",
+        "собака"
+      ],
+      [
+        "egg",
+        "яйцо"
+      ],
+      [
+        "flag",
+        "флаг"
+      ],
+      [
+        "glass",
+        "стакан"
+      ],
+      [
+        "horse",
+        "лошадь"
+      ]
+    ],
+    "questions": 24
+  },
+  {
+    "key": "en2lessonb",
+    "grade": 2,
+    "code": "b",
+    "unit": "letters",
+    "pages": "8–9",
+    "focus": "Буквы и слова этого урока.",
+    "words": [
+      [
+        "ink",
+        "чернила"
+      ],
+      [
+        "jug",
+        "кувшин"
+      ],
+      [
+        "kangaroo",
+        "кенгуру"
+      ],
+      [
+        "lamp",
+        "лампа"
+      ],
+      [
+        "mouse",
+        "мышь"
+      ],
+      [
+        "nest",
+        "гнездо"
+      ],
+      [
+        "orange",
+        "апельсин"
+      ],
+      [
+        "pin",
+        "булавка"
+      ],
+      [
+        "queen",
+        "королева"
+      ]
+    ],
+    "questions": 27
+  },
+  {
+    "key": "en2lessonc",
+    "grade": 2,
+    "code": "c",
+    "unit": "letters",
+    "pages": "10–11",
+    "focus": "Буквы и слова этого урока.",
+    "words": [
+      [
+        "rabbit",
+        "кролик"
+      ],
+      [
+        "snake",
+        "змея"
+      ],
+      [
+        "tree",
+        "дерево"
+      ],
+      [
+        "umbrella",
+        "зонт"
+      ],
+      [
+        "vest",
+        "жилет"
+      ],
+      [
+        "window",
+        "окно"
+      ],
+      [
+        "box",
+        "коробка"
+      ],
+      [
+        "yacht",
+        "яхта"
+      ],
+      [
+        "zip",
+        "молния-застёжка"
+      ]
+    ],
+    "questions": 27
+  },
+  {
+    "key": "en2lessond",
+    "grade": 2,
+    "code": "d",
+    "unit": "letters",
+    "pages": "12–13",
+    "focus": "Сочетания букв sh и ch.",
+    "words": [
+      [
+        "sheep",
+        "овца"
+      ],
+      [
+        "fish",
+        "рыба"
+      ],
+      [
+        "ship",
+        "корабль"
+      ],
+      [
+        "chick",
+        "цыплёнок"
+      ],
+      [
+        "cheese",
+        "сыр"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lessone",
+    "grade": 2,
+    "code": "e",
+    "unit": "letters",
+    "pages": "14–15",
+    "focus": "Узнавание сочетаний th и ph.",
+    "words": [
+      [
+        "thumb",
+        "большой палец руки"
+      ],
+      [
+        "thimble",
+        "напёрсток"
+      ],
+      [
+        "this",
+        "это"
+      ],
+      [
+        "photo",
+        "фотография"
+      ]
+    ],
+    "questions": 12
+  },
+  {
+    "key": "en2lessonf",
+    "grade": 2,
+    "code": "f",
+    "unit": "letters",
+    "pages": "16–17",
+    "focus": "Заглавные и строчные буквы.",
+    "words": [],
+    "questions": 26
+  },
+  {
+    "key": "en2lessonhelloA",
+    "grade": 2,
+    "code": "helloA",
+    "unit": "starter",
+    "pages": "18–19",
+    "focus": "Представляем человека: This is…; имя.",
+    "words": [
+      [
+        "sister",
+        "сестра"
+      ],
+      [
+        "hello",
+        "привет"
+      ],
+      [
+        "goodbye",
+        "до свидания"
+      ]
+    ],
+    "questions": 10
+  },
+  {
+    "key": "en2lessonhelloB",
+    "grade": 2,
+    "code": "helloB",
+    "unit": "starter",
+    "pages": "20–21",
+    "focus": "Команды и обращения в классе.",
+    "words": [
+      [
+        "stand up",
+        "встань"
+      ],
+      [
+        "sit down",
+        "сядь"
+      ],
+      [
+        "open your books",
+        "откройте книги"
+      ],
+      [
+        "close your books",
+        "закройте книги"
+      ],
+      [
+        "friend",
+        "друг"
+      ],
+      [
+        "children",
+        "дети"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lessonfamilyA",
+    "grade": 2,
+    "code": "familyA",
+    "unit": "starter",
+    "pages": "22–23",
+    "focus": "Члены семьи; This is my…",
+    "words": [
+      [
+        "mummy",
+        "мама"
+      ],
+      [
+        "daddy",
+        "папа"
+      ],
+      [
+        "grandma",
+        "бабушка"
+      ],
+      [
+        "grandpa",
+        "дедушка"
+      ],
+      [
+        "brother",
+        "брат"
+      ],
+      [
+        "sister",
+        "сестра"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lessonfamilyB",
+    "grade": 2,
+    "code": "familyB",
+    "unit": "starter",
+    "pages": "24–25",
+    "focus": "Цвета; вопрос What colour is it?",
+    "words": [
+      [
+        "red",
+        "красный"
+      ],
+      [
+        "yellow",
+        "жёлтый"
+      ],
+      [
+        "green",
+        "зелёный"
+      ],
+      [
+        "white",
+        "белый"
+      ],
+      [
+        "blue",
+        "синий"
+      ]
+    ],
+    "questions": 12
+  },
+  {
+    "key": "en2lesson1a",
+    "grade": 2,
+    "code": "1a",
+    "unit": "home",
+    "pages": "26–27",
+    "focus": "Предметы мебели; What’s this? It’s a…",
+    "words": [
+      [
+        "tree house",
+        "домик на дереве"
+      ],
+      [
+        "chair",
+        "стул"
+      ],
+      [
+        "table",
+        "стол"
+      ],
+      [
+        "radio",
+        "радио"
+      ],
+      [
+        "bed",
+        "кровать"
+      ],
+      [
+        "home",
+        "дом"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lesson1b",
+    "grade": 2,
+    "code": "1b",
+    "unit": "home",
+    "pages": "28–29",
+    "focus": "Закрепляем названия мебели и цветов.",
+    "words": [
+      [
+        "red chair",
+        "красный стул"
+      ],
+      [
+        "blue bed",
+        "синяя кровать"
+      ],
+      [
+        "green table",
+        "зелёный стол"
+      ],
+      [
+        "yellow radio",
+        "жёлтое радио"
+      ]
+    ],
+    "questions": 11
+  },
+  {
+    "key": "en2lesson2a",
+    "grade": 2,
+    "code": "2a",
+    "unit": "home",
+    "pages": "30–31",
+    "focus": "Комнаты; he/she; Where’s…? In…",
+    "words": [
+      [
+        "garden",
+        "сад"
+      ],
+      [
+        "kitchen",
+        "кухня"
+      ],
+      [
+        "bedroom",
+        "спальня"
+      ],
+      [
+        "house",
+        "дом"
+      ],
+      [
+        "black",
+        "чёрный"
+      ],
+      [
+        "brown",
+        "коричневый"
+      ]
+    ],
+    "questions": 15
+  },
+  {
+    "key": "en2lesson2b",
+    "grade": 2,
+    "code": "2b",
+    "unit": "home",
+    "pages": "32–33",
+    "focus": "Закрепляем комнаты и he/she.",
+    "words": [
+      [
+        "in the kitchen",
+        "на кухне"
+      ],
+      [
+        "in the garden",
+        "в саду"
+      ],
+      [
+        "in the bedroom",
+        "в спальне"
+      ],
+      [
+        "in the house",
+        "в доме"
+      ]
+    ],
+    "questions": 11
+  },
+  {
+    "key": "en2lesson3a",
+    "grade": 2,
+    "code": "3a",
+    "unit": "home",
+    "pages": "34–35",
+    "focus": "Новые комнаты; Yes, he/she is. No, he/she isn’t.",
+    "words": [
+      [
+        "living room",
+        "гостиная"
+      ],
+      [
+        "bathroom",
+        "ванная комната"
+      ],
+      [
+        "bath",
+        "ванна"
+      ],
+      [
+        "window",
+        "окно"
+      ],
+      [
+        "floor",
+        "пол"
+      ],
+      [
+        "door",
+        "дверь"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lesson3b",
+    "grade": 2,
+    "code": "3b",
+    "unit": "home",
+    "pages": "36–37",
+    "focus": "Комнаты, короткое e и сочетание ee.",
+    "words": [
+      [
+        "bed",
+        "кровать"
+      ],
+      [
+        "red",
+        "красный"
+      ],
+      [
+        "tree",
+        "дерево"
+      ],
+      [
+        "green",
+        "зелёный"
+      ]
+    ],
+    "questions": 11
+  },
+  {
+    "key": "en2lesson4a",
+    "grade": 2,
+    "code": "4a",
+    "unit": "birthday",
+    "pages": "44–45",
+    "focus": "Числа 1–10; How old are you? I’m…",
+    "words": [
+      [
+        "one",
+        "один"
+      ],
+      [
+        "two",
+        "два"
+      ],
+      [
+        "three",
+        "три"
+      ],
+      [
+        "four",
+        "четыре"
+      ],
+      [
+        "five",
+        "пять"
+      ],
+      [
+        "six",
+        "шесть"
+      ],
+      [
+        "seven",
+        "семь"
+      ],
+      [
+        "eight",
+        "восемь"
+      ],
+      [
+        "nine",
+        "девять"
+      ],
+      [
+        "ten",
+        "десять"
+      ],
+      [
+        "birthday",
+        "день рождения"
+      ],
+      [
+        "candles",
+        "свечи"
+      ],
+      [
+        "party",
+        "праздник"
+      ],
+      [
+        "happy",
+        "счастливый"
+      ],
+      [
+        "sad",
+        "грустный"
+      ]
+    ],
+    "questions": 33
+  },
+  {
+    "key": "en2lesson4b",
+    "grade": 2,
+    "code": "4b",
+    "unit": "birthday",
+    "pages": "46–47",
+    "focus": "Возраст; happy/sad; числа.",
+    "words": [
+      [
+        "happy",
+        "счастливый"
+      ],
+      [
+        "sad",
+        "грустный"
+      ],
+      [
+        "seven",
+        "семь"
+      ],
+      [
+        "eight",
+        "восемь"
+      ],
+      [
+        "nine",
+        "девять"
+      ],
+      [
+        "ten",
+        "десять"
+      ]
+    ],
+    "questions": 15
+  },
+  {
+    "key": "en2lesson5a",
+    "grade": 2,
+    "code": "5a",
+    "unit": "birthday",
+    "pages": "48–49",
+    "focus": "Названия еды; What’s your favourite food?",
+    "words": [
+      [
+        "burgers",
+        "бургеры"
+      ],
+      [
+        "chips",
+        "картофель фри"
+      ],
+      [
+        "apples",
+        "яблоки"
+      ],
+      [
+        "bananas",
+        "бананы"
+      ],
+      [
+        "sandwiches",
+        "бутерброды"
+      ],
+      [
+        "chocolate",
+        "шоколад"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en2lesson5b",
+    "grade": 2,
+    "code": "5b",
+    "unit": "birthday",
+    "pages": "50–51",
+    "focus": "I like…; I don’t like…; I’ve got…",
+    "words": [
+      [
+        "burgers",
+        "бургеры"
+      ],
+      [
+        "chips",
+        "картофель фри"
+      ],
+      [
+        "apples",
+        "яблоки"
+      ],
+      [
+        "bananas",
+        "бананы"
+      ],
+      [
+        "sandwiches",
+        "бутерброды"
+      ],
+      [
+        "chocolate",
+        "шоколад"
+      ]
+    ],
+    "questions": 15
+  },
+  {
+    "key": "en2lesson6a",
+    "grade": 2,
+    "code": "6a",
+    "unit": "birthday",
+    "pages": "52–53",
+    "focus": "My favourite food is…; напитки.",
+    "words": [
+      [
+        "ice cream",
+        "мороженое"
+      ],
+      [
+        "pizza",
+        "пицца"
+      ],
+      [
+        "milk",
+        "молоко"
+      ],
+      [
+        "orange juice",
+        "апельсиновый сок"
+      ],
+      [
+        "chocolate cake",
+        "шоколадный торт"
+      ]
+    ],
+    "questions": 12
+  },
+  {
+    "key": "en2lesson6b",
+    "grade": 2,
+    "code": "6b",
+    "unit": "birthday",
+    "pages": "54–55",
+    "focus": "Предпочтения в еде; чтение изученных слов.",
+    "words": [
+      [
+        "chips",
+        "картофель фри"
+      ],
+      [
+        "milk",
+        "молоко"
+      ],
+      [
+        "fish",
+        "рыба"
+      ],
+      [
+        "pizza",
+        "пицца"
+      ],
+      [
+        "ice cream",
+        "мороженое"
+      ]
+    ],
+    "questions": 13
+  },
+  {
+    "key": "en4lessonstarterA",
+    "grade": 4,
+    "code": "starterA",
+    "unit": "back",
+    "pages": "4–5",
+    "focus": "Знакомство; школьные предметы; be и can.",
+    "words": [
+      [
+        "school",
+        "школа"
+      ],
+      [
+        "friend",
+        "друг"
+      ],
+      [
+        "teacher",
+        "учитель"
+      ],
+      [
+        "English",
+        "английский язык"
+      ],
+      [
+        "Maths",
+        "математика"
+      ]
+    ],
+    "questions": 14
+  },
+  {
+    "key": "en4lessonstarterB",
+    "grade": 4,
+    "code": "starterB",
+    "unit": "back",
+    "pages": "6–8",
+    "focus": "Have got; сведения о себе; фигуры.",
+    "words": [
+      [
+        "surname",
+        "фамилия"
+      ],
+      [
+        "age",
+        "возраст"
+      ],
+      [
+        "phone number",
+        "номер телефона"
+      ],
+      [
+        "triangle",
+        "треугольник"
+      ],
+      [
+        "circle",
+        "круг"
+      ],
+      [
+        "square",
+        "квадрат"
+      ],
+      [
+        "present",
+        "подарок"
+      ]
+    ],
+    "questions": 18
+  },
+  {
+    "key": "en4lesson1a",
+    "grade": 4,
+    "code": "1a",
+    "unit": "friends",
+    "pages": "10–11",
+    "focus": "Описание человека; look like / be like; has got.",
+    "words": [
+      [
+        "tall",
+        "высокий"
+      ],
+      [
+        "short",
+        "невысокий"
+      ],
+      [
+        "slim",
+        "стройный"
+      ],
+      [
+        "fair hair",
+        "светлые волосы"
+      ],
+      [
+        "dark hair",
+        "тёмные волосы"
+      ],
+      [
+        "funny",
+        "забавный"
+      ],
+      [
+        "kind",
+        "добрый"
+      ],
+      [
+        "friendly",
+        "дружелюбный"
+      ],
+      [
+        "uncle",
+        "дядя"
+      ],
+      [
+        "aunt",
+        "тётя"
+      ],
+      [
+        "cousin",
+        "двоюродный брат или сестра"
+      ],
+      [
+        "vet",
+        "ветеринар"
+      ]
+    ],
+    "questions": 28
+  },
+  {
+    "key": "en4lesson1b",
+    "grade": 4,
+    "code": "1b",
+    "unit": "friends",
+    "pages": "12–13",
+    "focus": "Принадлежности; in/on/under/behind/next to/in front of.",
+    "words": [
+      [
+        "watch",
+        "наручные часы"
+      ],
+      [
+        "hairbrush",
+        "расчёска"
+      ],
+      [
+        "roller blades",
+        "роликовые коньки"
+      ],
+      [
+        "gloves",
+        "перчатки"
+      ],
+      [
+        "keys",
+        "ключи"
+      ],
+      [
+        "mobile phone",
+        "мобильный телефон"
+      ],
+      [
+        "camera",
+        "фотоаппарат"
+      ],
+      [
+        "guitar",
+        "гитара"
+      ]
+    ],
+    "questions": 20
+  },
+  {
+    "key": "en4lesson2a",
+    "grade": 4,
+    "code": "2a",
+    "unit": "friends",
+    "pages": "14–15",
+    "focus": "Present Continuous; am/is/are + -ing.",
+    "words": [
+      [
+        "skiing",
+        "катание на лыжах"
+      ],
+      [
+        "sailing",
+        "хождение под парусом"
+      ],
+      [
+        "skating",
+        "катание на коньках"
+      ],
+      [
+        "playing the violin",
+        "игра на скрипке"
+      ],
+      [
+        "surfing",
+        "сёрфинг"
+      ],
+      [
+        "diving",
+        "ныряние"
+      ],
+      [
+        "plump",
+        "полный"
+      ],
+      [
+        "best friend",
+        "лучший друг"
+      ]
+    ],
+    "questions": 20
+  },
+  {
+    "key": "en4lesson2b",
+    "grade": 4,
+    "code": "2b",
+    "unit": "friends",
+    "pages": "16–17",
+    "focus": "Числа 30–100; возраст.",
+    "words": [
+      [
+        "thirty",
+        "тридцать"
+      ],
+      [
+        "forty",
+        "сорок"
+      ],
+      [
+        "fifty",
+        "пятьдесят"
+      ],
+      [
+        "sixty",
+        "шестьдесят"
+      ],
+      [
+        "seventy",
+        "семьдесят"
+      ],
+      [
+        "eighty",
+        "восемьдесят"
+      ],
+      [
+        "ninety",
+        "девяносто"
+      ],
+      [
+        "a hundred",
+        "сто"
+      ]
+    ],
+    "questions": 20
+  },
+  {
+    "key": "en4lesson3a",
+    "grade": 4,
+    "code": "3a",
+    "unit": "work",
+    "pages": "26–27",
+    "focus": "Городские учреждения; Where does … work?",
+    "words": [
+      [
+        "station",
+        "станция"
+      ],
+      [
+        "garage",
+        "гараж"
+      ],
+      [
+        "café",
+        "кафе"
+      ],
+      [
+        "theatre",
+        "театр"
+      ],
+      [
+        "baker’s",
+        "булочная"
+      ],
+      [
+        "hospital",
+        "больница"
+      ]
+    ],
+    "questions": 16
+  },
+  {
+    "key": "en4lesson3b",
+    "grade": 4,
+    "code": "3b",
+    "unit": "work",
+    "pages": "28–29",
+    "focus": "Профессии; Present Simple; always/usually/sometimes/never.",
+    "words": [
+      [
+        "baker",
+        "пекарь"
+      ],
+      [
+        "greengrocer",
+        "продавец овощей"
+      ],
+      [
+        "mechanic",
+        "механик"
+      ],
+      [
+        "postman",
+        "почтальон"
+      ],
+      [
+        "waiter",
+        "официант"
+      ],
+      [
+        "nurse",
+        "медсестра"
+      ],
+      [
+        "uniform",
+        "форма"
+      ],
+      [
+        "post office",
+        "почта"
+      ]
+    ],
+    "questions": 21
+  },
+  {
+    "key": "en4lesson4a",
+    "grade": 4,
+    "code": "4a",
+    "unit": "work",
+    "pages": "30–31",
+    "focus": "Время; once/twice/three times a week.",
+    "words": [
+      [
+        "sports centre",
+        "спортивный центр"
+      ],
+      [
+        "volleyball",
+        "волейбол"
+      ],
+      [
+        "badminton",
+        "бадминтон"
+      ],
+      [
+        "tennis",
+        "теннис"
+      ],
+      [
+        "baseball",
+        "бейсбол"
+      ],
+      [
+        "hockey",
+        "хоккей"
+      ]
+    ],
+    "questions": 17
+  },
+  {
+    "key": "en4lesson4b",
+    "grade": 4,
+    "code": "4b",
+    "unit": "work",
+    "pages": "32–33",
+    "focus": "Have to / has to; don’t have to / doesn’t have to.",
+    "words": [
+      [
+        "polite",
+        "вежливый"
+      ],
+      [
+        "police officer",
+        "полицейский"
+      ],
+      [
+        "doctor",
+        "врач"
+      ],
+      [
+        "postcard",
+        "открытка"
+      ],
+      [
+        "week",
+        "неделя"
+      ],
+      [
+        "month",
+        "месяц"
+      ],
+      [
+        "wash the dishes",
+        "мыть посуду"
+      ],
+      [
+        "clean your room",
+        "убирать свою комнату"
+      ]
+    ],
+    "questions": 20
+  },
+  {
+    "key": "en4lesson5a",
+    "grade": 4,
+    "code": "5a",
+    "unit": "food",
+    "pages": "42–43",
+    "focus": "Продукты; вежливая просьба за столом.",
+    "words": [
+      [
+        "lemon",
+        "лимон"
+      ],
+      [
+        "beans",
+        "фасоль"
+      ],
+      [
+        "mango",
+        "манго"
+      ],
+      [
+        "butter",
+        "сливочное масло"
+      ],
+      [
+        "coconut",
+        "кокос"
+      ],
+      [
+        "flour",
+        "мука"
+      ],
+      [
+        "pineapple",
+        "ананас"
+      ],
+      [
+        "olive oil",
+        "оливковое масло"
+      ],
+      [
+        "sugar",
+        "сахар"
+      ],
+      [
+        "salt",
+        "соль"
+      ],
+      [
+        "pepper",
+        "перец"
+      ],
+      [
+        "tomato",
+        "помидор"
+      ]
+    ],
+    "questions": 27
+  },
+  {
+    "key": "en4lesson5b",
+    "grade": 4,
+    "code": "5b",
+    "unit": "food",
+    "pages": "44–45",
+    "focus": "Считаемые предметы: many; неисчисляемые продукты: much.",
+    "words": [
+      [
+        "lemon",
+        "лимон"
+      ],
+      [
+        "beans",
+        "фасоль"
+      ],
+      [
+        "mango",
+        "манго"
+      ],
+      [
+        "butter",
+        "сливочное масло"
+      ],
+      [
+        "coconut",
+        "кокос"
+      ],
+      [
+        "flour",
+        "мука"
+      ],
+      [
+        "pineapple",
+        "ананас"
+      ],
+      [
+        "olive oil",
+        "оливковое масло"
+      ],
+      [
+        "sugar",
+        "сахар"
+      ],
+      [
+        "salt",
+        "соль"
+      ],
+      [
+        "pepper",
+        "перец"
+      ],
+      [
+        "tomato",
+        "помидор"
+      ]
+    ],
+    "questions": 29
+  },
+  {
+    "key": "en4lesson6a",
+    "grade": 4,
+    "code": "6a",
+    "unit": "food",
+    "pages": "46–47",
+    "focus": "Упаковки продуктов; a lot of/many/much.",
+    "words": [
+      [
+        "packet",
+        "пакет"
+      ],
+      [
+        "bar",
+        "плитка"
+      ],
+      [
+        "kilo",
+        "килограмм"
+      ],
+      [
+        "loaf",
+        "буханка"
+      ],
+      [
+        "jar",
+        "банка с крышкой"
+      ],
+      [
+        "carton",
+        "картонная упаковка"
+      ],
+      [
+        "bottle",
+        "бутылка"
+      ],
+      [
+        "tin",
+        "консервная банка"
+      ]
+    ],
+    "questions": 20
+  },
+  {
+    "key": "en4lesson6b",
+    "grade": 4,
+    "code": "6b",
+    "unit": "food",
+    "pages": "48–49",
+    "focus": "May/may not; dairy/meat/fruit/vegetables.",
+    "words": [
+      [
+        "dairy",
+        "молочные продукты"
+      ],
+      [
+        "meat",
+        "мясо"
+      ],
+      [
+        "fruit",
+        "фрукты"
+      ],
+      [
+        "vegetables",
+        "овощи"
+      ],
+      [
+        "hungry",
+        "голодный"
+      ],
+      [
+        "hate",
+        "ненавидеть"
+      ],
+      [
+        "fast food",
+        "еда быстрого приготовления"
+      ]
+    ],
+    "questions": 18
+  },
+  {
+    "key": "en4lesson7a",
+    "grade": 4,
+    "code": "7a",
+    "unit": "zoo",
+    "pages": "58–59",
+    "focus": "Животные; Present Simple и Present Continuous.",
+    "words": [
+      [
+        "giraffe",
+        "жираф"
+      ],
+      [
+        "monkey",
+        "обезьяна"
+      ],
+      [
+        "dolphin",
+        "дельфин"
+      ],
+      [
+        "seal",
+        "тюлень"
+      ],
+      [
+        "lizard",
+        "ящерица"
+      ],
+      [
+        "whale",
+        "кит"
+      ],
+      [
+        "hippo",
+        "бегемот"
+      ],
+      [
+        "crocodile",
+        "крокодил"
+      ],
+      [
+        "lazy",
+        "ленивый"
+      ]
+    ],
+    "questions": 22
+  },
+  {
+    "key": "en4lesson7b",
+    "grade": 4,
+    "code": "7b",
+    "unit": "zoo",
+    "pages": "60–61",
+    "focus": "Present Simple/Continuous; чтение oo.",
+    "words": [
+      [
+        "giraffe",
+        "жираф"
+      ],
+      [
+        "monkey",
+        "обезьяна"
+      ],
+      [
+        "dolphin",
+        "дельфин"
+      ],
+      [
+        "seal",
+        "тюлень"
+      ],
+      [
+        "lizard",
+        "ящерица"
+      ],
+      [
+        "whale",
+        "кит"
+      ],
+      [
+        "hippo",
+        "бегемот"
+      ],
+      [
+        "crocodile",
+        "крокодил"
+      ],
+      [
+        "lazy",
+        "ленивый"
+      ]
+    ],
+    "questions": 23
+  },
+  {
+    "key": "en4lesson8a",
+    "grade": 4,
+    "code": "8a",
+    "unit": "zoo",
+    "pages": "62–63",
+    "focus": "Сравнительная степень; месяцы.",
+    "words": [
+      [
+        "January",
+        "январь"
+      ],
+      [
+        "February",
+        "февраль"
+      ],
+      [
+        "March",
+        "март"
+      ],
+      [
+        "April",
+        "апрель"
+      ],
+      [
+        "May",
+        "май"
+      ],
+      [
+        "June",
+        "июнь"
+      ],
+      [
+        "July",
+        "июль"
+      ],
+      [
+        "August",
+        "август"
+      ],
+      [
+        "September",
+        "сентябрь"
+      ],
+      [
+        "October",
+        "октябрь"
+      ],
+      [
+        "November",
+        "ноябрь"
+      ],
+      [
+        "December",
+        "декабрь"
+      ]
+    ],
+    "questions": 29
+  },
+  {
+    "key": "en4lesson8b",
+    "grade": 4,
+    "code": "8b",
+    "unit": "zoo",
+    "pages": "64–65",
+    "focus": "Must/mustn’t; правила обращения с животными.",
+    "words": [
+      [
+        "rules",
+        "правила"
+      ],
+      [
+        "feed",
+        "кормить"
+      ],
+      [
+        "rubbish",
+        "мусор"
+      ],
+      [
+        "bin",
+        "мусорная корзина"
+      ],
+      [
+        "plants",
+        "растения"
+      ]
+    ],
+    "questions": 14
+  }
+]

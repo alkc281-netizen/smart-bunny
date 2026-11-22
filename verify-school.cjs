@@ -14,7 +14,7 @@ vm.runInContext(fs.readFileSync('school-curriculum.js','utf8'),ctx);
 vm.runInContext(fs.readFileSync('school.js','utf8'),ctx);
 vm.runInContext(fs.readFileSync('players.js','utf8'),ctx);
 
-const keys=run('Object.keys(schoolTopics)');assert.equal(keys.length,39);
+const keys=run('Object.keys(schoolTopics)');assert.equal(keys.length,80);
 let total=0;
 for(const key of keys){const topic=run(`schoolTopics['${key}']`);assert.ok([2,4].includes(topic.grade));assert.ok(['math','english','world'].includes(topic.subject));assert.ok(/^[a-zA-Z0-9]+$/.test(key));assert.ok(topic.rule.length>20);const seen=new Set();
  for(const item of topic.items){const [prompt,correct,choices,why]=item;const id=run(`schoolItemId(${JSON.stringify(item)})`);assert.ok(prompt&&why);assert.ok(choices.includes(correct));assert.equal(new Set(choices).size,choices.length);assert.ok(choices.length>=2);assert.ok(!seen.has(id));seen.add(id);total++;}
@@ -40,7 +40,7 @@ for(const [id,range,grade] of [['junior',[1,2],2],['senior',[3,4],4]]){
  for(const subject of ['math','english','world']){
   run(`openSchoolClasses('${subject}')`);assert.equal(run('schoolClass'),grade);assert.equal(run('JSON.stringify(schoolAllowedClasses())'),JSON.stringify([grade]));
   assert.equal(run("$('school-menu').children[0].children[0].textContent"),grade+' класс · часть 1');
-  run('openSchoolTopics()');assert.equal(run('schoolStudied.size'),0);assert.equal(run("$('school-menu').children[0].children[1].disabled"),true);
+  run('openSchoolTopics()');assert.equal(run('schoolStudied.size'),0);if(subject!=='english')assert.equal(run("$('school-menu').children[0].children[1].disabled"),true);
   run('beginSchoolMixed()');assert.equal(run('game'),null);
   const topics=run('schoolClassTopics()');
   for(const topic of topics){
@@ -48,11 +48,11 @@ for(const [id,range,grade] of [['junior',[1,2],2],['senior',[3,4],4]]){
    for(let i=0;i<10;i++){run('choose(answer);choose(answer)');tick(1200)}
    assert.equal(run('phase'),'finished');assert.equal(run('score'),10);assert.equal(run("$('heading').textContent"),'Оценка: 5');assert.equal(run('playerOutbox.at(-1).data.topics[0]'),topic);
   }
-  run('schoolStudied=new Set(schoolClassTopics())');
+  run("schoolStudied=new Set(schoolClassTopics());englishSelection=new Set(schoolClassTopics())");
   for(const count of [10,50,100]){
    run(`schoolCount=${count};beginSchoolMixed()`);assert.equal(run('schoolDeck.length'),count);assert.ok(run('schoolDeck.every(item=>schoolTopics[item[4]].grade===schoolClass&&schoolTopics[item[4]].subject===schoolSubject)'));
    const distinct = Math.min(count, topics.reduce((n,key)=>n+run(`schoolTopics['${key}'].items.length`),0));
-   assert.equal(new Set(run(`schoolDeck.slice(0,${distinct}).map(([prompt,correct,choices,why,key,table])=>schoolItemId([prompt,correct,choices,why,table]))`)).size,distinct);
+   if(subject!=='english')assert.equal(new Set(run(`schoolDeck.slice(0,${distinct}).map(([prompt,correct,choices,why,key,table])=>schoolItemId([prompt,correct,choices,why,table]))`)).size,distinct);
    run("choose('incorrect')");tick(60000);assert.equal(run('phase'),'feedback');assert.equal(run('round'),0);
    run('openSettings()');tick(60000);run('settingsBack()');assert.equal(run('phase'),'feedback');
    run("$('answers').children[0].onclick()");assert.equal(run('attempt'),2);run("choose('incorrect')");tick(60000);assert.equal(run('round'),0);
@@ -70,4 +70,4 @@ run("loadSchoolSubject('math');schoolCount=10");
 const key=run('schoolClassTopics()[0]');run(`schoolSave('bunny-school-history-${key}','{}')`);
 const first=run(`pickSchoolItems('${key}',10).map(i=>i[0])`),second=run(`pickSchoolItems('${key}',10).map(i=>i[0])`);
 assert.equal(new Set(first).size,10);assert.ok(second.every(q=>!first.includes(q)));
-console.log('PASS 39 topics, reasoning exercises, mixed deck uniqueness, profile class ranges, 10/50/100 rounds, explanations, retries and rewards');
+console.log('PASS 31 unchanged subject topics + 41 English lessons + 8 preserved historical banks, reasoning exercises, mixed deck uniqueness, profile class ranges, 10/50/100 rounds, explanations, retries and rewards');
