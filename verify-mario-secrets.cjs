@@ -17,9 +17,9 @@ vm.runInContext(source,c);const t=window.secretTest;
 function tick(n=1){for(let i=0;i<n;i++){clock+=17;const pending=[...frames.values()];frames.clear();for(const fn of pending)fn(clock);}}
 async function ready(){for(let i=0;i<2000;i++){if(!t.getRun()||t.getRun().runtime)return;await new Promise(resolve=>setTimeout(resolve,2));}throw Error('Episode loading timed out');}
 function drain(){for(let i=0;frames.size&&i<2000;i++)tick();assert.equal(frames.size,0,'Animations settle');}
-function route(){const p=JSON.parse(fs.readFileSync(root+'/assets/emulation/routes/1-1.json'));return {engine,rom,start:0,startState:p.startState,startImage:p.startImage.flatMap(([n,b])=>Array(n).fill(b)),buttons:p.inputs.flatMap(([n,b])=>Array(n).fill(b)),flag:p.goal,end:p.end};}
+function route(id='1-1'){const p=JSON.parse(fs.readFileSync(root+'/assets/emulation/routes/'+id+'.json'));return {engine,rom,start:0,startState:p.startState,startImage:p.startImage.flatMap(([n,b])=>Array(n).fill(b)),buttons:p.inputs.flatMap(([n,b])=>Array(n).fill(b)),flag:p.goal,end:p.end};}
 (async()=>{
- // The loader verifies all five native proof predicates before playing anything.
+ // The loader verifies every native proof predicate before playing anything.
  $('nes-secret-dialog').showModal();
  for(const record of t.secrets){await t.startSecret(record,false);await ready();assert.ok(t.getRun()?.runtime,record.id+' must validate');tick(1000);assert.equal(t.getRun(),null);console.log('PASS native secret',record.id);}
  assert.equal(saved.length,0,'Collection replay does not grant discoveries');$('nes-secret-dialog').close();
@@ -38,5 +38,30 @@ function route(){const p=JSON.parse(fs.readFileSync(root+'/assets/emulation/rout
  window.bunnyReplay.setProgress(0,10);window.bunnyReplay.setProgress(5,10);window.bunnyReplay.setProgress(0,0);await ready();tick(600);assert.equal(t.getRun(),null,'Leaving while loading cannot restart an episode');
  window.bunnyReplay.setProgress(0,10);window.bunnyReplay.setProgress(5,10);await ready();window.bunnyReplay.setTheme(false);tick(600);assert.equal(t.getRun(),null,'Changing theme cancels the clip');
  assert.equal(t.discoveries().size,0,'Profiles have separate discovery collections');
+ // All three second-world clips appear in order without granting old-world entries.
+ window.bunnyReplay.setTheme(true);$('nes-level').value='4';t.setRoute(route('2-1'));
+ const previousSaves=saved.length;
+ for(const id of ['oneup21','cloud21','coins21']){
+   window.bunnyReplay.setProgress(0,10);window.bunnyReplay.setProgress(5,10);await ready();
+   assert.equal(t.getRun()?.record.id,id);
+   const learning=t.getSession(),snapshot=JSON.stringify(learning.nes.toJSON());tick(30);
+   assert.equal(JSON.stringify(learning.nes.toJSON()),snapshot,'World 2 clip has independent NES memory');
+   drain();assert.equal(t.getSession(),learning);assert.ok(t.discoveries().has(id));
+ }
+ assert.equal(saved.length,previousSaves+3);assert.equal(t.discoveries().size,3);
+ window.bunnyReplay.setProgress(10,10);drain();assert.equal(t.getFrame(),route('2-1').end);
+ assert.equal(t.getSession().nes.cpu.mem[0x75f],1,'World 2 learning route remains in world 2');
+ // A mismatched level or missing native proof must fail before playback or discovery.
+ $('nes-secret-dialog').showModal();
+ for(const [id,change]of [['oneup21',p=>{p.level='1-1';}],['cloud21',p=>{p.proof='coins';}],['coins21',p=>{p.inputs=[[1,0]];}]]){
+   const record=t.secrets.find(s=>s.id===id),original=fs.readFileSync(root+'/assets/emulation/secrets/'+id+'.json');
+   // Use a fresh VM so the validated packet cache cannot conceal corrupt input.
+   const packet=JSON.parse(original);change(packet);
+   const oldFetch=c.fetch;c.fetch=async url=>url.endsWith('/'+id+'.json')?{ok:true,json:async()=>packet}:oldFetch(url);
+   let isolated=source.replace('window.secretTest={','secretCache.clear();window.secretTest={');
+   vm.runInContext(isolated,c);$('nes-secret-dialog').showModal();
+   await window.secretTest.startSecret(record,false);await ready();assert.equal(window.secretTest.getRun(),null,'Invalid packet is rejected: '+id);
+   c.fetch=oldFetch;
+ }
  console.log('PASS one episode per round; native life gain/coin room/reveal/growth/coins; learning state/finish preserved; hidden/settings pause; skip/profile/exit/theme/final-answer cancellation; collection replay grants nothing');
 })().catch(error=>{console.error(error);process.exitCode=1});
