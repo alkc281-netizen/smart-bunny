@@ -385,7 +385,11 @@
   }
 
   function schedulePlayback() {
+    // Waiting for an answer is not elapsed emulation time. A new segment must
+    // start with a fresh clock rather than catching up across the task pause.
+    if (frame>=target) lastFrame=null;
     if (!secretRun && !manualActive && !frameRequest && chosen && marioTheme && session && frame<target && !document.hidden) {
+      if (lastFrame===null) lastFrame=performance.now();
       frameRequest=requestAnimationFrame(advance);
     }
   }
