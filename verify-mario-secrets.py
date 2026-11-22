@@ -23,8 +23,10 @@ with tempfile.TemporaryDirectory() as directory:
         update(['coins11'])
         update([])
         assert set(json.loads(profile['preferences']['bunny-mario-discoveries'])) == {'oneup11', 'coins11'}
+        update(['oneup21', 'cloud21', 'coins21'])
+        assert set(json.loads(profile['preferences']['bunny-mario-discoveries'])) == {'oneup11','coins11','oneup21','cloud21','coins21'}
         assert not other['preferences']
-        for ids in [None, {}, ['unknown'], [True], [['oneup11']], ['oneup11']*6]:
+        for ids in [None, {}, ['unknown'], [True], [['oneup11']], ['oneup11']*(len(b.MARIO_DISCOVERIES)+1)]:
             previous = copy.deepcopy(profile)
             try:
                 update(ids)

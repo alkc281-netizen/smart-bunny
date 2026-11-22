@@ -69,6 +69,9 @@
     {id:'oneup12',level:1,title:'Гриб над шестью монетами',hint:'1‑2 · Над площадкой с шестью монетами спрятан блок с зелёным грибом 1‑UP.',proof:'reveal'},
     {id:'mushroom13',level:2,title:'Бонус на высоте',hint:'1‑3 · Из блока на высокой площадке можно достать супергриб. Он превращает маленького Марио в большого.',proof:'grow'},
     {id:'coins14',level:3,title:'Невидимые монеты в замке',hint:'1‑4 · В просторном зале прыгай под невидимыми блоками: в них спрятаны монеты.',proof:'coins'},
+    {id:'oneup21',level:4,title:'Гриб над невидимой ступенькой',hint:'2‑1 · Два скрытых блока ведут к 1‑UP. Гриб появляется после 21 монеты на 1‑3 или продолжения игры.',proof:'life'},
+    {id:'cloud21',level:4,title:'Лоза к облачным монетам',hint:'2‑1 · Найди лозу в верхнем кирпиче, поднимись по ней и прыгни на движущуюся платформу за монетами.',proof:'cloud'},
+    {id:'coins21',level:4,title:'Подземный запас монет',hint:'2‑1 · После лозы есть труба в монетную комнату. Собери монеты и выйди через правую трубу.',proof:'roomCoins'},
   ];
   const discoveryKey='bunny-mario-discoveries';
   const secretCache=new Map();
@@ -108,15 +111,16 @@
     const buttons=expandRuns(packet.inputs,255,900),picture=expandRuns(packet.startImage,0xffffff,256*240);
     if(!Number.isInteger(packet.end)||packet.end<1||buttons.length!==packet.end+1||picture.length!==256*240)throw Error('Неполный эпизод.');
     const probe=makeSession(engine,bytes,()=>{},()=>{});probe.restore(packet.startState,buttons[0]);
-    const m=probe.nes.cpu.mem,before={lives:m[0x75a],coins:m[0x75e],status:m[0x756],area:m[0x750]};let reveal=false,room=false,deadline=performance.now()+8;
+    const m=probe.nes.cpu.mem,before={lives:m[0x75a],coins:m[0x75e],status:m[0x756],area:m[0x750]};let reveal=false,room=false,underground=false,cloud=false,vine=false,deadline=performance.now()+8;
     for(let i=1;i<buttons.length;i++){
       if(!secretLive(run))return null;
       probe.step(buttons[i]);
-      if(m[0x75f]!==0||m[0x75c]!==record.level||m[0x770]!==1||[4,5,11].includes(m[0xe]))throw Error('Эпизод не прошёл проверку.');
-      reveal ||=m[0x39]===3&&m[0x1b]===46&&m[0x14]!==0;room ||=m[0x750]!==before.area;
+      if(m[0x75f]!==Math.floor(record.level/4)||m[0x75c]!==record.level%4||m[0x770]!==1||[4,5,11].includes(m[0xe]))throw Error('Эпизод не прошёл проверку.');
+      reveal ||=m[0x39]===3&&m[0x1b]===46&&m[0x14]!==0;room ||=m[0x750]!==before.area;underground ||=m[0x74e]===2;cloud ||=m[0x743]>0&&m[0x772]===3&&m[0xe]===8;vine ||=m[0x399]>0&&m[0x1b]===47&&m[0x1d]===3;
       if(performance.now()>deadline){await new Promise(resolve=>setTimeout(resolve,0));deadline=performance.now()+8;}
     }
-    const valid=record.proof==='life'?reveal&&m[0x75a]===before.lives+1:record.proof==='room'?room&&m[0x750]===before.area&&m[0x75e]-before.coins>=10:record.proof==='reveal'?reveal:record.proof==='grow'?m[0x756]>before.status:m[0x75e]-before.coins>=3;
+    const coins=(m[0x75e]-before.coins+100)%100;
+    const valid=record.proof==='life'?reveal&&m[0x75a]===before.lives+1:record.proof==='room'?room&&m[0x750]===before.area&&coins>=10:record.proof==='roomCoins'?underground&&m[0x74e]===1&&m[0xe]===8&&coins>=8:record.proof==='cloud'?cloud&&vine&&coins>=7:record.proof==='reveal'?reveal:record.proof==='grow'?m[0x756]>before.status:coins>=3;
     if(!valid)throw Error('Бонус не подтверждён в эмуляторе.');
     const result={packet,buttons,picture};secretCache.set(record.id,result);return result;
   }
