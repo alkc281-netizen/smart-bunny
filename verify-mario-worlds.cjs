@@ -3,11 +3,11 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=__dirname,manifest=JSON.parse(fs.readFileSync(root+'/assets/emulation/routes/manifest.json'));
 const engine=require(root+'/assets/emulation/jsnes-2.1.0.min.js'),rom=new Uint8Array(fs.readFileSync(root+'/assets/emulation/smb-world.nes'));
 const elements=new Map(),frames=new Map();let clock=0,serial=0;
-function el(){return {hidden:true,value:'0',textContent:'',setAttribute(){},getContext(){return {createImageData:()=>({data:new Uint8ClampedArray(256*240*4)}),putImageData(){}}}}}
+function el(){return {hidden:true,value:'0',textContent:'',setAttribute(){},addEventListener(){},close(){},getContext(){return {createImageData:()=>({data:new Uint8ClampedArray(256*240*4)}),putImageData(){}}}}}
 const $=id=>{if(!elements.has(id))elements.set(id,el());return elements.get(id)};
 const window={jsnes:engine},document={hidden:false,addEventListener(){}};
 const fetch=async url=>{const file=path.join(root,url.split('?')[0]);const bytes=fs.readFileSync(file);return {ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.length),json:async()=>JSON.parse(bytes)}};
-const context=vm.createContext({window,document,$,console,fetch,AbortController,setTimeout,clearTimeout,structuredClone,Uint8Array,Uint32Array,Uint8ClampedArray,Float32Array,performance,phase:'answer',audioCtx:null,mute:false,fxVolume:.65,
+const context=vm.createContext({window,document,$,console,fetch,AbortController,setTimeout,clearTimeout,structuredClone,Uint8Array,Uint32Array,Uint8ClampedArray,Float32Array,performance,phase:'answer',activePlayer:null,audioCtx:null,mute:false,fxVolume:.65,
 requestAnimationFrame:fn=>{frames.set(++serial,fn);return serial},cancelAnimationFrame:id=>frames.delete(id)});
 let source=fs.readFileSync(root+'/mario-replay.js','utf8');source=source.replace(/\}\)\(\);\s*$/,`window.routeTest={verifyRoute,bootManualLevel,makeSession,isolateEffects,levelTitle,getVersion:()=>loadVersion,getFrame:()=>frame,getTarget:()=>target,getSession:()=>session,setRoute:value=>{verified=value;chosen=true;marioTheme=true;resetSession();}};})();`);
 vm.runInContext(source,context);const t=window.routeTest;

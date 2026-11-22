@@ -3041,6 +3041,12 @@ async function flushPlayerUpdates() {
       playerOutbox.splice(index, 1);
       storePlayerOutbox();
       if (activePlayer?.id === player) {
+        const discoveryKey='bunny-mario-discoveries';
+        try {
+          const known=JSON.parse(activePlayer.preferences[discoveryKey]||'[]');
+          const saved=JSON.parse(result.preferences[discoveryKey]||'[]');
+          activePlayer.preferences[discoveryKey]=JSON.stringify([...new Set([...known,...saved])]);
+        } catch {}
         // Preserve any newer preference changes still waiting to be saved.
         result.preferences = activePlayer.preferences;
         // An earlier response must not undo a newer move waiting in the outbox.
@@ -3155,6 +3161,7 @@ function chooseActivePlayer(player) {
   loadAudioProfile(player);
   if(player)window.bunnyAssets?.warm();
   window.bunnyMario?.playerChanged();
+  window.bunnyReplay?.playerChanged();
   $('app').classList.toggle('auth-required', !player);
   loadRussianProgress();
   window.bunnySchool?.load();
