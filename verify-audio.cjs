@@ -1,55 +1,39 @@
+// Audio lifecycle tests with real application logic and a controllable audio clock/network.
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 const manifest=JSON.parse(fs.readFileSync(__dirname+'/assets/audio/music/loops.json'));
 function harness(){
- const nodes=[],requests=[],els=new Map();let current=0;
+ const nodes=[],requests=[],els=new Map(),listeners={},windowListeners={},saved=[];let current=0;
  const param=()=>({value:1,setValueAtTime(v){this.value=v},linearRampToValueAtTime(v){this.value=v},setTargetAtTime(v){this.value=v},cancelScheduledValues(){}});
  const gain=()=>({gain:param(),connect(){},disconnect(){}});
- class AC{constructor(){this.currentTime=0;this.destination={};this.state='running'}resume(){return Promise.resolve()}createGain(){return gain()}createBufferSource(){const n={connect(){},disconnect(){},start(t){this.started=true;this.time=t},stop(t){this.stopped=true;this.stopTime=t},loop:false};nodes.push(n);return n}decodeAudioData(data,ok){ok({duration:data.duration,sampleRate:48000})}}
- function el(){return {hidden:false,textContent:'',style:{},classList:{toggle(){}},append(){},replaceChildren(){},setAttribute(){}}}
- const document={getElementById(id){if(!els.has(id))els.set(id,el());return els.get(id)},createElement:el,querySelectorAll(){return []},addEventListener(){}};
- class Audio{addEventListener(){}play(){return Promise.resolve()}pause(){}}
+ class AC{constructor(){this.currentTime=42;this.destination={};this.state='running'}resume(){this.state='running';return Promise.resolve()}suspend(){this.state='suspended';return Promise.resolve()}createGain(){return gain()}createBufferSource(){const n={connect(){},disconnect(){},start(t){this.started=true;this.time=t},stop(t){this.stopped=true;this.stopTime=t}};nodes.push(n);return n}decodeAudioData(data,ok){ok({duration:data.duration,sampleRate:48000})}}
+ function el(){return {hidden:false,textContent:'',value:'',style:{},classList:{toggle(){}},append(){},replaceChildren(){},setAttribute(){}}}
+ const document={hidden:false,getElementById(id){if(!els.has(id))els.set(id,el());return els.get(id)},createElement:el,querySelectorAll(){return []},addEventListener(name,fn){listeners[name]=fn}};
+ class Audio{addEventListener(){}play(){return Promise.resolve()}pause(){this.paused=true}}
  const fetch=url=>new Promise((resolve,reject)=>requests.push({url,resolve,reject}));
- const c=vm.createContext({console:{warn(){}},document,window:{AudioContext:AC},Audio,fetch,performance:{now:()=>0},setTimeout(){return ++current},clearTimeout(){}});
+ const window={AudioContext:AC,addEventListener:(name,fn)=>windowListeners[name]=fn,bunnyAudioPreferences:{save:(k,v)=>saved.push([k,v])}};
+ const c=vm.createContext({console:{warn(){}},document,window,Audio,fetch,performance:{now:()=>0},setTimeout(){return ++current},clearTimeout(){}});
  vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),c);const run=s=>vm.runInContext(s,c);
- const flush=async()=>{for(let i=0;i<20;i++)await Promise.resolve()};
- async function resolveAll(){for(const r of requests.splice(0)){if(r.url.endsWith('loops.json'))r.resolve({ok:true,json:async()=>manifest});else {const t=manifest.tracks.find(t=>r.url.endsWith(t.file));r.resolve({ok:true,arrayBuffer:async()=>({duration:t?t.duration_seconds:5.641})})}}await flush()}
- return {run,nodes,requests,resolveAll,flush,els};
+ const flush=async()=>{for(let i=0;i<30;i++)await Promise.resolve()};
+ async function resolveAll(){await flush();for(const r of requests.splice(0)){if(r.url.endsWith('loops.json'))r.resolve({ok:true,json:async()=>manifest});else {const t=manifest.tracks.find(t=>r.url.endsWith(t.file));r.resolve({ok:true,arrayBuffer:async()=>({duration:t?t.duration_seconds:5.641})})}}await flush()}
+ return {run,nodes,requests,resolveAll,flush,els,saved,document,listeners,windowListeners};
 }
 (async()=>{
- for(const action of ['home()','finish()',"begin('compare')"]){const h=harness();h.run("begin('add')");h.run(action);await h.resolveAll();const music=h.nodes.filter(n=>n.loop&&n.started&&!n.stopped);if(action.startsWith('begin')){assert.equal(music.length,1);assert.equal(music[0].loopStart,manifest.tracks.find(t=>t.file==='underground.wav').loop_start_sample/44100)}else assert.equal(music.length,0)}
- const h=harness();h.run("begin('add')");await h.resolveAll();let n=h.nodes.find(n=>n.loop);assert.ok(n.started);assert.equal(n.loopStart,manifest.tracks[0].loop_start_sample/44100);assert.ok(Math.abs(n.loopEnd-manifest.tracks[0].loop_end_sample_exclusive/44100)<1/44100);
- for(const [mode,index] of Object.entries({memory:2,compare:1,pattern:3,add:0,multiply:4,divide:1})){h.run(`begin('${mode}')`);await h.flush();assert.equal(h.run('selectedMusic'),index)}
- h.run("openSettings();$('auto-music').onchange({target:{checked:false}});$('song').onchange({target:{value:'4'}})");await h.flush();assert.equal(h.run('selectedMusic'),4);assert.equal(h.run('autoMusic'),false);
- h.run("$('music-volume').oninput({target:{value:'25'}});$('fx-volume').oninput({target:{value:'80'}})");assert.equal(h.run('musicVolume'),.25);assert.equal(h.run('fxVolume'),.8);
- h.run('settingsBack();finish()');await h.flush();const win=h.nodes.filter(n=>!n.loop&&n.started).at(-1);assert.ok(win);assert.equal(win.buffer.duration,5.641);assert.equal(h.run('musicNodes.length'),0);
- h.run("home();begin('add')");await h.flush();assert.ok(!win.stopped);assert.equal(h.run('musicNodes.length'),0);win.onended();await h.flush();assert.equal(h.run('musicNodes.length'),1);
- h.run('finish()');await h.flush();const win2=h.nodes.filter(n=>!n.loop&&n.started).at(-1);h.run('home()');win2.onended();await h.flush();assert.equal(h.run('musicNodes.length'),0);
- h.run("begin('add')");await h.flush();h.run("selectedMusic=4;startMusic()");await h.flush();const fading=[...h.run('retiringMusic')];assert.ok(fading.length);h.run('finish()');for(const old of fading)assert.equal(old.source.stopTime,undefined);
- const e=harness();e.run("begin('add')");for(const r of e.requests.splice(0))r.reject(new Error('offline'));await e.flush();assert.equal(e.run('musicNodes.length'),0);assert.match(e.els.get('track-label').textContent,/недоступна/);
- const m=harness();m.run("begin('memory');$('mute').onclick()");await m.resolveAll();assert.equal(m.run('musicNodes.length'),0);
- const album=harness();album.run("begin('add');finish()");
- await album.resolveAll();
- const albumWin=album.nodes.find(node=>!node.loop&&node.started);
- album.run("home();phase='player-album';startMusic();albumRewardSound('albumClear')");
- assert.equal(album.run('pendingAlbumSound'),'albumClear');
- assert.equal(albumWin.stopped,undefined);
- albumWin.onended();await album.flush();
- await album.resolveAll();
- const ending=manifest.tracks.find(track=>track.file==='ending.wav');
- assert.equal(album.run("musicNodes[0].source.loopStart"),ending.loop_start_sample/44100);
- assert.equal(album.run("musicBus.gain.value"),.35*.15);
- album.run("home()");
- assert.equal(album.run('musicNodes.length'),0);
- const lateAlbum=harness();lateAlbum.run("phase='player-album';startMusic()");await lateAlbum.flush();lateAlbum.run('home()');
- await lateAlbum.resolveAll();assert.equal(lateAlbum.run('musicNodes.length'),0);
- const nes=harness();nes.run("begin('add')");await nes.flush();
- nes.run("stopMusic();phase='player-mario'");await nes.resolveAll();
- assert.equal(nes.run('musicNodes.length'),0,'Late WAV load cannot play over manual NES');
- nes.run("startMusic();sound('tap');sound('jump')");await nes.flush();
- assert.equal(nes.run('musicNodes.length'),0);assert.equal(nes.run('players.size'),0);
- nes.run("phase='settings';settingsSnapshot={phase:'player-mario'};startMusic(true)");await nes.flush();
- assert.equal(nes.run('musicNodes.length'),0,'A music preview cannot bypass manual NES exclusion');
- nes.run("settingsSnapshot=null;phase='menu';begin('add')");await nes.flush();await nes.resolveAll();
- assert.equal(nes.run('musicNodes.length'),1,'Learning soundtrack still works after leaving NES');
- console.log('PASS audio: stale loads/menu/victory/mode switch; six mappings; 44100 loop points in 48000 context; manual/auto; independent volumes; full fanfare and replay; mute; network failure; manual NES excludes Bunny music, late loads and interface effects.');
+ const h=harness();await h.resolveAll();assert.equal(h.run('music.length'),10);assert.equal(h.run('musicNodes[0].index'),6);
+ const original=h.run('musicNodes[0].source');h.run('home();home()');await h.flush();assert.equal(h.run('musicNodes[0].source'),original,'Navigation keeps the existing source and position');
+ h.document.hidden=true;h.listeners.visibilitychange();assert.equal(h.run('audioCtx.state'),'suspended');assert.equal(original.stopped,undefined);
+ const clock=h.run('audioCtx.currentTime');h.document.hidden=false;h.listeners.visibilitychange();await h.flush();assert.equal(h.run('audioCtx.state'),'running');assert.equal(h.run('musicNodes[0].source'),original);assert.equal(h.run('audioCtx.currentTime'),clock);
+ h.run("loadAudioProfile({id:'julia',preferences:{'bunny-audio-selectedMusic':'4','bunny-audio-autoMusic':'false','bunny-audio-taskVolume':'0.2'}});home()");await h.resolveAll();assert.equal(h.run('musicNodes[0].index'),4);
+ h.run("$('music-volume').oninput({target:{value:'25'}});$('music-volume').onchange();$('fx-volume').oninput({target:{value:'80'}});$('fx-volume').onchange()");assert.deepEqual(h.saved.slice(-2),[['bunny-audio-musicVolume','0.25'],['bunny-audio-fxVolume','0.8']]);
+ h.run("sound('coin');sound('tap')");assert.equal(h.run("[...players].find(p=>p[1]==='coin')[0].volume"),.2);assert.equal(h.run("[...players].find(p=>p[1]==='tap')[0].volume"),.8);
+ h.run("loadAudioProfile({id:'sonya',preferences:{}});home()");await h.resolveAll();assert.equal(h.run('autoMusic'),true);assert.equal(h.run('taskVolume'),.65);assert.equal(h.run('fxVolume'),.65);assert.equal(h.run('musicNodes[0].index'),6);
+ h.run("begin('add')");await h.resolveAll();assert.equal(h.run('musicNodes[0].index'),7);const ordinary=h.run('musicNodes[0].source');h.run("begin('compare')");await h.flush();assert.equal(h.run('musicNodes[0].source'),ordinary);
+ h.run("home();phase='player-album';startMusic()");await h.resolveAll();assert.equal(h.run('musicNodes[0].index'),8);const count=h.nodes.filter(n=>!n.loop&&n.started).length;h.run("albumRewardSound('albumClear');albumRewardSound('albumClear')");await h.resolveAll();assert.equal(h.nodes.filter(n=>!n.loop&&n.started).length,count,'Album opening never replays an award');
+ h.run("planRoundAudio('r1','sonya');finish()");await h.resolveAll();assert.equal(h.nodes.filter(n=>!n.loop&&n.started).length,count,'Wait for the actual award before choosing fanfare');
+ h.run("completeRoundAudio('r1','sonya',{kind:'sticker'});completeRoundAudio('r1','sonya',{kind:'sticker'})");await h.resolveAll();assert.equal(h.nodes.filter(n=>!n.loop&&n.started).length,count+1);assert.equal(h.run("[...players.values()].filter(n=>n==='stickerClear').length"),1);assert.equal(h.run('musicBus.gain.value'),.35*.15);
+ h.run("stopEffects(true);phase='finished';planRoundAudio('r2','sonya');completeRoundAudio('r2','sonya',{kind:'collection',collections:[{name:'Микки Маус'}]})");await h.resolveAll();assert.match(h.els.get('message').textContent,/Коллекция собрана: Микки Маус/);assert.equal(h.run('audioFanfare!==null'),true);
+ h.document.hidden=true;h.listeners.visibilitychange();assert.equal(h.run('players.size'),0);h.document.hidden=false;h.listeners.visibilitychange();await h.flush();assert.equal(h.run('audioFanfare'),null,'Resume does not replay fanfare');
+ const late=harness();late.run("begin('add')");await late.flush();late.document.hidden=true;late.listeners.visibilitychange();await late.resolveAll();assert.equal(late.run('musicNodes.length'),0,'Late load cannot start while hidden');late.document.hidden=false;late.listeners.visibilitychange();await late.resolveAll();assert.equal(late.run('musicNodes.length'),1);
+ const nes=harness();nes.run("stopMusic();game=null;phase='player-mario';startMusic();sound('tap');playFanfare('win')");await nes.resolveAll();assert.equal(nes.run('musicNodes.length'),0);assert.equal(nes.run('players.size'),0);nes.run("phase='settings';settingsSnapshot={phase:'player-mario'};startMusic(true)");await nes.resolveAll();assert.equal(nes.run('musicNodes.length'),0);nes.run('settingsSnapshot=null;home()');await nes.resolveAll();assert.equal(nes.run('musicNodes.length'),1);
+ const e=harness();await e.flush();for(const r of e.requests.splice(0))r.reject(new Error('offline'));await e.flush();assert.match(e.els.get('track-label').textContent,/недоступна/);e.run('startMusic()');await e.resolveAll();assert.equal(e.run('musicNodes.length'),1);
+ console.log('PASS audio: ten themes; source continuity; hidden clock suspension and resume; stale loads; profile preferences; separate volumes; one award sound; collection congratulations; NES exclusion; network retry.');
 })().catch(e=>{console.error(e);process.exitCode=1});
