@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from pathlib import Path
 from uuid import uuid4
+from unittest.mock import patch
 
 ROOT = Path(__file__).parent
 spec = importlib.util.spec_from_file_location("bunny", ROOT / "tool/bunny-server.py")
@@ -89,6 +90,36 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         assert transferred["id"] != first["id"] and transferred["expires"] == first["expires"]
         assert request(child, "mario", dict(action="heartbeat", id=first["id"]))[0] == 403
         assert request(second, "mario", dict(action="heartbeat", id=transferred["id"]))[0] == 200
+        # A native pause freezes the earned budget on the server, even past the old deadline.
+        base = time.time()
+        with patch.object(bunny.time, 'time', return_value=base + 90):
+            paused = request(second, "mario", dict(action="pause", id=transferred['id']))[1]
+            assert paused['paused'] and paused['expires'] is None and 508 <= paused['remaining'] <= 511
+            held = paused['remaining']
+        with patch.object(bunny.time, 'time', return_value=base + 3690):
+            bunny.initialize_database(database)  # Restart/migration preserves a paused session.
+            for action in ('heartbeat', 'pause', 'pause'):
+                again = request(second, "mario", dict(action=action, id=transferred['id']))[1]
+                assert again['paused'] and again['remaining'] == held
+            assert request(second, "mario")[1]['remaining'] == held
+            assert request(other, "mario", dict(action="resume", id=transferred['id']))[0] == 403
+            assert request(second, "mario", dict(action="resume", id='forged'))[0] == 403
+            # Transfer while paused preserves the budget and revokes the previous holder.
+            moved = request(child, "mario", dict(action="start"))[1]
+            assert moved['id'] != transferred['id'] and moved['paused'] and moved['remaining'] == held
+            assert request(second, "mario", dict(action="resume", id=transferred['id']))[0] == 403
+            moved = request(second, "mario", dict(action="start"))[1]
+            transferred = moved
+            assert moved['paused'] and moved['remaining'] == held
+            resumed = request(second, "mario", dict(action="resume", id=moved['id']))[1]
+            assert not resumed['paused'] and resumed['remaining'] == held
+            assert request(second, "mario", dict(action="resume", id=moved['id']))[1]['expires'] == resumed['expires']
+        with patch.object(bunny.time, 'time', return_value=base + 3720):
+            running = request(second, "mario", dict(action="heartbeat", id=transferred['id']))[1]
+            assert abs(running['remaining'] - (held-30)) < .001
+            assert request(second, "mario", dict(action="resume", id=transferred['id']))[1]['remaining'] == running['remaining']
+        assert request(second, path)[1] == before, 'Pause/resume cannot alter school progress or stickers'
+        assert request(second, "mario")[1]['tickets'] == 0, 'Pause/resume never mints a new ticket'
         with sqlite3.connect(database) as db:
             db.execute("UPDATE mario_sessions SET expires=? WHERE player=?", (time.time()-1, child_id))
         assert request(second, "mario", dict(action="heartbeat", id=transferred["id"]))[0] == 403
@@ -100,7 +131,7 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         assert next_play["id"] != transferred["id"] and next_play["remaining"] > 599
         assert request(second, "auth/logout", {})[0] == 200
         assert request(second, "mario", dict(action="heartbeat", id=next_play["id"]))[0] == 401
-        print("PASS Mario: admin-only free access, earned 600 seconds, profile isolation, concurrent/double-start, duplicate/invalid rounds, device transfer, expiry, new earned launch, logout and unchanged sticker positions")
+        print("PASS Mario: server pause budget, repeated pause/resume deduplication, hour-long pause, paused device transfer, active-time debit, unchanged progress; admin-only free access, earned 600 seconds, profile isolation, concurrent/double-start, duplicate/invalid rounds, device transfer, expiry, new earned launch, logout and unchanged sticker positions")
     finally:
         server.shutdown()
         server.server_close()

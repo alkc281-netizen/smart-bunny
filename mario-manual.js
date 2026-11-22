@@ -6,6 +6,7 @@
   const roundButton=playerButton($('finished'),'🎮 Играть в Марио · 10 минут',open);
   adminButton.id='mario-admin-play';earnedButton.id='mario-earned-play';roundButton.id='round-mario';roundButton.className='wide';
   let access=null,accessVersion=0,screenOpen=false,owner=null,generation=0;
+  let quotaPaused=false,frozenRemaining=0,timerRevision=0,leaseOperations=Promise.resolve();
   let selectedLevel=null;
   let runtime=null,loadedLevel='original',lease=null,deadline=0,verifiedUntil=0;
   let playing=false,loading=false,frameRequest=0,lastFrame=null,heartbeatFlight=null,heartbeatVersion=-1;
@@ -75,6 +76,7 @@
   }
 
   function pause(text='Пауза') {
+    syncQuotaTimer(true);
     playing=false;clearInput();
     if(frameRequest)cancelAnimationFrame(frameRequest);
     frameRequest=0;lastFrame=null;runtime?.silence();stopMusic();
@@ -217,6 +219,7 @@
         runtime.step(mask);
       }}catch{pause('Не удалось продолжить. Вернись к заданиям и открой игру ещё раз.');return;}
       const nativePaused=runtime.isPaused();
+      syncQuotaTimer(nativePaused);
       pauseButton.setAttribute('aria-pressed',String(nativePaused));
       report(nativePaused?'Пауза NES':'');
     }
@@ -225,44 +228,77 @@
 
   function applyLease(result,sent) {
     lease=result.id;
-    deadline=result.admin?Infinity:sent+result.remaining*1000;
+    quotaPaused=Boolean(result.paused);
+    frozenRemaining=result.admin?Infinity:Math.max(0,result.remaining*1000);
+    deadline=result.admin||quotaPaused?Infinity:sent+frozenRemaining;
     verifiedUntil=performance.now()+6500;
     access={...result,player:owner};refreshButtons();
     updateClock();
   }
 
-  async function heartbeat() {
-    if(!lease||!screenOpen)return null;
-    if(heartbeatFlight&&heartbeatVersion===generation)return heartbeatFlight;
-    const current=generation,player=owner,sent=performance.now(),id=lease;
-    heartbeatVersion=current;
-    heartbeatFlight=(async()=>{
+  function sendLease(action,revision=timerRevision) {
+    const current=generation,player=owner,id=lease;
+    if(!id)return Promise.resolve(false);
+    const request=leaseOperations.catch(()=>{}).then(async()=>{
+      const sent=performance.now();
       try {
-        const result=await apiRequest('mario',{action:'heartbeat',id});
+        const result=await apiRequest('mario',{action,id});
         if(current!==generation||player!==activePlayer?.id||!screenOpen)return false;
-        applyLease(result,sent);return true;
+        // A heartbeat already in flight must not undo a more recent local pause/resume.
+        if(revision===timerRevision)applyLease(result,sent);
+        else verifiedUntil=performance.now()+6500;
+        if(action==='heartbeat'&&!playing&&!quotaPaused)syncQuotaTimer(true);
+        return true;
       }catch(error){
         if(current===generation&&screenOpen){
-          if(error.status===403)expire();else pause('Нет связи с сервером. Нажми START после восстановления связи.');
+          if(error.status===403)expire();
+          else {
+            // Stop locally without enqueuing another failing pause from this handler.
+            if(!quotaPaused){frozenRemaining=Math.max(0,deadline-performance.now());quotaPaused=true;deadline=Infinity;timerRevision++;}
+            playing=false;clearInput();if(frameRequest)cancelAnimationFrame(frameRequest);frameRequest=0;lastFrame=null;runtime?.silence();
+            report('Нет связи с сервером. Нажми START после восстановления связи.');updateClock();
+          }
           if(error.status===401)loadPlayerSession().catch(()=>{});
         }
         return false;
-      }finally{if(heartbeatVersion===current)heartbeatFlight=null;}
-    })();
-    return heartbeatFlight;
+      }
+    });
+    // Pause/resume and periodic heartbeats reach the server in their original order.
+    leaseOperations=request.then(()=>{},()=>{});
+    return request;
+  }
+
+  function syncQuotaTimer(paused) {
+    if(!lease)return Promise.resolve(false);
+    if(access?.admin){quotaPaused=paused;return Promise.resolve(true);}
+    if(quotaPaused===paused)return Promise.resolve(true);
+    const now=performance.now();
+    if(paused){frozenRemaining=Math.max(0,deadline-now);deadline=Infinity;}
+    else deadline=now+frozenRemaining;
+    quotaPaused=paused;timerRevision++;updateClock();
+    return sendLease(paused?'pause':'resume');
+  }
+
+  async function heartbeat() {
+    if(!lease||!screenOpen)return null;
+    if(heartbeatFlight&&heartbeatVersion===generation)return heartbeatFlight;
+    const current=generation;heartbeatVersion=current;
+    heartbeatFlight=sendLease('heartbeat');
+    try{return await heartbeatFlight;}finally{if(heartbeatVersion===current)heartbeatFlight=null;}
   }
 
   function updateClock() {
     if(!screenOpen||!clock)return;
     if(!lease){clock.textContent='';return;}
-    if(deadline===Infinity){clock.textContent='Администратор · без ограничения';return;}
-    const seconds=Math.max(0,Math.ceil((deadline-performance.now())/1000));
-    clock.textContent='Осталось '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+    if(access?.admin){clock.textContent='Администратор · без ограничения';return;}
+    const seconds=Math.max(0,Math.ceil((quotaPaused?frozenRemaining:deadline-performance.now())/1000));
+    clock.textContent='Осталось '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0')+(quotaPaused?' · пауза':'');
     if(!seconds)expire();
   }
 
   function expire() {
     if(!screenOpen||!lease)return;
+    timerRevision++;lease=null;
     saveState();pause('10 минут закончились. Заверши ещё один учебный раунд, чтобы продолжить.');
     lease=null;pauseButton.disabled=true;startButton.hidden=false;startButton.disabled=false;
     startButton.textContent='🎮 Следующий заработанный запуск';
@@ -280,6 +316,8 @@
     unlockAudio();const current=generation,player=owner;
     const ok=await heartbeat();
     if(!ok||current!==generation||player!==owner||!screenOpen||!runtime)return false;
+    const timerOk=await syncQuotaTimer(runtime.isPaused());
+    if(!timerOk||current!==generation||!screenOpen)return false;
     playing=true;lastFrame=null;clearInput();report('');
     if(!frameRequest)frameRequest=requestAnimationFrame(tick);
     return true;
@@ -288,7 +326,12 @@
   async function systemButton(mask) {
     if(!screenOpen||!runtime||!lease||loading)return;
     unlockAudio();
-    if(!playing&&!await resume())return;
+    if(!playing){
+      const nativePaused=runtime.isPaused();
+      if(!await resume())return;
+      // Returning from a browser/background pause must not immediately pause a running ROM.
+      if(mask===16&&!nativePaused)return;
+    }
     pendingPress|=mask;
     if(mask===16)saveState();
   }
@@ -309,10 +352,14 @@
       if(!fresh){const saved=await checkpoint('get');if(current!==generation)return;
         if(saved?.version===1)try{runtime.restore(saved.state);}catch{}
       }
+      await leaseOperations;
+      if(current!==generation||!screenOpen)return;
       const sent=performance.now();
       const result=await apiRequest('mario',previousLease?{action:'heartbeat',id:previousLease}:{action:'start'});
       if(current!==generation||activePlayer?.id!==player||!screenOpen)return;
       applyLease(result,sent);startButton.hidden=true;pauseButton.disabled=false;
+      const timerOk=await syncQuotaTimer(runtime.isPaused());
+      if(!timerOk||current!==generation||!screenOpen)return;
       playing=true;lastFrame=null;report('');
       pauseButton.textContent='START';pauseButton.setAttribute('aria-label','START — начать игру или пауза NES');pauseButton.setAttribute('aria-pressed','false');
       frameRequest=requestAnimationFrame(tick);
@@ -351,7 +398,7 @@
     if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала полностью заверши учебный раунд.');return;}
     selectedLevel=level;
     const panel=playerScreen('🎮 Марио','', 'player-mario');
-    screenOpen=true;owner=player;generation++;loading=false;lease=null;runtime=null;playing=false;
+    screenOpen=true;owner=player;generation++;timerRevision++;quotaPaused=false;frozenRemaining=0;loading=false;lease=null;runtime=null;playing=false;
     $('app').classList.add('manual-playing');
     const layout=playerElement('div','',panel);layout.className='manual-layout';
     const left=playerElement('div','',layout);left.className='manual-side manual-left';
