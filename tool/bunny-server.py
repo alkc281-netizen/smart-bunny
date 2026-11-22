@@ -29,6 +29,8 @@ PREFERENCES = {
 PREFERENCES |= {f"bunny-school-{subject}-{setting}" for subject in ("math", "english", "world")
                 for setting in ("class", "count", "studied2", "studied4", "mistakes")}
 PREFERENCES |= {'bunny-school-english-selection2', 'bunny-school-english-selection4'}
+MARIO_DISCOVERIES = ('oneup11', 'coins11', 'oneup12', 'mushroom13', 'coins14')
+PREFERENCES.add('bunny-mario-discoveries')
 AUDIO_PREFERENCES = {
     'autoMusic': 'bool', 'selectedMusic': 'track', 'enableMusic': 'bool',
     'enableVictory': 'bool', 'mute': 'bool', 'musicVolume': 'volume',
@@ -646,6 +648,13 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Учебники доступны для 2-го и 4-го классов.")
             if key.startswith('bunny-audio-'):
                 validate_audio_preference(key, value)
+            if key == 'bunny-mario-discoveries':
+                ids = json.loads(value)
+                if not isinstance(ids, list) or len(ids) > len(MARIO_DISCOVERIES) or any(not isinstance(i, str) or i not in MARIO_DISCOVERIES for i in ids):
+                    raise ValueError('Некорректные секреты Марио.')
+                # Two devices can discover different episodes at the same time.
+                previous = json.loads(profile['preferences'].get(key, '[]'))
+                value = json.dumps([i for i in MARIO_DISCOVERIES if i in ids or i in previous])
             profile["preferences"][key] = value
         elif kind == "round":
             operation = data.get("id")

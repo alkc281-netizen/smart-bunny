@@ -652,3 +652,14 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 .english-lesson-picker legend {font-weight:700;}
 .english-lesson-picker label {display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;padding:8px 2px;}
 .english-lesson-picker input {width:22px;height:22px;flex:none;accent-color:var(--accent);}
+:root .nes-secret-notice{padding:10px 12px;background:var(--panel,#fff8ea);color:var(--text,#4b354d);border-top:2px solid currentColor;text-align:left}
+.nes-secret-notice p{margin:0 0 8px;font-size:16px;line-height:1.4}
+.nes-secret-notice button{padding:8px 12px;font-size:14px}
+.nes-secret-dialog{box-sizing:border-box;width:min(94vw,580px);max-height:90dvh;overflow:auto;border:3px solid var(--edge,#c88bad);border-radius:24px;padding:20px;background:var(--panel,#fff8ea);color:var(--text,#4b354d)}
+.nes-secret-dialog::backdrop{background:#0009}
+.nes-secret-dialog h2{margin-top:0;font-size:26px}
+.nes-secret-dialog p{font-size:16px;line-height:1.45}
+.nes-secret-list{display:grid;gap:8px;margin:16px 0}
+.nes-secret-list button{width:100%;padding:12px;text-align:left;font-size:16px}
+.nes-secret-list button:disabled{opacity:.6}
+#nes-secret-picture{display:block;width:100%;max-width:384px;margin:12px auto;image-rendering:pixelated;background:#10131b}

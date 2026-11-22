@@ -10,14 +10,14 @@
     if(!routeManifest)routeManifest=fetch(assets+'routes/manifest.json',{cache:'no-cache'}).then(response=>{if(!response.ok)throw Error('Маршруты недоступны. Проверь соединение.');return response.json();}).catch(error=>{routeManifest=null;throw error;});
     return routeManifest;
   }
-  async function loadRoutePacket(record){
+  async function loadRoutePacket(record,folder='routes/'){
     let response;
     if(typeof DecompressionStream==='function'){
-      response=await fetch(assets+'routes/'+record.compressed);
+      response=await fetch(assets+folder+record.compressed);
       if(!response.ok)throw Error('Не удалось загрузить маршрут.');
       return new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).json();
     }
-    response=await fetch(assets+'routes/'+record.file);
+    response=await fetch(assets+folder+record.file);
     if(!response.ok)throw Error('Не удалось загрузить маршрут.');
     return response.json();
   }
@@ -62,6 +62,131 @@
   let sampleCount = 0;
   const leftSamples = new Float32Array(4096);
   const rightSamples = new Float32Array(4096);
+  // Discovery clips run in another NES instance. The learning route stays intact.
+  const secrets = [
+    {id:'oneup11',level:0,title:'Скрытый гриб 1‑UP',hint:'1‑1 · После четвёртой трубы прыгни под невидимым блоком. Зелёный гриб добавит жизнь.',proof:'life'},
+    {id:'coins11',level:0,title:'Комната с монетами',hint:'1‑1 · Встань на четвёртую трубу и нажми вниз. Собери монеты и выйди через правую трубу.',proof:'room'},
+    {id:'oneup12',level:1,title:'Гриб над шестью монетами',hint:'1‑2 · Над площадкой с шестью монетами спрятан блок с зелёным грибом 1‑UP.',proof:'reveal'},
+    {id:'mushroom13',level:2,title:'Бонус на высоте',hint:'1‑3 · Из блока на высокой площадке можно достать супергриб. Он превращает маленького Марио в большого.',proof:'grow'},
+    {id:'coins14',level:3,title:'Невидимые монеты в замке',hint:'1‑4 · В просторном зале прыгай под невидимыми блоками: в них спрятаны монеты.',proof:'coins'},
+  ];
+  const discoveryKey='bunny-mario-discoveries';
+  const secretCache=new Map();
+  let secretEpoch=0,secretRun=null,secretAttempted=false;
+  const secretNotice=$('nes-secret-notice'),secretText=$('nes-secret-text');
+  const secretsButton=$('nes-secrets'),secretDialog=$('nes-secret-dialog');
+  const secretList=$('nes-secret-list'),secretViewer=$('nes-secret-viewer');
+  const secretCanvas=$('nes-secret-picture'),secretContext=secretCanvas.getContext('2d');
+
+  function discoveries(){
+    try {const ids=JSON.parse(readPlayerPreference(discoveryKey,'[]'));return new Set(Array.isArray(ids)?ids.filter(id=>secrets.some(s=>s.id===id)):[]);}catch{return new Set();}
+  }
+  function refreshSecrets(){
+    secretsButton.textContent=`📖 Секреты Марио · ${discoveries().size}/${secrets.length}`;
+    secretsButton.disabled=currentTotal>0&&currentCompleted<currentTotal;
+  }
+  function rememberSecret(id,owner){
+    if(!owner||activePlayer?.id!==owner)return;
+    const found=discoveries();if(found.has(id))return;
+    found.add(id);savePlayerPreference(discoveryKey,JSON.stringify([...found]));refreshSecrets();
+  }
+  function secretLive(run){
+    return secretRun===run&&run.epoch===secretEpoch&&activePlayer?.id===run.owner&&!manualActive
+      &&(run.inline?chosen&&marioTheme&&currentTotal>0&&currentCompleted<currentTotal:secretDialog.open);
+  }
+  function cancelSecret(restore=true){
+    secretEpoch++;
+    if(secretRun?.request)cancelAnimationFrame(secretRun.request);
+    secretRun=null;secretNotice.hidden=true;stopEffectsPlayback();lastFrame=null;
+    if(restore&&session&&verified){paint(frame===0?verified.startImage:session.nes.ppu.buffer);updateCaption();schedulePlayback();}
+  }
+  async function prepareSecret(record,engine,bytes,run){
+    if(secretCache.has(record.id))return secretCache.get(record.id);
+    const packet=await loadRoutePacket({file:record.id+'.json',compressed:record.id+'.json.gz'},'secrets/');
+    if(!secretLive(run))return null;
+    if(packet.version!==1||packet.id!==record.id||packet.level!==levelTitle(record.level)||packet.proof!==record.proof||packet.romSignature!==romSignature(bytes))throw Error('Эпизод не подходит к этому файлу игры.');
+    const buttons=expandRuns(packet.inputs,255,900),picture=expandRuns(packet.startImage,0xffffff,256*240);
+    if(!Number.isInteger(packet.end)||packet.end<1||buttons.length!==packet.end+1||picture.length!==256*240)throw Error('Неполный эпизод.');
+    const probe=makeSession(engine,bytes,()=>{},()=>{});probe.restore(packet.startState,buttons[0]);
+    const m=probe.nes.cpu.mem,before={lives:m[0x75a],coins:m[0x75e],status:m[0x756],area:m[0x750]};let reveal=false,room=false,deadline=performance.now()+8;
+    for(let i=1;i<buttons.length;i++){
+      if(!secretLive(run))return null;
+      probe.step(buttons[i]);
+      if(m[0x75f]!==0||m[0x75c]!==record.level||m[0x770]!==1||[4,5,11].includes(m[0xe]))throw Error('Эпизод не прошёл проверку.');
+      reveal ||=m[0x39]===3&&m[0x1b]===46&&m[0x14]!==0;room ||=m[0x750]!==before.area;
+      if(performance.now()>deadline){await new Promise(resolve=>setTimeout(resolve,0));deadline=performance.now()+8;}
+    }
+    const valid=record.proof==='life'?reveal&&m[0x75a]===before.lives+1:record.proof==='room'?room&&m[0x750]===before.area&&m[0x75e]-before.coins>=10:record.proof==='reveal'?reveal:record.proof==='grow'?m[0x756]>before.status:m[0x75e]-before.coins>=3;
+    if(!valid)throw Error('Бонус не подтверждён в эмуляторе.');
+    const result={packet,buttons,picture};secretCache.set(record.id,result);return result;
+  }
+  async function startSecret(record,inline){
+    cancelSecret(false);stopPlayback();
+    const run={record,inline,owner:activePlayer?.id,epoch:secretEpoch,request:0,frame:0,last:null,runtime:null};secretRun=run;
+    const label=inline?secretText:$('nes-secret-viewer-text');
+    label.textContent=record.hint+' Готовим показ…';
+    if(inline)secretNotice.hidden=false;else secretViewer.hidden=false;
+    try {
+      const bytes=rom||new Uint8Array(await readHomeRom()),engine=await loadReplayEngine();
+      validateRomHeader(bytes);
+      if(!secretLive(run))return;
+      const data=await prepareSecret(record,engine,bytes,run);
+      if(!data||!secretLive(run))return;
+      rom=bytes;run.data=data;
+      const render=inline?paint:buffer=>{
+        const picture=secretContext.createImageData(256,240),out=new Uint32Array(picture.data.buffer);
+        for(let i=0;i<out.length;i++)out[i]=0xff000000|buffer[i];secretContext.putImageData(picture,0,0);
+      };
+      run.runtime=makeSession(engine,bytes,render,recordSample);run.runtime.restore(data.packet.startState,data.buttons[0]);isolateEffects(run.runtime.nes);render(data.picture);
+      label.textContent=record.hint;
+      run.request=requestAnimationFrame(now=>advanceSecret(run,now));
+    }catch(error){
+      if(secretRun!==run)return;
+      cancelSecret();
+      if(!inline)$('nes-secret-viewer-text').textContent=error.message||'Не удалось показать секрет.';
+      // A missing optional episode must never block the next learning question.
+    }
+  }
+  function advanceSecret(run,now){
+    run.request=0;
+    if(!secretLive(run)){if(secretRun===run)cancelSecret();return;}
+    if(document.hidden||phase==='settings'||phase==='show'){run.last=null;stopEffectsPlayback();}
+    else {
+      const count=run.last===null?0:Math.min(3,Math.floor((now-run.last)/replayFrameMs));
+      if(run.last===null)run.last=now+900; // Read the hint before the action starts.
+      if(count>0){
+        run.last=Math.max(now-2*replayFrameMs,run.last+count*replayFrameMs);sampleCount=0;
+        for(let i=0;i<count&&run.frame<run.data.packet.end;i++)run.runtime.step(run.data.buttons[++run.frame]);
+        playEffectSamples();
+      }
+      if(run.frame===run.data.packet.end){
+        if(run.inline){rememberSecret(run.record.id,run.owner);cancelSecret();}
+        else {$('nes-secret-viewer-text').textContent=run.record.hint+' Показ завершён.';secretRun=null;stopEffectsPlayback();}
+        return;
+      }
+    }
+    run.request=requestAnimationFrame(next=>advanceSecret(run,next));
+  }
+  function maybeShowSecret(){
+    if(secretAttempted||manualActive||!chosen||!marioTheme||!session||!activePlayer||currentTotal<2||currentCompleted<Math.min(5,Math.floor(currentTotal/2))||currentCompleted>=currentTotal)return;
+    const candidates=secrets.filter(s=>s.level===Number(levelSelect.value));if(!candidates.length)return;
+    secretAttempted=true;
+    const found=discoveries(),record=candidates.find(s=>!found.has(s.id))||candidates[currentTotal% candidates.length];
+    void startSecret(record,true);
+  }
+  secretsButton.onclick=()=>{
+    if(currentTotal>0&&currentCompleted<currentTotal)return;
+    cancelSecret();secretList.replaceChildren();secretViewer.hidden=true;
+    const found=discoveries();
+    for(const record of secrets){
+      const button=playerButton(secretList,`${found.has(record.id)?'▶':'🔒'} ${levelTitle(record.level)} · ${record.title}`,()=>{ensureAudio();void startSecret(record,false);});button.disabled=!found.has(record.id);
+    }
+    secretDialog.showModal();
+  };
+  $('nes-secret-skip').onclick=()=>cancelSecret();
+  $('nes-secret-close').onclick=()=>secretDialog.close();
+  secretDialog.addEventListener('close',()=>cancelSecret());
+  refreshSecrets();
 
   function loadEngine() {
     return new Promise((resolve,reject) => {
@@ -256,14 +381,14 @@
   }
 
   function schedulePlayback() {
-    if (!manualActive && !frameRequest && chosen && marioTheme && session && frame<target && !document.hidden) {
+    if (!secretRun && !manualActive && !frameRequest && chosen && marioTheme && session && frame<target && !document.hidden) {
       frameRequest=requestAnimationFrame(advance);
     }
   }
 
   function advance(now) {
     frameRequest=0;
-    if (manualActive || !chosen || !marioTheme || !session || document.hidden) return;
+    if (secretRun || manualActive || !chosen || !marioTheme || !session || document.hidden) return;
     if (phase==='settings' || phase==='show') {
       lastFrame=null;
       stopEffectsPlayback();
@@ -282,6 +407,7 @@
   }
 
   function resetSession() {
+    cancelSecret(false);
     stopPlayback();
     session=makeSession(verified.engine,verified.rom,paint,recordSample);
     session.restore(verified.startState,verified.buttons[verified.start]);
@@ -295,7 +421,7 @@
     $('nes-controls').hidden=!marioTheme;
     screen.hidden=!(marioTheme && chosen && verified);
     stage.setAttribute('data-nes',String(!screen.hidden));
-    if (screen.hidden) stopPlayback();
+    if (screen.hidden) {cancelSecret(false);stopPlayback();}
     else schedulePlayback();
   }
 
@@ -391,7 +517,7 @@
       const result=cached || await verifyRoute(engine,gameRom,level,version);
       if (!result||version!==loadVersion) return;
       chosen=true;
-      if (gameRom!==rom) verifiedLevels.clear();
+      if (gameRom!==rom) {verifiedLevels.clear();secretCache.clear();}
       rom=gameRom;
       verified=result;
       verifiedLevels.delete(level);verifiedLevels.set(level,result);
@@ -422,6 +548,7 @@
   };
 
   document.addEventListener('visibilitychange',()=>{
+    if(secretRun)secretRun.last=null;
     if(document.hidden)stopPlayback();
     else schedulePlayback();
   });
@@ -429,6 +556,7 @@
   window.bunnyReplay={
     setEffectsVolume,
     async manual(level,render) {
+      cancelSecret(false);secretDialog.close();
       manualActive=true;stopPlayback();
       const version=++loadVersion;
       const gameRom=rom||new Uint8Array(await readHomeRom());
@@ -455,9 +583,13 @@
       updateVisibility();
     },
     setProgress(completed,total) {
+      if(completed===0){secretAttempted=false;cancelSecret();}
+      else if(completed>=total)cancelSecret();
       currentCompleted=completed;
       currentTotal=total;
       applyProgress();
+      refreshSecrets();maybeShowSecret();
     },
+    playerChanged(){cancelSecret(false);secretDialog.close();secretAttempted=false;refreshSecrets();},
   };
 })();
