@@ -161,6 +161,7 @@ def initialize_database(database):
         db.execute("CREATE TABLE IF NOT EXISTS rounds (player TEXT, id TEXT, PRIMARY KEY(player,id))")
         db.execute("CREATE TABLE IF NOT EXISTS mario_tickets (player TEXT, round TEXT, created REAL NOT NULL, used REAL, PRIMARY KEY(player,round))")
         db.execute("CREATE TABLE IF NOT EXISTS mario_sessions (player TEXT PRIMARY KEY, id TEXT NOT NULL, auth TEXT NOT NULL, expires REAL)")
+        db.execute("CREATE TABLE IF NOT EXISTS mario_pauses (player TEXT PRIMARY KEY, session TEXT NOT NULL, remaining REAL NOT NULL CHECK(remaining >= 0 AND remaining <= 600))")
         db.execute("CREATE TABLE IF NOT EXISTS accounts (player TEXT PRIMARY KEY, login TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, digest TEXT NOT NULL, parent INTEGER NOT NULL DEFAULT 0)")
         db.execute("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, player TEXT NOT NULL, expires REAL NOT NULL)")
         db.execute("CREATE TABLE IF NOT EXISTS auth_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
@@ -587,7 +588,10 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         now = time.time()
         auth = token_digest(self.session_token())
         session = db.execute("SELECT id,auth,expires FROM mario_sessions WHERE player=?", (player,)).fetchone()
-        valid = bool(session and (session[2] is None and parent or session[2] is not None and session[2] > now))
+        saved = db.execute("SELECT session,remaining FROM mario_pauses WHERE player=?", (player,)).fetchone()
+        paused = bool(session and saved and saved[0] == session[0] and saved[1] > 0)
+        remaining = saved[1] if paused else max(0, session[2] - now) if session and session[2] is not None else None
+        valid = bool(session and (parent and session[2] is None or remaining is not None and remaining > 0))
         action = data.get("action") if data is not None else None
         if action == "start":
             if not valid:
@@ -598,20 +602,35 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                     db.execute("UPDATE mario_tickets SET used=? WHERE player=? AND round=?", (now, player, ticket[0]))
                 session = (secrets.token_urlsafe(24), auth, None if parent else now + 600)
                 db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
+                db.execute("DELETE FROM mario_pauses WHERE player=?", (player,))
+                remaining = None if parent else 600
+                paused = False
             elif session[1] != auth:
-                # Transfer an earned session to another signed-in device without extending it.
+                # Transfer the same remaining budget; a pause survives the device change.
                 session = (secrets.token_urlsafe(24), auth, session[2])
                 db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
+                if paused:
+                    db.execute("UPDATE mario_pauses SET session=? WHERE player=?", (session[0], player))
             valid = True
-        elif action == "heartbeat":
+        elif action in ("heartbeat", "pause", "resume"):
             if not valid or session[1] != auth or not isinstance(data.get("id"), str) or not hmac.compare_digest(session[0], data["id"]):
                 return 403, {"error": "Время игры закончилось. Заверши ещё один учебный раунд."}
+            if action == "pause" and not paused and not parent:
+                # Only the server measures the unused seconds. Repeated pauses cannot refill them.
+                db.execute("INSERT OR REPLACE INTO mario_pauses VALUES (?,?,?)", (player, session[0], remaining))
+                paused = True
+            elif action == "resume" and paused:
+                session = (session[0], session[1], now + remaining)
+                db.execute("UPDATE mario_sessions SET expires=? WHERE player=?", (session[2], player))
+                db.execute("DELETE FROM mario_pauses WHERE player=?", (player,))
+                paused = False
         elif data is not None:
             raise ValueError("Неизвестное действие Марио.")
         tickets = db.execute("SELECT count(*) FROM mario_tickets WHERE player=? AND used IS NULL", (player,)).fetchone()[0]
         result = dict(admin=bool(parent), tickets=tickets, canResume=valid, serverTime=now)
         if valid and session[1] == auth:
-            result.update(id=session[0], expires=session[2], remaining=None if session[2] is None else max(0, session[2]-now))
+            result.update(id=session[0], expires=None if paused else session[2],
+                          paused=paused, remaining=None if parent else remaining)
         return 200, result
 
     @staticmethod
