@@ -635,3 +635,12 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 .album-decorations { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .album-decorations h2,.album-decorations p { width: 100%; }
 .album-decorations button { min-height: 44px; padding: 10px; }
+
+/* World selection is outside the full-screen NES controller. */
+.mario-world-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;text-align:left;}
+.mario-world-grid fieldset {min-width:0;border:2px solid var(--edge);border-radius:18px;padding:10px;}
+.mario-world-grid legend {font-weight:700;padding:0 6px;}
+.mario-world-levels {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.mario-world-levels button {min-width:0;min-height:48px;padding:8px 4px;}
+.nes-route-credit {font-size:.8em;}
+@media(max-width:420px){.mario-world-grid{grid-template-columns:1fr;}.mario-world-levels{grid-template-columns:repeat(4,minmax(0,1fr));}}
