@@ -17,7 +17,7 @@ class Element {
   getContext(){return {createImageData:()=>({data:new Uint8ClampedArray(256*240*4)}),putImageData(){}};}
 }
 async function harness(){
-  const root=new Element(),elements=new Map(),frames=new Map(),masks=[];
+  const root=new Element(),elements=new Map(),frames=new Map(),masks=[],startedLevels=[];
   let now=0,serial=0,released=0,selection={rangeCount:1,removeAllRanges(){this.rangeCount=0;}};
   const $=id=>{if(!elements.has(id)){const el=new Element('div',root);el.id=id;elements.set(id,el);}return elements.get(id);};
   const document=new Element();document.hidden=false;
@@ -34,18 +34,18 @@ async function harness(){
     assert.equal(session.nes.cpu.mem[0x0e],8,'Original ROM enters active gameplay');
   }
   const runtime={step:mask=>{masks.push(mask);session?.step(mask);},isPaused:()=>false,snapshot:()=>({}),restore(){},silence(){},releaseInput(){released++;session?.release();}};
-  window.bunnyReplay={manual:async()=>runtime,stopManual(){}};
+  window.bunnyReplay={manual:async level=>{startedLevels.push(level);return runtime;},stopManual(){}};
   const c=vm.createContext({window,document,console,$,navigator:{},performance:{now:()=>now},
     activePlayer:{id:'test'},parentSession:true,phase:'menu',mute:true,
     playerElement:(tag,text,parent)=>{const el=new Element(tag,parent);el.textContent=text;return el;},
     playerButton:(parent,text,fn)=>{const el=new Element('button',parent);el.textContent=text;el.onclick=fn;return el;},
-    playerScreen:()=>{c.phase='player-mario';const panel=$('player-panel');panel.children=[];return panel;},
+    playerScreen:(title,hint,screen)=>{c.phase=screen;window.bunnyMario?.screenChanged();const panel=$('player-panel');panel.children=[];return panel;},
     apiRequest:async()=>({player:'test',admin:true,id:'lease',tickets:0}),stopMusic(){},message(){},
     home:()=>{c.phase='menu';window.bunnyMario.screenChanged();},
     requestAnimationFrame:fn=>{frames.set(++serial,fn);return serial;},cancelAnimationFrame:id=>frames.delete(id),setInterval(){},
   });
   vm.runInContext(fs.readFileSync(__dirname+'/mario-manual.js','utf8'),c);
-  await window.bunnyMario.open();for(let i=0;i<15;i++)await Promise.resolve();
+  await window.bunnyMario.open(null);for(let i=0;i<15;i++)await Promise.resolve();
   assert.ok(window.bunnyMario.isPlaying());
   const panel=$('player-panel'),buttons=root.querySelectorAll('[data-mask]');
   const button=mask=>buttons.find(el=>+el.dataset.mask===mask);
@@ -54,7 +54,7 @@ async function harness(){
   const touch=(id,mask)=>({identifier:id,target:button(mask),clientX:30,clientY:30});
   function dispatch(type,touches,changed=touches){const e=event(panel,{touches,changedTouches:changed});(type==='touchstart'||type==='touchmove'?panel:window).dispatch(type,e);return e;}
   function tick(count=1){for(let i=0;i<count;i++){now+=17;const callbacks=[...frames.values()];frames.clear();callbacks.forEach(fn=>fn(now));}}
-  return {window,document,button,pad,panel,event,touch,dispatch,tick,masks,c,$,released:()=>released,selection,session};
+  return {window,document,button,pad,panel,event,touch,dispatch,tick,masks,startedLevels,c,$,released:()=>released,selection,session};
 }
 (async()=>{
   const h=await harness(),{touch,dispatch,tick,button,pad,window,event,masks}=h;
@@ -95,8 +95,15 @@ async function harness(){
   assert.equal(button(64).attrs['aria-pressed'],'false');
   h.selection.rangeCount=1;h.document.dispatch('selectionchange',{});assert.equal(h.selection.rangeCount,0);
   h.c.home();const lesson=event(h.panel);h.panel.onselectstart(lesson);assert.equal(lesson.prevented,undefined,'Lessons retain normal selection');
-  await window.bunnyMario.open();for(let i=0;i<15;i++)await Promise.resolve();
+  await window.bunnyMario.open(null);for(let i=0;i<15;i++)await Promise.resolve();
   assert.equal(h.panel.listeners.touchstart.length,1,'Reopening does not accumulate gesture handlers');
   assert.equal(h.panel.listeners.touchmove.length,1);
+  h.c.home();await window.bunnyMario.open();
+  assert.equal(h.c.phase,'player-mario-select');assert.equal(window.bunnyMario.isPlaying(),false);
+  const choices=h.panel.querySelectorAll('button').filter(button=>button.dataset.marioLevel!==undefined);
+  assert.equal(choices.length,32);assert.deepEqual(choices.map(button=>Number(button.dataset.marioLevel)),Array.from({length:32},(_,i)=>i));
+  await choices[31].click();for(let i=0;i<15;i++)await Promise.resolve();
+  assert.equal(h.startedLevels.at(-1),31);assert.equal(window.bunnyMario.isPlaying(),true);
+  h.c.home();await window.bunnyMario.open(null);for(let i=0;i<15;i++)await Promise.resolve();assert.equal(h.startedLevels.at(-1),null);
   console.log('PASS NES input: native three-touch, short tap, missed release recovery, cancel, slip, global pointer release, failed capture, duplicate suppression, SELECT, blur reset, selection blocking');
 })().catch(error=>{console.error(error);process.exitCode=1;});

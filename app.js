@@ -44,7 +44,7 @@ function decodeAudio(data){return new Promise((resolve,reject)=>audioCtx.decodeA
 function loadAudio(url){if(!audioBuffers.has(url)){const pending=fetch(url).then(r=>{if(!r.ok)throw new Error('Audio HTTP '+r.status);return r.arrayBuffer()}).then(decodeAudio).catch(e=>{audioBuffers.delete(url);throw e});audioBuffers.set(url,pending)}return audioBuffers.get(url)}
 function loadLoops(){if(!loopManifest)loopManifest=fetch('assets/audio/music/loops.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('Loop metadata HTTP '+r.status);return r.json()}).catch(e=>{loopManifest=null;throw e});return loopManifest}
 function musicScreen(){return phase==='settings'?settingsSnapshot?.phase:phase}
-function musicAllowed(){const screen=musicScreen();return screen!=='player-mario'&&Boolean((phase==='settings'&&musicPreview)||['menu','player-select','player-album','math-length','math-menu','school-menu','russian-menu'].includes(screen)||game)}
+function musicAllowed(){const screen=musicScreen();return screen!=='player-mario'&&Boolean((phase==='settings'&&musicPreview)||['menu','player-select','player-mario-select','player-album','math-length','math-menu','school-menu','russian-menu'].includes(screen)||game)}
 function targetMusic(){if(!autoMusic)return selectedMusic;const screen=musicScreen();if(screen==='player-album')return 8;if(!game||screen==='menu'||screen==='player-select')return 6;if(game==='mission')return 9;return gameMusic[game]??7}
 function setAudioLevel(){
  window.bunnyReplay?.setEffectsVolume?.(mute||audioHidden?0:fxVolume);

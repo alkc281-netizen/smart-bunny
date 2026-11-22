@@ -3,34 +3,30 @@
 (() => {
   const replayFrameMs = 1000 / 60.0988138974405;
   const assets = 'assets/emulation/';
-  // World 1 routes, recorded against JSNES 2.1.0. A prefix reuses a previous run.
-  // Each pair is [frame count, button mask] in RLDUTSBA order.
-  const levelRoutes = [
-    {inputs:[
-      [41,0], [1,16], [174,0], [128,65], [15,193], [17,65], [15,193], [41,65],
-      [15,193], [17,65], [32,193], [72,65], [23,193], [65,65], [15,193], [105,65],
-      [15,193], [33,65], [15,193], [65,65], [32,193], [40,0], [40,65], [40,193],
-      [32,65], [8,193], [16,65], [15,193], [65,65], [15,193], [9,65], [15,193],
-      [49,65], [15,193], [49,65], [32,193], [40,65], [15,193], [25,65], [15,193],
-      [81,65], [15,193], [52,65],
-    ]},
-    {prefix:0, inputs:[
-      [595,65], [542,0], [56,65], [15,193], [57,65], [15,193], [17,65], [15,193],
-      [89,65], [15,193], [33,65], [8,193], [80,0], [40,2], [24,65], [15,193],
-      [161,65], [15,193], [33,65], [15,193], [105,65], [32,193], [40,65], [15,193],
-      [33,65], [15,193], [25,65], [15,193], [57,65], [40,193], [40,65], [40,193],
-      [16,65], [15,193], [89,65], [40,193], [8,65], [32,193], [40,1], [32,2],
-      [8,0], [213,65], [24,193], [16,65], [24,193], [56,65], [15,193], [60,65],
-    ]},
-    {area:3, inputs:[
-      [41,0], [1,16], [174,0], [80,65], [15,193], [33,65], [15,193], [57,65],
-      [15,193], [25,65], [32,193], [9,65], [49,193], [36,65], [12,193], [48,65],
-      [15,193], [9,65], [15,193], [29,65], [4,193], [48,65], [39,193], [25,65],
-      [8,193], [32,65], [15,193], [17,65], [8,193], [64,65], [8,193], [24,65],
-      [24,193], [60,65], [12,193], [12,65], [27,193], [33,65], [24,0], [4,65],
-      [20,193], [59,65],
-    ]},
-  ];
+  const levelTitle=level=>`${Math.floor(level/4)+1}-${level%4+1}`;
+  let routeManifest;
+  function romSignature(bytes){let hash=2166136261;for(const byte of bytes)hash=Math.imul(hash^byte,16777619)>>>0;return hash.toString(16).padStart(8,'0');}
+  async function loadRouteManifest(){
+    if(!routeManifest)routeManifest=fetch(assets+'routes/manifest.json',{cache:'no-cache'}).then(response=>{if(!response.ok)throw Error('Маршруты недоступны. Проверь соединение.');return response.json();}).catch(error=>{routeManifest=null;throw error;});
+    return routeManifest;
+  }
+  async function loadRoutePacket(record){
+    let response;
+    if(typeof DecompressionStream==='function'){
+      response=await fetch(assets+'routes/'+record.compressed);
+      if(!response.ok)throw Error('Не удалось загрузить маршрут.');
+      return new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).json();
+    }
+    response=await fetch(assets+'routes/'+record.file);
+    if(!response.ok)throw Error('Не удалось загрузить маршрут.');
+    return response.json();
+  }
+  function expandRuns(runs,maximum,limit){
+    if(!Array.isArray(runs))throw Error('Некорректный маршрут.');
+    const values=[];
+    for(const pair of runs){if(!Array.isArray(pair)||pair.length!==2||!Number.isInteger(pair[0])||pair[0]<1||!Number.isInteger(pair[1])||pair[1]<0||pair[1]>maximum||values.length+pair[0]>limit)throw Error('Некорректный маршрут.');for(let i=0;i<pair[0];i++)values.push(pair[1]);}
+    return values;
+  }
   const levelSelect = $('nes-level');
   const progressLabel = $('nes-caption');
   const status = $('nes-status');
@@ -95,6 +91,10 @@
       nes,
       restore(state,buttons) {
         nes.fromJSON(structuredClone(state));
+        for(let i=0;i<directions.length;i++){
+          nes[buttons&(1<<i)?'buttonDown':'buttonUp'](1,directions[i]);
+          if(mirrorControls)nes[buttons&(1<<i)?'buttonDown':'buttonUp'](2,directions[i]);
+        }
         previous=buttons;
       },
       release() { for(const button of directions){nes.buttonUp(1,button);if(mirrorControls)nes.buttonUp(2,button);}previous=0; },
@@ -189,45 +189,53 @@
   }
 
   async function verifyRoute(engine,rom,level,version) {
-    const route=levelRoutes[level];
-    const runs=route.prefix===undefined ? route.inputs : levelRoutes[route.prefix].inputs.concat(route.inputs);
-    const buttons=runs.flatMap(([length,mask])=>Array(length).fill(mask));
-    let pixels;
-    let startState;
-    let startImage;
-    const probe=makeSession(engine,rom,frame=>{pixels=frame;},()=>{});
-    let start=-1;
-    let flag=-1;
+    if(!Number.isInteger(level)||level<0||level>31)throw Error('Выберите уровень от 1-1 до 8-4.');
+    const manifest=await loadRouteManifest();
+    if(manifest.version!==1||manifest.romSignature!==romSignature(rom))throw Error('Этот маршрут подготовлен для другого файла игры. Выберите оригинальный Super Mario Bros. (World).');
+    const record=manifest.levels.find(item=>item.id===levelTitle(level));
+    if(!record)throw Error('Маршрут уровня пока недоступен.');
+    const packet=await loadRoutePacket(record);
+    if(version!==loadVersion)return null;
+    if(packet.version!==1||packet.id!==record.id||packet.romSignature!==manifest.romSignature||packet.goal!==record.goal||packet.end!==record.end||!Number.isInteger(packet.goal)||!Number.isInteger(packet.end)||packet.goal<1||packet.end<packet.goal)throw Error('Некорректный маршрут уровня.');
+    const buttons=expandRuns(packet.inputs,255,20000),startImage=expandRuns(packet.startImage,0xffffff,256*240);
+    if(buttons.length!==packet.end+1||startImage.length!==256*240)throw Error('Неполный маршрут уровня.');
+    const probe=makeSession(engine,rom,()=>{},()=>{});
+    probe.restore(packet.startState,buttons[0]);
+    const matches=()=>{const m=probe.nes.cpu.mem;return m[0x075f]===Math.floor(level/4)&&m[0x075c]===level%4;};
+    if(!matches()||probe.nes.cpu.mem[0x0770]!==1||probe.nes.cpu.mem[0x0e]!==8)throw Error('Неверное начало уровня.');
     let deadline=performance.now()+8;
-    for (let i=0;i<buttons.length;i++) {
-      if (version!==loadVersion) return null;
-      const ram=probe.nes.cpu.mem;
-      if (route.area!==undefined && start<0 && buttons[i]===16) {
-        // Select the internal area just before START calls the game's area loader.
-        ram[0x075c]=level;
-        ram[0x0760]=route.area;
-      }
+    for(let i=1;i<buttons.length;i++){
+      if(version!==loadVersion)return null;
       probe.step(buttons[i]);
-      // OperMode and OperMode_Task identify the active level after the title screen.
-      const inLevel=ram[0x0770]===1 && ram[0x0772]===3 && ram[0x075f]===0 && ram[0x075c]===level;
-      // GameEngineSubroutine: 8 plays the level, 4 slides the flag, 5 ends the level.
-      const routine=ram[0x0e];
-      if (start<0 && inLevel && ram[0x0774]===0 && routine===8 && (level!==1 || ram[0x074e]===2)) {
-        start=i;
-        startState=structuredClone(probe.nes.toJSON());
-        startImage=pixels.slice();
-      }
-      if (flag<0 && start>=0 && inLevel && routine===4) flag=i;
-      if (flag>=0 && inLevel && routine===5) {
-        return {engine,rom,buttons,start,startState,startImage,flag,end:i};
-      }
-      if (start>=0 && inLevel && routine===11) break;
-      if (performance.now()>deadline) {
-        await new Promise(resolve=>setTimeout(resolve,0));
-        deadline=performance.now()+8;
-      }
+      const m=probe.nes.cpu.mem;
+      if(!matches()||(m[0x0770]===1&&m[0x0e]===11))throw Error('Маршрут сбился. Попробуйте загрузить уровень снова.');
+      const goal=packet.goalKind==='castle'?m[0x0770]===2:m[0x0770]===1&&(m[0x0e]===4||m[0x0e]===5);
+      if(i<packet.goal&&goal)throw Error('Финиш наступил раньше последнего задания.');
+      if(i===packet.goal&&!goal)throw Error('Не подтверждён финиш уровня.');
+      if(performance.now()>deadline){await new Promise(resolve=>setTimeout(resolve,0));deadline=performance.now()+8;}
     }
-    throw Error(`Маршрут мира 1-${level+1} на выбранном файле не дошёл до флага.`);
+    const m=probe.nes.cpu.mem;
+    if(packet.goalKind==='castle' ? !(m[0x0770]===2&&m[0x0772]===4) : !(m[0x0770]===1&&m[0x0e]===5))throw Error('Не подтверждено завершение уровня.');
+    return {engine,rom,buttons,start:0,startState:packet.startState,startImage,flag:packet.goal,end:packet.end};
+  }
+
+  async function bootManualLevel(runtime,level,version){
+    if(!Number.isInteger(level)||level<0||level>31)throw Error('Выберите уровень от 1-1 до 8-4.');
+    const world=Math.floor(level/4),number=level%4;
+    for(let i=0;i<120;i++){runtime.step(0);if(runtime.nes.cpu.mem[0x0770]===0&&runtime.nes.cpu.mem[0x0772]===3)break;}
+    const m=runtime.nes.cpu.mem;
+    if(m[0x0770]!==0||m[0x0772]!==3)throw Error('Не удалось открыть оригинальное меню NES.');
+    const area=[0,1,3,4].includes(world)&&number>=2?number+1:number;
+    m[0x075f]=m[0x0766]=world;m[0x075c]=m[0x0763]=number;m[0x0760]=m[0x0767]=area;
+    runtime.step(16);
+    let deadline=performance.now()+8;
+    for(let i=0;i<1000;i++){
+      if(version!==loadVersion||!manualActive)return false;
+      runtime.step(0);
+      if(m[0x0770]===1&&m[0x0772]===3&&m[0x0e]===8&&m[0x075f]===world&&m[0x075c]===number){runtime.release();return true;}
+      if(performance.now()>deadline){await new Promise(resolve=>setTimeout(resolve,0));deadline=performance.now()+8;}
+    }
+    throw Error('Не удалось запустить уровень '+levelTitle(level)+'.');
   }
 
   function paint(buffer) {
@@ -374,7 +382,7 @@
     const version=++loadVersion;
     const level=Number(levelSelect.value);
     levelSelect.disabled=true;
-    status.textContent='Проверяем маршрут от старта до флага…';
+    status.textContent='Проверяем маршрут до конца уровня…';
     try {
       const gameRom=(reuseRom && rom) || new Uint8Array(await readRom());
       validateRomHeader(gameRom);
@@ -386,9 +394,10 @@
       if (gameRom!==rom) verifiedLevels.clear();
       rom=gameRom;
       verified=result;
-      verifiedLevels.set(level,result);
-      $('nes-level-label').textContent=`Мир 1-${level+1}`;
-      canvas.setAttribute('aria-label',`Super Mario Bros., мир 1-${level+1}`);
+      verifiedLevels.delete(level);verifiedLevels.set(level,result);
+      if(verifiedLevels.size>4)verifiedLevels.delete(verifiedLevels.keys().next().value);
+      $('nes-level-label').textContent=`Мир ${levelTitle(level)}`;
+      canvas.setAttribute('aria-label',`Super Mario Bros., мир ${levelTitle(level)}`);
       resetSession();
       applyProgress();
       status.textContent='';
@@ -430,6 +439,7 @@
       // Manual play boots the original ROM and keeps every APU channel. Only
       // the learning-round replay uses prepared levels and music isolation.
       const runtime=makeSession(engine,gameRom,render,recordSample,true);
+      if(level!==null&&!await bootManualLevel(runtime,level,version))return null;
       return {
         step(buttons) {sampleCount=0;runtime.step(buttons);playEffectSamples();},
         isPaused() {return Boolean(runtime.nes.cpu.mem[0x0776]&1);},
