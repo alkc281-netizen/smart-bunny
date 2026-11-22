@@ -3066,6 +3066,7 @@ async function flushPlayerUpdates() {
               'Для награды нужно '+outcome.required+' верных. Выполненные этапы сохранены.'));
           }
         }
+        if(data.kind==='round') completeRoundAudio(data.id,player,result.audioEvent);
       }
     }
   } catch (error) {
@@ -3074,6 +3075,7 @@ async function flushPlayerUpdates() {
       message('Сервер недоступен. Изменения ожидают отправки.');
     } else if (phase === 'finished' && activePlayer) {
       $('round-album').textContent = '📒 Альбом · сохранение ожидается';
+      if(roundAudio)completeRoundAudio(roundAudio.id,activePlayer.id,null);
     }
   } finally {
     writingPlayer = false;
@@ -3110,6 +3112,7 @@ function playerScreen(title, hint, screen) {
   message('');
   const panel = $('player-panel');
   panel.replaceChildren();
+  startMusic();
   return panel;
 }
 
@@ -3149,6 +3152,7 @@ function chooseActivePlayer(player) {
     }
   }
   activePlayer = player;
+  loadAudioProfile(player);
   if(player)window.bunnyAssets?.warm();
   window.bunnyMario?.playerChanged();
   $('app').classList.toggle('auth-required', !player);
@@ -3986,21 +3990,25 @@ $('replay').onclick=()=>game==='mission' ? startRewardMission(rewardRound.key) :
 const playerBaseFinish = finish;
 finish = function () {
   if (phase === 'finished') return;
+  const audioId=playerRoundId();
+  if(activePlayer)planRoundAudio(audioId,activePlayer.id);
   playerBaseFinish();
   setVisible('round-album', Boolean(activePlayer));
   $('round-album').textContent = '📒 Мой альбом';
   if (!activePlayer) return;
   const total = roundQuestionCount();
   if (game === 'mission') {
-    enqueuePlayerUpdate({kind:'round',id:playerRoundId(),score,total,review:false,
+    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,review:false,
       topics:[...new Set(rewardRound.deck.map(item=>item.topic))],corrected:rewardRound.corrected,
       mission:rewardRound.key,daily:rewardRound.daily,rewardVersion:2,missionClass:rewardRound.grade});
     return;
   }
   const topics = game === 'russian' ? Object.keys(russianRoundStats) : game === 'school' ? window.bunnySchool.topics() : [game];
-  enqueuePlayerUpdate({kind: 'round', id: playerRoundId(), score, total, topics,
+  enqueuePlayerUpdate({kind: 'round', id: audioId, score, total, topics,
     review: game === 'school' ? window.bunnySchool.review() : game === 'russian' && russianMode === 'mistakes',corrected:game==='russian' ? russianCorrected : game==='school' ? window.bunnySchool.corrected() : 0});
 };
+
+window.bunnyAudioPreferences={save:savePlayerPreference};
 
 // Keep an album or profile picker visible when returning from music settings.
 const playerBaseOpenSettings = openSettings;
@@ -4008,6 +4016,14 @@ $('open-settings').onclick = () => {
   const playerPanelVisible = !$('player-panel').hidden;
   playerBaseOpenSettings();
   if (playerPanelVisible) settingsSnapshot.visible.push(['player-panel', true]);
+  // Refresh cross-device choices without replacing edits made while this request is in flight.
+  const owner=activePlayer?.id,revision=audioSettingsRevision;
+  if(owner)playerRequest('/'+owner).then(profile=>{
+    if(activePlayer?.id!==owner||phase!=='settings'||revision!==audioSettingsRevision)return;
+    for(const item of playerOutbox)if(item.player===owner&&item.data.kind==='preference')profile.preferences[item.data.key]=item.data.value;
+    activePlayer.preferences=profile.preferences;
+    loadAudioProfile(activePlayer);startMusic(musicPreview);
+  }).catch(()=>{});
 };
 $('choose-player').onclick = () => { openPlayerPicker(); sound('playerIntro'); };
 $('open-album').onclick = openPlayerAlbum;
