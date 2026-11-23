@@ -61,7 +61,9 @@ with tempfile.TemporaryDirectory(prefix='bunny-public-') as tmp:
   # Retrying the very same result through the LAN cannot add a second round or ticket.
   child_lan=cookie(request(lan,'/api/auth/login',dict(login='child',password='Child-test-123'))[2])
   result=request(lan,'/api/players/child',event,child_lan)[1];assert result['rounds']==1 and result['coins']==1
-  assert request(public,'/api/mario',cookie=public_cookie)[1]['tickets']==1
+  access=request(public,'/api/mario',cookie=public_cookie)[1]
+  assert access['tickets']==0 and access['bonusSeconds']==60
+  assert request(public,'/api/mario',dict(action='start'),public_cookie)[0]==403,'Ordinary bonus cannot open play'
   point=dict(kind='sticker',sticker='start',x=25,y=35,boardX=500,boardY=700)
   assert request(lan,'/api/players/child',point,child_lan)[0]==200
   assert request(public,'/api/players/child',cookie=public_cookie)[1]['stickers']['start']['boardX']==500

@@ -663,3 +663,10 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 .nes-secret-list button{width:100%;padding:12px;text-align:left;font-size:16px}
 .nes-secret-list button:disabled{opacity:.6}
 #nes-secret-picture{display:block;width:100%;max-width:384px;margin:12px auto;image-rendering:pixelated;background:#10131b}
+
+.mario-mission-subject {border:2px solid var(--border,#cb90ac);border-radius:16px;text-align:left;margin:12px 0;padding:12px;}
+.mario-mission-topic {display:block;margin:10px 0;}
+.mario-mission-subject input {width:22px;height:22px;vertical-align:middle;}
+.mario-mission-subject summary {cursor:pointer;padding:8px 0;}
+
+#player-nav > .hint {grid-column:1 / -1;}

@@ -159,11 +159,22 @@ def token_digest(value):
 
 def initialize_database(database):
     with closing(sqlite3.connect(database)) as db, db:
+        db.execute('BEGIN IMMEDIATE')
         db.execute("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, progress TEXT)")
         db.execute("CREATE TABLE IF NOT EXISTS rounds (player TEXT, id TEXT, PRIMARY KEY(player,id))")
         db.execute("CREATE TABLE IF NOT EXISTS mario_tickets (player TEXT, round TEXT, created REAL NOT NULL, used REAL, PRIMARY KEY(player,round))")
         db.execute("CREATE TABLE IF NOT EXISTS mario_sessions (player TEXT PRIMARY KEY, id TEXT NOT NULL, auth TEXT NOT NULL, expires REAL)")
-        db.execute("CREATE TABLE IF NOT EXISTS mario_pauses (player TEXT PRIMARY KEY, session TEXT NOT NULL, remaining REAL NOT NULL CHECK(remaining >= 0 AND remaining <= 600))")
+        db.execute("CREATE TABLE IF NOT EXISTS mario_pauses (player TEXT PRIMARY KEY, session TEXT NOT NULL, remaining REAL NOT NULL CHECK(remaining >= 0))")
+        # Preserve every existing ticket and frozen second while lifting the old ten-minute ceiling.
+        if 'seconds' not in {row[1] for row in db.execute('PRAGMA table_info(mario_tickets)')}:
+            db.execute('ALTER TABLE mario_tickets ADD COLUMN seconds INTEGER NOT NULL DEFAULT 600')
+        if 'remaining <= 600' in db.execute("SELECT sql FROM sqlite_master WHERE name='mario_pauses'").fetchone()[0]:
+            db.execute('ALTER TABLE mario_pauses RENAME TO mario_pauses_v1')
+            db.execute('CREATE TABLE mario_pauses (player TEXT PRIMARY KEY, session TEXT NOT NULL, remaining REAL NOT NULL CHECK(remaining >= 0))')
+            db.execute('INSERT INTO mario_pauses SELECT * FROM mario_pauses_v1')
+            db.execute('DROP TABLE mario_pauses_v1')
+        db.execute('CREATE TABLE IF NOT EXISTS mario_bonus (player TEXT PRIMARY KEY, seconds INTEGER NOT NULL CHECK(seconds >= 0))')
+        db.execute('CREATE TABLE IF NOT EXISTS mario_rewards (player TEXT, round TEXT, minutes INTEGER NOT NULL, unlock INTEGER NOT NULL, PRIMARY KEY(player,round))')
         db.execute("CREATE TABLE IF NOT EXISTS accounts (player TEXT PRIMARY KEY, login TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, digest TEXT NOT NULL, parent INTEGER NOT NULL DEFAULT 0)")
         db.execute("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, player TEXT NOT NULL, expires REAL NOT NULL)")
         db.execute("CREATE TABLE IF NOT EXISTS auth_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
@@ -232,7 +243,7 @@ def apply_round(profile, data):
     corrected = data.get("corrected", 0)
     mission = data.get("mission")
     daily = data.get("daily")
-    if (type(score) is not int or total not in ((10, 20, 30, 50, 100) if mission is not None else (10, 50, 100)) or not 0 <= score <= total
+    if (type(score) is not int or type(total) is not int or total not in (10, 20, 30, 50, 100) or not 0 <= score <= total
             or not isinstance(topics, list) or not 1 <= len(topics) <= 64
             or not all(isinstance(topic, str) and topic.isascii() and topic.isalnum()
                        and 1 <= len(topic) <= 40 for topic in topics)
@@ -271,6 +282,44 @@ def apply_round(profile, data):
             award(profile, "rocket")
         if len(profile["best"]) < 100 or previous is not None:
             profile["best"][topic] = max(percentage, previous or 0)
+
+
+MARIO_SCHOOL_TOPICS = {'math2numbers': ['math', 2], 'math2addsub': ['math', 2], 'math2expressions': ['math', 2], 'math2unknown': ['math', 2], 'math2problems': ['math', 2], 'math2length': ['math', 2], 'math2money': ['math', 2], 'math2time': ['math', 2], 'math2geometry': ['math', 2], 'math4numbers': ['math', 4], 'math4compare': ['math', 4], 'math4operations': ['math', 4], 'math4multiply': ['math', 4], 'math4order': ['math', 4], 'math4unknown': ['math', 4], 'math4length': ['math', 4], 'math4area': ['math', 4], 'math4mass': ['math', 4], 'math4time': ['math', 4], 'world2home': ['world', 2], 'world2nature': ['world', 2], 'world2seasons': ['world', 2], 'world2plants': ['world', 2], 'world2animals': ['world', 2], 'world2work': ['world', 2], 'world4space': ['world', 4], 'world4earth': ['world', 4], 'world4russia': ['world', 4], 'world4zones': ['world', 4], 'world4resources': ['world', 4], 'world4communities': ['world', 4], 'en2lessongo': ['english', 2], 'en2lessona': ['english', 2], 'en2lessonb': ['english', 2], 'en2lessonc': ['english', 2], 'en2lessond': ['english', 2], 'en2lessone': ['english', 2], 'en2lessonf': ['english', 2], 'en2lessonhelloA': ['english', 2], 'en2lessonhelloB': ['english', 2], 'en2lessonfamilyA': ['english', 2], 'en2lessonfamilyB': ['english', 2], 'en2lesson1a': ['english', 2], 'en2lesson1b': ['english', 2], 'en2lesson2a': ['english', 2], 'en2lesson2b': ['english', 2], 'en2lesson3a': ['english', 2], 'en2lesson3b': ['english', 2], 'en2lesson4a': ['english', 2], 'en2lesson4b': ['english', 2], 'en2lesson5a': ['english', 2], 'en2lesson5b': ['english', 2], 'en2lesson6a': ['english', 2], 'en2lesson6b': ['english', 2], 'en4lessonstarterA': ['english', 4], 'en4lessonstarterB': ['english', 4], 'en4lesson1a': ['english', 4], 'en4lesson1b': ['english', 4], 'en4lesson2a': ['english', 4], 'en4lesson2b': ['english', 4], 'en4lesson3a': ['english', 4], 'en4lesson3b': ['english', 4], 'en4lesson4a': ['english', 4], 'en4lesson4b': ['english', 4], 'en4lesson5a': ['english', 4], 'en4lesson5b': ['english', 4], 'en4lesson6a': ['english', 4], 'en4lesson6b': ['english', 4], 'en4lesson7a': ['english', 4], 'en4lesson7b': ['english', 4], 'en4lesson8a': ['english', 4], 'en4lesson8b': ['english', 4]}
+
+
+def mario_round_reward(profile, data):
+    """Only a balanced curriculum mission opens play; ordinary rounds add a bonus."""
+    total, score = data['total'], data['score']
+    junior = max(school_classes(profile)) <= 2
+    required = math.ceil(total * (0.8 if junior else 26 / 30))
+    evidence = data.get('marioMission')
+    if evidence is not None:
+        base = 20 if junior else 30
+        if (data.get('mission') is not None or data.get('review') or total not in (base, 50)
+                or not isinstance(evidence, list) or len(evidence) != total):
+            raise ValueError('Некорректная смешанная миссия Марио.')
+        subjects, topics, correct = {}, set(), 0
+        for item in evidence:
+            if not isinstance(item, dict) or type(item.get('correct')) is not bool:
+                raise ValueError('Некорректный ответ смешанной миссии.')
+            key, grade = item.get('topic'), item.get('grade')
+            if not isinstance(key, str) or type(grade) is not int:
+                raise ValueError('Некорректная тема смешанной миссии.')
+            subject = item.get('subject')
+            known = ('russian', REWARD_TOPIC_GRADES[key]) if key in REWARD_TOPIC_GRADES else MARIO_SCHOOL_TOPICS.get(key)
+            if not known or list(known) != [subject, grade] or grade not in school_classes(profile):
+                raise ValueError('Выбери темы своего класса.')
+            subjects[subject] = subjects.get(subject, 0) + 1
+            topics.add(key)
+            correct += item['correct']
+        if (len(subjects) != 3 or max(subjects.values()) - min(subjects.values()) > 1
+                or correct != score or set(data['topics']) != topics
+                or any(len({i['topic'] for i in evidence if i['subject'] == subject}) < 2 for subject in subjects)):
+            raise ValueError('Для миссии нужны три предмета и минимум две темы каждого.')
+        return (10 + (total - base) // 10 if score >= required else 0), True
+    if data.get('review') or score < required:
+        return 0, False
+    return total // 10, False
 
 
 def public_origin(value):
@@ -580,6 +629,10 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         result = player_view(player_id, name, avatar, profile, getattr(self, "character_rewards", False), getattr(self, "catalog_rewards", False))
         if audio_event:
             result['audioEvent'] = audio_event
+        if data is not None and data.get('kind') == 'round':
+            receipt = db.execute('SELECT minutes,unlock FROM mario_rewards WHERE player=? AND round=?', (player_id, data.get('id'))).fetchone()
+            if receipt:
+                result['marioReward'] = dict(minutes=receipt[0], unlock=bool(receipt[1]))
         return 200, result
 
     def route_mario(self, db, data):
@@ -598,14 +651,15 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         if action == "start":
             if not valid:
                 if not parent:
-                    ticket = db.execute("SELECT round FROM mario_tickets WHERE player=? AND used IS NULL ORDER BY created,round LIMIT 1", (player,)).fetchone()
+                    ticket = db.execute("SELECT round,seconds FROM mario_tickets WHERE player=? AND used IS NULL ORDER BY created,round LIMIT 1", (player,)).fetchone()
                     if not ticket:
-                        return 403, {"error": "Сначала полностью заверши учебный раунд — получишь 10 минут Марио."}
+                        return 403, {"error": "Заверши смешанную миссию по трём предметам. Добавочные минуты сохраняются до её прохождения."}
                     db.execute("UPDATE mario_tickets SET used=? WHERE player=? AND round=?", (now, player, ticket[0]))
-                session = (secrets.token_urlsafe(24), auth, None if parent else now + 600)
+                budget = 0 if parent else ticket[1]
+                session = (secrets.token_urlsafe(24), auth, None if parent else now + budget)
                 db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
                 db.execute("DELETE FROM mario_pauses WHERE player=?", (player,))
-                remaining = None if parent else 600
+                remaining = None if parent else budget
                 paused = False
             elif session[1] != auth:
                 # Transfer the same remaining budget; a pause survives the device change.
@@ -613,10 +667,20 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 db.execute("INSERT OR REPLACE INTO mario_sessions VALUES (?,?,?,?)", (player, *session))
                 if paused:
                     db.execute("UPDATE mario_pauses SET session=? WHERE player=?", (session[0], player))
+            if not parent:
+                bonus = db.execute('SELECT seconds FROM mario_bonus WHERE player=?', (player,)).fetchone()
+                if bonus and bonus[0]:
+                    remaining += bonus[0]
+                    if paused:
+                        db.execute('UPDATE mario_pauses SET remaining=? WHERE player=?', (remaining, player))
+                    else:
+                        session = (session[0], session[1], now + remaining)
+                        db.execute('UPDATE mario_sessions SET expires=? WHERE player=?', (session[2], player))
+                    db.execute('UPDATE mario_bonus SET seconds=0 WHERE player=?', (player,))
             valid = True
         elif action in ("heartbeat", "pause", "resume"):
             if not valid or session[1] != auth or not isinstance(data.get("id"), str) or not hmac.compare_digest(session[0], data["id"]):
-                return 403, {"error": "Время игры закончилось. Заверши ещё один учебный раунд."}
+                return 403, {"error": "Время игры закончилось. Пройди смешанную миссию, чтобы продолжить."}
             if action == "pause" and not paused and not parent:
                 # Only the server measures the unused seconds. Repeated pauses cannot refill them.
                 db.execute("INSERT OR REPLACE INTO mario_pauses VALUES (?,?,?)", (player, session[0], remaining))
@@ -629,7 +693,10 @@ class BunnyHandler(SimpleHTTPRequestHandler):
         elif data is not None:
             raise ValueError("Неизвестное действие Марио.")
         tickets = db.execute("SELECT count(*) FROM mario_tickets WHERE player=? AND used IS NULL", (player,)).fetchone()[0]
-        result = dict(admin=bool(parent), tickets=tickets, canResume=valid, serverTime=now)
+        bonus = db.execute('SELECT seconds FROM mario_bonus WHERE player=?', (player,)).fetchone()
+        earned = db.execute('SELECT coalesce(sum(seconds),0) FROM mario_tickets WHERE player=? AND used IS NULL', (player,)).fetchone()[0]
+        result = dict(admin=bool(parent), tickets=tickets, canResume=valid, serverTime=now,
+                      bonusSeconds=bonus[0] if bonus else 0, earnedSeconds=earned)
         if valid and session[1] == auth:
             result.update(id=session[0], expires=None if paused else session[2],
                           paused=paused, remaining=None if parent else remaining)
@@ -664,12 +731,17 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             if inserted:
                 before = set(profile['stickers'])
                 apply_round(profile, data)
-                db.execute("INSERT INTO mario_tickets (player,round,created) VALUES (?,?,?)", (player_id, operation, time.time()))
+                minutes, unlock = mario_round_reward(profile, data)
+                db.execute('INSERT INTO mario_rewards VALUES (?,?,?,?)', (player_id, operation, minutes, int(unlock)))
+                if minutes and unlock:
+                    db.execute("INSERT INTO mario_tickets (player,round,created,seconds) VALUES (?,?,?,?)", (player_id, operation, time.time(), minutes * 60))
+                elif minutes:
+                    db.execute('INSERT INTO mario_bonus VALUES (?,?) ON CONFLICT(player) DO UPDATE SET seconds=seconds+excluded.seconds', (player_id, minutes * 60))
                 after = set(profile['stickers'])
                 completed = [dict(id=group['id'], name=group['name']) for group in COLLECTION_REWARDS
                              if not set(group['keys']) <= before and set(group['keys']) <= after]
                 return dict(id=operation, kind='collection' if completed else 'sticker' if after-before else 'round',
-                            collections=completed)
+                            collections=completed, marioMinutes=minutes, marioUnlock=unlock)
 
         elif kind == "sticker":
             sticker, x, y = (data.get(key) for key in ("sticker", "x", "y"))

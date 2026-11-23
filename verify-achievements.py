@@ -75,7 +75,7 @@ with tempfile.TemporaryDirectory(prefix='bunny-achievements-') as directory:
         e=event('monty',7,topics=['compare'])
         b.BunnyHandler.update(db,'julia',p,e);b.BunnyHandler.update(db,'julia',p,e)
         assert p['rounds']==1 and p['stickerStages']['monty']==['compare']
-        assert db.execute('select count(*) from mario_tickets').fetchone()[0]==1
+        assert db.execute('select count(*) from mario_tickets').fetchone()[0]==0
         before=copy.deepcopy(p)
         b.BunnyHandler.update(db,'julia',p,dict(kind='redeem',sticker='darkwing'))
         assert p==before,'Old exchange cannot grant or debit'
