@@ -7,8 +7,7 @@
   adminButton.id='mario-admin-play';earnedButton.id='mario-earned-play';roundButton.id='round-mario';roundButton.className='wide';
   let access=null,accessVersion=0,screenOpen=false,owner=null,generation=0;
   let quotaPaused=false,frozenRemaining=0,timerRevision=0,leaseOperations=Promise.resolve();
-  let selectedLevel=null;
-  let runtime=null,loadedLevel='original',lease=null,deadline=0,verifiedUntil=0;
+  let runtime=null,lease=null,deadline=0,verifiedUntil=0;
   let playing=false,loading=false,frameRequest=0,lastFrame=null,heartbeatFlight=null,heartbeatVersion=-1;
   let canvas,status,pauseButton,startButton,clock;
   let pendingPress=0,audioPrimed=false;
@@ -39,7 +38,8 @@
   }
 
   function checkpoint(action,value) {
-    const key=owner+':'+loadedLevel;
+    // Keep the existing original-game save. Old level-specific saves are not deleted.
+    const key=owner+':original';
     if(action==='put')memory.set(key,value);
     return new Promise(resolve=>{
       if(!window.indexedDB){resolve(memory.get(key));return;}
@@ -336,7 +336,7 @@
     if(mask===16)saveState();
   }
 
-  async function loadGame(fresh=false) {
+  async function loadGame() {
     if(loading||!screenOpen)return;
     unlockAudio();pause('Готовим уровень…');
     loading=true;const current=++generation,player=owner,previousLease=lease;
@@ -346,12 +346,11 @@
     try {
       const context=canvas.getContext('2d'),image=context.createImageData(256,240),pixels=new Uint32Array(image.data.buffer);
       const render=buffer=>{for(let i=0;i<pixels.length;i++)pixels[i]=0xff000000|buffer[i];context.putImageData(image,0,0);};
-      const next=await window.bunnyReplay.manual(selectedLevel,render);
+      const next=await window.bunnyReplay.manual(null,render);
       if(!next||current!==generation||activePlayer?.id!==player||!screenOpen)return;
-      runtime=next;loadedLevel=selectedLevel===null?'original':`${Math.floor(selectedLevel/4)+1}-${selectedLevel%4+1}`;
-      if(!fresh){const saved=await checkpoint('get');if(current!==generation)return;
-        if(saved?.version===1)try{runtime.restore(saved.state);}catch{}
-      }
+      runtime=next;
+      const saved=await checkpoint('get');if(current!==generation)return;
+      if(saved?.version===1)try{runtime.restore(saved.state);}catch{}
       await leaseOperations;
       if(current!==generation||!screenOpen)return;
       const sent=performance.now();
@@ -373,30 +372,12 @@
     }finally{if(current===generation){loading=false;startButton.disabled=false;}}
   }
 
-  async function open(level) {
-    if(!Number.isInteger(level)&&level!==null){
-      if(!activePlayer)return;
-      unlockAudio();const player=activePlayer.id,allowed=await refreshAccess();
-      if(activePlayer?.id!==player)return;
-      if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала полностью заверши учебный раунд.');return;}
-      const panel=playerScreen('🎮 Миры Марио',allowed.admin?'Выбери мир и уровень':'Заработанное время сохраняется при смене уровня','player-mario-select');
-      playerButton(panel,'▶ Продолжить сохранённую игру',()=>open(null)).className='wide';
-      playerElement('p','8 миров · 32 уровня. Оригинальное меню NES доступно через продолжение игры.',panel).className='hint';
-      const grid=playerElement('div','',panel);grid.className='mario-world-grid';
-      for(let world=0;world<8;world++){
-        const group=playerElement('fieldset','',grid);playerElement('legend','Мир '+(world+1),group);
-        const levels=playerElement('div','',group);levels.className='mario-world-levels';
-        for(let stage=0;stage<4;stage++){const index=world*4+stage;const button=playerButton(levels,`${world+1}-${stage+1}${stage===3?' 🏰':''}`,()=>open(index));button.dataset.marioLevel=String(index);}
-      }
-      return;
-    }
-    if(level!==null&&(level<0||level>31))return;
+  async function open() {
     if(!activePlayer)return;
     unlockAudio();const player=activePlayer.id;
     const allowed=await refreshAccess();
     if(activePlayer?.id!==player)return;
     if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала полностью заверши учебный раунд.');return;}
-    selectedLevel=level;
     const panel=playerScreen('🎮 Марио','', 'player-mario');
     screenOpen=true;owner=player;generation++;timerRevision++;quotaPaused=false;frozenRemaining=0;loading=false;lease=null;runtime=null;playing=false;
     $('app').classList.add('manual-playing');
@@ -426,7 +407,7 @@
     // Block text selection/callouts only inside the manual game, not in lessons.
     panel.oncontextmenu=panel.onselectstart=event=>{if(screenOpen)event.preventDefault();};
     bindControls(pad);bindControls(actions);bindTouchControls(panel);refreshButtons();
-    loadGame(level!==null);
+    loadGame();
   }
 
   document.addEventListener('keydown',event=>{

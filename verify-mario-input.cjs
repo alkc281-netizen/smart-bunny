@@ -99,11 +99,13 @@ async function harness(){
   assert.equal(h.panel.listeners.touchstart.length,1,'Reopening does not accumulate gesture handlers');
   assert.equal(h.panel.listeners.touchmove.length,1);
   h.c.home();await window.bunnyMario.open();
-  assert.equal(h.c.phase,'player-mario-select');assert.equal(window.bunnyMario.isPlaying(),false);
+  for(let i=0;i<15;i++)await Promise.resolve();
+  assert.equal(h.c.phase,'player-mario');assert.equal(window.bunnyMario.isPlaying(),true);
   const choices=h.panel.querySelectorAll('button').filter(button=>button.dataset.marioLevel!==undefined);
-  assert.equal(choices.length,32);assert.deepEqual(choices.map(button=>Number(button.dataset.marioLevel)),Array.from({length:32},(_,i)=>i));
-  await choices[31].click();for(let i=0;i<15;i++)await Promise.resolve();
-  assert.equal(h.startedLevels.at(-1),31);assert.equal(window.bunnyMario.isPlaying(),true);
+  assert.equal(choices.length,0,'Manual play opens directly without a world/level picker');
+  assert.equal(h.startedLevels.at(-1),null,'Manual play always boots the original game');
+  h.c.home();await window.bunnyMario.open(31);for(let i=0;i<15;i++)await Promise.resolve();
+  assert.equal(h.startedLevels.at(-1),null,'An old level argument cannot jump to a later stage');
   h.c.home();await window.bunnyMario.open(null);for(let i=0;i<15;i++)await Promise.resolve();assert.equal(h.startedLevels.at(-1),null);
   console.log('PASS NES input: native three-touch, short tap, missed release recovery, cancel, slip, global pointer release, failed capture, duplicate suppression, SELECT, blur reset, selection blocking');
 })().catch(error=>{console.error(error);process.exitCode=1;});
