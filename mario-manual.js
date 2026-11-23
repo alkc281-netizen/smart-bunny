@@ -2,6 +2,8 @@
 
 (() => {
   const adminButton=playerButton($('game-menu'),'🎮 Играть в Марио',open);
+  const missionButton=playerButton($('game-menu'),'🎮 Заработать время Марио',()=>window.bunnyMarioMission.open());
+  const bonusInfo=playerElement('p','',$('player-nav'));bonusInfo.className='hint';
   const earnedButton=playerButton($('player-nav'),'🎮 Награда за задания',open);
   const roundButton=playerButton($('finished'),'🎮 Играть в Марио · 10 минут',open);
   adminButton.id='mario-admin-play';earnedButton.id='mario-earned-play';roundButton.id='round-mario';roundButton.className='wide';
@@ -20,9 +22,12 @@
     const same=Boolean(activePlayer&&access?.player===activePlayer.id);
     const allowed=same&&(access.admin||access.tickets>0||access.canResume);
     adminButton.hidden=!(same&&parentSession&&access.admin);
+    missionButton.hidden=!activePlayer;
+    bonusInfo.hidden=!(same&&!access.admin);
+    bonusInfo.textContent=same?'🎮 Запас: '+Math.floor((access.earnedSeconds||0)/60)+' мин. · добавочные: '+Math.floor((access.bonusSeconds||0)/60)+' мин.':'';
     earnedButton.hidden=!(allowed&&!parentSession);
     roundButton.hidden=!(allowed&&phase==='finished');
-    roundButton.textContent=same&&access.admin?'🎮 Играть в Марио':same&&access.canResume?'🎮 Продолжить Марио':'🎮 Награда: Марио · 10 минут';
+    roundButton.textContent=same&&access.admin?'🎮 Играть в Марио':same&&access.canResume?'🎮 Продолжить Марио':'🎮 Использовать заработанное время';
   }
 
   async function refreshAccess() {
@@ -299,14 +304,14 @@
   function expire() {
     if(!screenOpen||!lease)return;
     timerRevision++;lease=null;
-    saveState();pause('10 минут закончились. Заверши ещё один учебный раунд, чтобы продолжить.');
+    saveState();pause('Время закончилось. Пройди смешанную миссию, чтобы продолжить.');
     lease=null;pauseButton.disabled=true;startButton.hidden=false;startButton.disabled=false;
     startButton.textContent='🎮 Следующий заработанный запуск';
     clock.textContent='Время закончилось';
     refreshAccess().then(result=>{
       if(!screenOpen||lease)return;
       const more=result&&(result.admin||result.tickets>0);
-      startButton.textContent=more?'▶ Следующие заработанные 10 минут':'← К заданиям';
+      startButton.textContent=more?'▶ Использовать заработанное время':'← К заданиям';
       startButton.onclick=more?()=>loadGame():home;
     });
   }
@@ -377,7 +382,7 @@
     unlockAudio();const player=activePlayer.id;
     const allowed=await refreshAccess();
     if(activePlayer?.id!==player)return;
-    if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала полностью заверши учебный раунд.');return;}
+    if(!allowed||!(allowed.admin||allowed.tickets||allowed.canResume)){message('Сначала пройди смешанную миссию по трём предметам. Добавочные минуты сохраняются.');return;}
     const panel=playerScreen('🎮 Марио','', 'player-mario');
     screenOpen=true;owner=player;generation++;timerRevision++;quotaPaused=false;frozenRemaining=0;loading=false;lease=null;runtime=null;playing=false;
     $('app').classList.add('manual-playing');

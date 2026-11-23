@@ -3062,6 +3062,12 @@ async function flushPlayerUpdates() {
           if(data.kind==='redeem')message('Персонажи выдаются за достижения. Монеты можно потратить на оформление.');
         }
         if (phase === 'finished' && data.kind === 'round') {
+          if(data.id===marioResultRound&&result.marioReward){
+            const reward=result.marioReward;
+            marioRoundResult.textContent=reward.minutes?(reward.unlock?'🎮 Миссия: ':'🎮 Добавлено в запас: ')+'+'+reward.minutes+' мин.':
+              data.review?'Повторение ошибок: без игровых минут.':'Игровые минуты не начислены: нужно больше верных ответов с первой попытки.';
+            marioRoundResult.hidden=false;
+          }
           const unlocked = Object.keys(result.stickers).filter(key => !previous.includes(key));
           $('round-album').textContent = unlocked.length ? '✨ Новая наклейка! Открыть альбом' : '📒 Мой альбом';
           if(game==='mission'&&result.lastMission?.id===data.id){
@@ -3865,7 +3871,8 @@ function playerRoundId() {
     '8' + value.slice(17, 20), value.slice(20)].join('-');
 }
 
-let rewardRound;
+let rewardRound,marioResultRound=null;
+const marioRoundResult=playerElement('p','',$('finished'));marioRoundResult.className='hint';marioRoundResult.hidden=true;
 names.mission='Миссия за наклейку';
 gameMusic.mission=gameMusic.compare;
 
@@ -3920,6 +3927,7 @@ function renderRewardQuestion() {
   message(item.question);
   $('message').classList.toggle('russian-question',item.question.length>100||item.question.includes('\n'));
   setVisible('russian-detail',false);
+  if(typeof renderSchoolTable==='function')renderSchoolTable(item.table);
   const answers=$('answers');
   answers.replaceChildren();
   for (const choice of item.choices) playerButton(answers,choice,()=>choose(choice));
@@ -3932,6 +3940,7 @@ function chooseRewardAnswer(value) {
   phase='feedback';
   setVisible('answers',false);
   const item=rewardRound.deck[round];
+  if(attempt===1)item.firstCorrect=value===item.correct;
   if (value===item.correct) {
     if (attempt===1) score++;
     else rewardRound.corrected++;
@@ -3952,7 +3961,7 @@ function chooseRewardAnswer(value) {
   const answers=$('answers');
   answers.replaceChildren();
   playerButton(answers,'Продолжить',()=>{
-    if (game!=='mission' || rewardRound!==current || round!==task || phase!=='feedback') return;
+    if (!['mission','marioMission'].includes(game) || rewardRound!==current || round!==task || phase!=='feedback') return;
     phase='transition';
     if (attempt===2) nextTask();
     else {
@@ -3991,19 +4000,94 @@ window.bunnyMissions={
   },
 };
 
+names.marioMission='Смешанная миссия Марио';
+gameMusic.marioMission=gameMusic.compare;
+
+function marioMissionRule() {
+  const junior=Math.max(...playerSchoolClasses())<=2;
+  return {base:junior?20:30,ratio:junior?0.8:26/30,grade:junior?2:4};
+}
+
+function openMarioMission() {
+  if(!activePlayer)return;
+  const rule=marioMissionRule(),grade=rule.grade;
+  const panel=playerScreen('🎮 Заработать время Марио','Смешанная миссия · '+grade+' класс','mario-mission-menu');
+  playerElement('p','Три предмета, минимум две темы каждого. Считаются ответы с первой попытки. Исправления помогут разобраться, но не увеличивают награду.',panel);
+  const lengthLabel=playerElement('label','Количество вопросов: ',panel),length=playerElement('select','',lengthLabel);
+  for(const n of [rule.base,50]){const option=playerElement('option',String(n),length);option.value=String(n);}
+  length.value=String(rule.base);
+  const summary=playerElement('p','',panel),selection=new Map();
+  const refresh=()=>{const n=Number(length.value);summary.textContent='Нужно '+Math.ceil(n*rule.ratio)+' из '+n+' верных сразу → '+(10+Math.floor((n-rule.base)/10))+' минут. Добавочные минуты тренировок прибавятся при запуске игры.';};
+  length.onchange=refresh;refresh();
+  for(const subject of ['math','russian','world','english']) {
+    const name=subject==='russian'?'📚 Русский язык':schoolSubjects[subject].join(' ');
+    const group=playerElement('fieldset','',panel),legend=playerElement('legend','',group);
+    group.className='mario-mission-subject';
+    const label=playerElement('label','',legend),enabled=playerElement('input','',label);enabled.type='checkbox';enabled.checked=subject!=='english';
+    label.append(document.createTextNode(' '+name));
+    const details=playerElement('details','',group);playerElement('summary','Выбрать темы',details);
+    const bank=subject==='russian'?russianTopics:schoolTopics;
+    const keys=Object.keys(bank).filter(key=>(bank[key].grade||1)===grade&&(subject==='russian'||bank[key].subject===subject&&!bank[key].legacyEnglish));
+    const preference=subject==='russian'?'bunny-russian-studied-'+grade:'bunny-school-'+subject+'-'+(subject==='english'?'selection':'studied')+grade;
+    let saved=[];try{saved=JSON.parse(readPlayerPreference(preference,'[]'));}catch{}
+    const defaults=keys.filter(key=>saved.includes(key));for(const key of keys)if(defaults.length<2&&!defaults.includes(key))defaults.push(key);
+    const chosen=new Map();
+    for(const key of keys){
+      const topicLabel=playerElement('label','',details),toggle=playerElement('input','',topicLabel);
+      topicLabel.className='mario-mission-topic';toggle.type='checkbox';toggle.checked=defaults.includes(key);
+      topicLabel.append(document.createTextNode(' '+bank[key].name));chosen.set(key,toggle);
+    }
+    selection.set(subject,{enabled,chosen});
+  }
+  playerButton(panel,'▶ Начать миссию',()=>{
+    const subjects=[...selection].filter(([,value])=>value.enabled.checked);
+    if(subjects.length!==3){message('Выбери ровно три предмета.');return;}
+    const topics=subjects.map(([subject,value])=>[subject,[...value.chosen].filter(([,toggle])=>toggle.checked).map(([key])=>key)]);
+    if(topics.some(([,keys])=>keys.length<2)){message('Выбери минимум две темы каждого предмета.');return;}
+    const n=Number(length.value),order=shuffledRussian(subjects.map(([subject])=>subject)),queues=new Map();
+    for(const [subject,keys] of topics){
+      const count=Math.floor(n/3)+(order.indexOf(subject)<n%3?1:0);
+      const topicOrder=Array.from({length:count},(_,i)=>keys[i%keys.length]);
+      const pools=new Map(keys.map(key=>[key,subject==='russian'?rewardRussian([key],topicOrder.filter(k=>k===key).length):
+        pickSchoolItems(key,topicOrder.filter(k=>k===key).length).map(([question,correct,choices,explanation,,table])=>({question,correct,choices,explanation,table,topic:key,label:schoolTopics[key].name}))]));
+      queues.set(subject,topicOrder.map(key=>({...pools.get(key).shift(),subject,grade})));
+    }
+    const deck=[];while(deck.length<n)for(const subject of order)if(queues.get(subject).length)deck.push(queues.get(subject).shift());
+    rewardRound={deck,corrected:0,rule:{...rule,required:Math.ceil(n*rule.ratio)}};begin('marioMission');
+  }).className='wide';
+  playerElement('p','Обычные тренировки: '+Math.ceil(10*rule.ratio)+' из 10 → +1 минута; '+Math.ceil(50*rule.ratio)+' из 50 → +5 минут. Считаются ответы с первой попытки. Они пополняют запас, а игру открывает смешанная миссия. Работа над ошибками минут не даёт.',panel).className='hint';
+  playerButton(panel,'← К заданиям',home);
+}
+
+window.bunnyMarioMission={
+  open:openMarioMission,count:()=>rewardRound.deck.length,answer:chooseRewardAnswer,
+  task(){cancelTask();mood();attempt=1;stats();panels();$('heading').textContent=names.marioMission;renderRewardQuestion();},
+  finish(){cancelTask();phase='finished';mood('party');panels();setVisible('finished',true);$('progress-fill').style.width='100%';$('counter').textContent='Миссия завершена';
+    $('heading').textContent=score>=rewardRound.rule.required?'🏆 Миссия пройдена!':'Попробуй ещё раз';
+    $('hint').textContent='Нужно '+rewardRound.rule.required+' верных с первой попытки';
+    message('Верно сразу: '+score+' из '+rewardRound.deck.length+' · Сохраняем результат…');victorySound();},
+};
+
 const playerBaseReplay=$('replay').onclick;
-$('replay').onclick=()=>game==='mission' ? startRewardMission(rewardRound.key) : playerBaseReplay();
+$('replay').onclick=()=>game==='marioMission'?openMarioMission():game==='mission' ? startRewardMission(rewardRound.key) : playerBaseReplay();
 
 const playerBaseFinish = finish;
 finish = function () {
   if (phase === 'finished') return;
   const audioId=playerRoundId();
+  marioResultRound=audioId;marioRoundResult.textContent='🎮 Проверяем заработанные минуты…';marioRoundResult.hidden=!activePlayer;
   if(activePlayer)planRoundAudio(audioId,activePlayer.id);
   playerBaseFinish();
   setVisible('round-album', Boolean(activePlayer));
   $('round-album').textContent = '📒 Мой альбом';
   if (!activePlayer) return;
   const total = roundQuestionCount();
+  if(game==='marioMission') {
+    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,review:false,corrected:rewardRound.corrected,
+      topics:[...new Set(rewardRound.deck.map(item=>item.topic))],
+      marioMission:rewardRound.deck.map(item=>({topic:item.topic,grade:item.grade,subject:item.subject,correct:item.firstCorrect===true}))});
+    return;
+  }
   if (game === 'mission') {
     enqueuePlayerUpdate({kind:'round',id:audioId,score,total,review:false,
       topics:[...new Set(rewardRound.deck.map(item=>item.topic))],corrected:rewardRound.corrected,

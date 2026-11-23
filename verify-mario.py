@@ -64,8 +64,19 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         assert admin["admin"] and admin["expires"] is None and admin["tickets"] == 0
         assert request(child, "mario", dict(action="heartbeat", id=admin["id"]))[0] == 403
 
-        event = dict(kind="round", id=str(uuid4()), score=8, total=10, topics=["add"], review=False)
+        evidence = []
+        for i in range(30):
+            subject = ('math', 'world', 'english')[i % 3]
+            keys = [k for k, v in bunny.MARIO_SCHOOL_TOPICS.items() if v == [subject, 4]][:2]
+            evidence.append(dict(subject=subject, grade=4, topic=keys[(i // 3) % 2], correct=i < 26))
+        event = dict(kind="round", id=str(uuid4()), score=26, total=30,
+                     topics=list({item['topic'] for item in evidence}), review=False, marioMission=evidence)
         path = "players/" + child_id
+        bonus = dict(kind='round',id=str(uuid4()),score=44,total=50,topics=['add'],review=False)
+        assert request(child,path,bonus)[1]['marioReward']==dict(minutes=5,unlock=False)
+        assert request(child,path,bonus)[1]['marioReward']==dict(minutes=5,unlock=False)
+        assert request(child,'mario')[1]['bonusSeconds']==300
+        assert request(child,'mario',dict(action='start'))[0]==403
         assert request(child, path, event)[0] == 200
         assert request(child, path, event)[0] == 200
         assert request(child, "mario")[1]["tickets"] == 1
@@ -75,7 +86,7 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         assert all(status == 200 for status, _ in starts)
         first, retry = [result for _, result in starts]
         assert first["id"] == retry["id"] and first["expires"] == retry["expires"]
-        assert not first["admin"] and 599 <= first["remaining"] <= 600 and first["tickets"] == 0
+        assert not first["admin"] and 899 <= first["remaining"] <= 900 and first["tickets"] == 0
         assert request(child, path)[1] == before, "Playing must not alter school progress or sticker layout"
         assert request(other, "mario", dict(action="start"))[0] == 403
         assert request(other, "mario", dict(action="heartbeat", id=first["id"]))[0] == 403
@@ -94,7 +105,7 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         base = time.time()
         with patch.object(bunny.time, 'time', return_value=base + 90):
             paused = request(second, "mario", dict(action="pause", id=transferred['id']))[1]
-            assert paused['paused'] and paused['expires'] is None and 508 <= paused['remaining'] <= 511
+            assert paused['paused'] and paused['expires'] is None and 808 <= paused['remaining'] <= 811
             held = paused['remaining']
         with patch.object(bunny.time, 'time', return_value=base + 3690):
             bunny.initialize_database(database)  # Restart/migration preserves a paused session.
@@ -129,9 +140,24 @@ with tempfile.TemporaryDirectory(prefix="bunny-mario-") as directory:
         assert request(second, path, next_round)[0] == 200
         next_play = request(second, "mario", dict(action="start"))[1]
         assert next_play["id"] != transferred["id"] and next_play["remaining"] > 599
+        paused = request(second, 'mario', dict(action='pause', id=next_play['id']))[1]
+        held = paused['remaining']
+        extra = dict(bonus, id=str(uuid4()))
+        assert request(second, path, extra)[0] == 200
+        extended = request(second, 'mario', dict(action='start'))[1]
+        assert extended['paused'] and extended['id'] == next_play['id']
+        assert extended['remaining'] == held + 300 and extended['bonusSeconds'] == 0
+        assert request(second, 'mario', dict(action='start'))[1]['remaining'] == extended['remaining']
+        assert request(second, path, extra)[1]['marioReward'] == dict(minutes=5, unlock=False)
+        assert request(second, 'mario')[1]['bonusSeconds'] == 0
+        # Retained tickets are still usable under the new rules, without retroactive awards.
+        with sqlite3.connect(database) as db:
+            other_id = next(item['id'] for item in children if item['login'] == 'other')
+            db.execute('INSERT INTO mario_tickets (player,round,created) VALUES (?,?,?)', (other_id, str(uuid4()), time.time()))
+        assert request(other, 'mario', dict(action='start'))[1]['remaining'] > 599
         assert request(second, "auth/logout", {})[0] == 200
         assert request(second, "mario", dict(action="heartbeat", id=next_play["id"]))[0] == 401
-        print("PASS Mario: server pause budget, repeated pause/resume deduplication, hour-long pause, paused device transfer, active-time debit, unchanged progress; admin-only free access, earned 600 seconds, profile isolation, concurrent/double-start, duplicate/invalid rounds, device transfer, expiry, new earned launch, logout and unchanged sticker positions")
+        print("PASS Mario: server pause budget, repeated pause/resume deduplication, hour-long pause, paused device transfer, active-time debit, unchanged progress; admin-only free access, mixed mission + bonus seconds, profile isolation, concurrent/double-start, duplicate/invalid rounds, device transfer, expiry, new earned launch, logout and unchanged sticker positions")
     finally:
         server.shutdown()
         server.server_close()

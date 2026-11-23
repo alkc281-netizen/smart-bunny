@@ -33,7 +33,7 @@ with tempfile.TemporaryDirectory() as t:
   assert one['stickers']['mario']==layout
   after=copy.deepcopy(one)
   assert b.BunnyHandler.update(db,'one',one,e) is None and one==after,'Duplicate does not emit another reward'
-  assert db.execute('SELECT count(*) FROM mario_tickets').fetchone()[0]==1
+  assert db.execute('SELECT count(*) FROM mario_tickets').fetchone()[0]==0
   other=b.initial_profile();other.update(schoolClasses=[1,2],stickerPolicy='junior-v1')
   fresh=dict(e,id=str(uuid4()));assert b.BunnyHandler.update(db,'two',other,fresh)['kind']=='sticker'
   fresh=dict(e,id=str(uuid4()));assert b.BunnyHandler.update(db,'two',other,fresh)['kind']=='round'
