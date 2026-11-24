@@ -2939,12 +2939,13 @@ try {
   if (Array.isArray(saved)) playerOutbox = saved;
 } catch {}
 
-async function apiRequest(path, data) {
-  const response = await fetch('/api/' + path + '?rewards=catalog-v1', {
+async function apiRequest(path, data, options={}) {
+  const response = await fetch('/api/' + path + (path.includes('?')?'&':'?')+'rewards=catalog-v1', {
     cache: 'no-store',
     credentials: 'same-origin',
     signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(8000) : undefined,
     ...(data ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)} : {}),
+    ...options,
   });
   if (!response.headers.get('content-type')?.includes('application/json')) {
     throw Error('Вход доступен по домашнему адресу игры.');
@@ -3094,7 +3095,11 @@ async function flushPlayerUpdates() {
   }
 }
 
+const parentReportsButton=playerButton($('player-nav'),'📊 Прогресс детей',()=>openParentReports());
+parentReportsButton.hidden=true;parentReportsButton.className='wide';
+parentReportsButton.id='parent-report-open';
 function refreshPlayerNav() {
+  parentReportsButton.hidden=!activePlayer||!parentSession;
   setVisible('player-nav', playerApiReady && !game);
   $('choose-player').textContent = activePlayer ? activePlayer.avatar + ' ' + activePlayer.name : '👤 Выбрать игрока';
   setVisible('open-album', Boolean(activePlayer));
@@ -3123,6 +3128,7 @@ function playerScreen(title, hint, screen) {
   $('hint').textContent = hint;
   message('');
   const panel = $('player-panel');
+  panel.className='';
   panel.replaceChildren();
   startMusic();
   return panel;
@@ -3143,6 +3149,7 @@ function playerButton(parent, text, action) {
 }
 
 function chooseActivePlayer(player) {
+  window.bunnyActivity?.boundary();
   if (activePlayer?.id !== player?.id) { albumUndo = []; albumCamera = null; }
   albumDrag = null;
   if (player) {
@@ -3172,6 +3179,7 @@ function chooseActivePlayer(player) {
   loadRussianProgress();
   window.bunnySchool?.load();
   home();
+  window.bunnyActivity?.playerChanged();
   flushPlayerUpdates();
 }
 
@@ -3330,6 +3338,7 @@ function openParentSetup() {
 function openParentSettings() {
   if (!parentSession || !activePlayer) { openPlayerPicker(); return; }
   const panel = playerScreen('Родительский кабинет', 'Назначь логин и пароль существующему профилю или создай новый', 'player-select');
+  playerButton(panel,'📊 Занятия и прогресс детей',()=>openParentReports()).className='wide';
   accountForm(panel, false);
   playerButton(panel, 'Назад к игре', home);
 }
@@ -3871,7 +3880,7 @@ function playerRoundId() {
     '8' + value.slice(17, 20), value.slice(20)].join('-');
 }
 
-let rewardRound,marioResultRound=null;
+let rewardRound,marioResultRound=null,activityRound=null;
 const marioRoundResult=playerElement('p','',$('finished'));marioRoundResult.className='hint';marioRoundResult.hidden=true;
 names.mission='Миссия за наклейку';
 gameMusic.mission=gameMusic.compare;
@@ -4075,6 +4084,7 @@ const playerBaseFinish = finish;
 finish = function () {
   if (phase === 'finished') return;
   const audioId=playerRoundId();
+  const telemetry={studySession:activityRound?.player===activePlayer?.id?activityRound.id:null,completedAt:Date.now()/1000};
   marioResultRound=audioId;marioRoundResult.textContent='🎮 Проверяем заработанные минуты…';marioRoundResult.hidden=!activePlayer;
   if(activePlayer)planRoundAudio(audioId,activePlayer.id);
   playerBaseFinish();
@@ -4083,19 +4093,19 @@ finish = function () {
   if (!activePlayer) return;
   const total = roundQuestionCount();
   if(game==='marioMission') {
-    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,review:false,corrected:rewardRound.corrected,
+    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,...telemetry,review:false,corrected:rewardRound.corrected,
       topics:[...new Set(rewardRound.deck.map(item=>item.topic))],
       marioMission:rewardRound.deck.map(item=>({topic:item.topic,grade:item.grade,subject:item.subject,correct:item.firstCorrect===true}))});
     return;
   }
   if (game === 'mission') {
-    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,review:false,
+    enqueuePlayerUpdate({kind:'round',id:audioId,score,total,...telemetry,review:false,
       topics:[...new Set(rewardRound.deck.map(item=>item.topic))],corrected:rewardRound.corrected,
       mission:rewardRound.key,daily:rewardRound.daily,rewardVersion:2,missionClass:rewardRound.grade});
     return;
   }
   const topics = game === 'russian' ? Object.keys(russianRoundStats) : game === 'school' ? window.bunnySchool.topics() : [game];
-  enqueuePlayerUpdate({kind: 'round', id: audioId, score, total, topics,
+  enqueuePlayerUpdate({kind: 'round', id: audioId, score, total, topics,...telemetry,
     review: game === 'school' ? window.bunnySchool.review() : game === 'russian' && russianMode === 'mistakes',corrected:game==='russian' ? russianCorrected : game==='school' ? window.bunnySchool.corrected() : 0});
 };
 
@@ -4122,6 +4132,265 @@ $('round-album').onclick = openPlayerAlbum;
 window.addEventListener('online', flushPlayerUpdates);
 $('logout-player').onclick = logoutPlayer;
 $('parent-settings').onclick = openParentSettings;
+const reportSubjects={math:'Математика',russian:'Русский язык',english:'Английский язык',world:'Окружающий мир',logic:'Память и логика',mixed:'Смешанная миссия'};
+const parentReportState={player:'',days:7,month:'',tab:'overview',metric:'study',day:''};
+let parentReportVersion=0;
+function reportToday(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Moscow'}).format(new Date());}
+function reportSinceDay(report){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Moscow'}).format(new Date(report.since*1000));}
+function reportDate(key){return key.slice(8,10)+'.'+key.slice(5,7);}
+function reportTime(value){const seconds=Math.max(0,Math.round(value||0));return seconds<60?seconds+' с':seconds<3600?Math.floor(seconds/60)+' мин':Math.floor(seconds/3600)+' ч '+Math.floor(seconds%3600/60)+' мин';}
+function reportTopic(key){return russianTopics[key]?.name||(typeof schoolTopics!=='undefined'?schoolTopics[key]?.name:null)||names[key]||key;}
+function reportCard(parent,label,value){const card=playerElement('div','',parent);card.className='report-card';playerElement('span',label,card);playerElement('strong',value,card);return card;}
+
+async function openParentReports(){
+  if(!parentSession||!activePlayer){openPlayerPicker();return;}
+  const owner=activePlayer.id,version=++parentReportVersion;
+  const panel=playerScreen('📊 Занятия и прогресс','Личная статистика детей · все устройства','parent-reports');
+  panel.className='player-panel parent-reports';
+  playerElement('p','Загружаем занятия…',panel).setAttribute('role','status');
+  const query=['days='+parentReportState.days];
+  if(parentReportState.player)query.push('player='+encodeURIComponent(parentReportState.player));
+  if(parentReportState.month)query.push('month='+encodeURIComponent(parentReportState.month));
+  try{
+    const data=await apiRequest('reports?'+query.join('&'));
+    if(version!==parentReportVersion||!parentSession||activePlayer?.id!==owner||phase!=='parent-reports')return;
+    renderParentReports(panel,data);
+  }catch(error){
+    if(version!==parentReportVersion||phase!=='parent-reports'||activePlayer?.id!==owner)return;
+    panel.replaceChildren();playerElement('p',error.message,panel).setAttribute('role','alert');
+    playerButton(panel,'Повторить',openParentReports);playerButton(panel,'К родительскому кабинету',openParentSettings);
+  }
+}
+
+function renderParentReports(panel,data){
+  panel.replaceChildren();
+  const report=data.report;
+  if(!report){playerElement('p','Создай детский профиль, чтобы видеть занятия.',panel);playerButton(panel,'Профили и доступ',openParentSettings);return;}
+  parentReportState.player=report.player.id;parentReportState.month=report.month;
+  const controls=playerElement('div','',panel);controls.className='report-controls';
+  const childLabel=playerElement('label','Ребёнок ',controls),child=playerElement('select','',childLabel);
+  for(const item of data.children){const option=playerElement('option',item.avatar+' '+item.name,child);option.value=item.id;}
+  child.value=report.player.id;child.onchange=()=>{parentReportState.player=child.value;parentReportState.day='';openParentReports();};
+  const periods=playerElement('div','',controls);periods.className='report-toggle';
+  for(const [days,label] of [[7,'Неделя'],[30,'Месяц']]){const button=playerButton(periods,label,()=>{parentReportState.days=days;openParentReports();});button.setAttribute('aria-pressed',String(parentReportState.days===days));}
+  const tabs=playerElement('div','',panel);tabs.className='report-tabs';tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Разделы отчёта');
+  const area=playerElement('div','',panel);area.className='report-content';
+  const paint=()=>{
+    area.replaceChildren();
+    for(const button of tabs.children)button.setAttribute('aria-pressed',String(button.dataset.tab===parentReportState.tab));
+    ({overview:renderReportOverview,calendar:renderReportCalendar,topics:renderReportTopics,weekly:renderReportWeekly}[parentReportState.tab]||renderReportOverview)(area,report,paint);
+  };
+  for(const [tab,label] of [['overview','Обзор'],['calendar','Календарь'],['topics','Темы'],['weekly','Отчёт']]){const button=playerButton(tabs,label,()=>{parentReportState.tab=tab;paint();});button.dataset.tab=tab;}
+  paint();
+  playerElement('p','Подробный учёт с '+new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow'}).format(new Date(report.since*1000))+'. Старое время не восстановлено. Даты — по Москве.',panel).className='report-note';
+  playerElement('p','Считается время на открытом экране. Фон исключён; в заданиях и меню после 2 минут без действий учёт останавливается. Пересечения устройств считаются один раз. Во время Марио учитывается работающая игра; пауза показана отдельно.',panel).className='report-note';
+  const footer=playerElement('div','',panel);footer.className='report-toggle';
+  playerButton(footer,'Обновить',openParentReports);playerButton(footer,'Профили и доступ',openParentSettings);playerButton(footer,'К игре',home);
+}
+
+function renderReportOverview(area,report,paint){
+  const summary=report.summary,previous=report.previous;
+  playerElement('h2',report.player.name+' · '+reportDate(report.period.start)+'–'+reportDate(report.period.end),area);
+  if(report.coverage?.currentComplete===false)playerElement('p','Период записан не полностью: подробный учёт начался недавно.',area).className='report-note';
+  const cards=playerElement('div','',area);cards.className='report-cards';
+  reportCard(cards,'Активное время',reportTime(summary.total));reportCard(cards,'Учёба',reportTime(summary.study));
+  reportCard(cards,'Марио',reportTime(summary.mario));reportCard(cards,'Альбом и меню',reportTime(summary.other));
+  reportCard(cards,'Заданий / раундов',summary.questions+' / '+summary.rounds);
+  reportCard(cards,'Верно сразу',summary.accuracy===null?'Пока нет ответов':summary.correct+'/'+summary.questions+' · '+summary.accuracy+'%');
+  reportCard(cards,'Исправлено',String(summary.corrected));reportCard(cards,'Новых наклеек',String(summary.stickers));
+  playerElement('p','Пауза Марио на экране: '+reportTime(summary.pause)+'. В активное время не входит.',area).className='report-note';
+  const delta=summary.accuracy!==null&&previous.accuracy!==null?summary.accuracy-previous.accuracy:null;
+  playerElement('p',report.coverage?.previousComplete===false?'Предыдущий период записан не полностью. Полное сравнение появится после накопления истории.':'Предыдущий такой же период: '+previous.questions+' заданий, '+reportTime(previous.study)+' учёбы'+(previous.accuracy===null?'':', точность '+previous.accuracy+'%')+(delta===null?'':'. Изменение точности: '+(delta>0?'+':'')+delta+' п. п.'),area).className='report-note';
+  renderReportChart(area,report,paint);
+  playerElement('h3','Предметы',area);
+  const subjects=Object.entries(summary.subjects).filter(([,seconds])=>seconds>0);
+  if(!subjects.length)playerElement('p','Время занятий появится после первых заданий.',area);
+  for(const [subject,seconds] of subjects){const row=playerElement('div','',area);row.className='report-subject-row';playerElement('span',reportSubjects[subject]||subject,row);playerElement('strong',reportTime(seconds),row);}
+  playerElement('h3','Время Марио',area);
+  playerElement('p','Заработано за период: '+summary.earnedMinutes+' мин. Неиспользованные запуски: '+reportTime(report.mario.earnedSeconds)+'. Добавочные минуты: '+reportTime(report.mario.bonusSeconds)+'. Остаток текущей игры: '+reportTime(report.mario.remaining)+(report.mario.paused?' · на паузе.':'.'),area);
+  playerElement('p','За всё время — раундов: '+report.lifetime.rounds+', верных ответов: '+report.lifetime.correct+', наклеек: '+report.lifetime.stickers+'. Включены занятия до начала подробного учёта.',area).className='report-note';
+  if(parentReportState.day)renderReportDay(area,report,parentReportState.day);
+}
+
+function renderReportChart(area,report,paint){
+  playerElement('h3','Динамика по дням',area);
+  const label=playerElement('label','Показать ',area),metric=playerElement('select','',label);
+  for(const [key,name] of [['study','Время учёбы'],['total','Всё активное время'],['mario','Время Марио'],['questions','Количество заданий'],['accuracy','Точность с первой попытки']]){const option=playerElement('option',name,metric);option.value=key;}
+  metric.value=parentReportState.metric;metric.onchange=()=>{parentReportState.metric=metric.value;paint();};
+  const days=report.days.filter(day=>day.date>=report.period.start&&day.date<=report.period.end),key=parentReportState.metric;
+  const value=day=>key==='accuracy'?(day.questions?100*day.correct/day.questions:0):day[key];
+  const maximum=key==='accuracy'?100:Math.max(1,...days.map(value));
+  const chart=playerElement('div','',area);chart.className='report-chart';chart.setAttribute('aria-label','Дни занятий; нажми на столбик для подробностей');
+  for(const day of days){
+    const before=day.date<reportSinceDay(report);
+    const text=before?'Учёт ещё не вёлся':['study','total','mario'].includes(key)?reportTime(day[key]):key==='accuracy'?(day.questions?Math.round(value(day))+'%':'Нет ответов'):day.questions+' заданий';
+    const button=playerButton(chart,'',()=>{parentReportState.day=day.date;paint();});button.className='report-bar';
+    button.disabled=before;
+    button.title=reportDate(day.date)+' · '+text;button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(parentReportState.day===day.date));
+    const track=playerElement('span','',button);track.className='report-bar-track';
+    const fill=playerElement('span','',track);fill.style.height=(100*value(day)/maximum)+'%';
+    playerElement('span',day.date.slice(8),button).className='report-bar-day';
+  }
+  playerElement('p','Нажми на день, чтобы открыть занятия. Подписи столбиков — числа месяца.',area).className='report-note';
+}
+
+function renderReportCalendar(area,report,paint){
+  const label=playerElement('label','Месяц ',area),month=playerElement('input','',label);month.type='month';month.value=report.month;month.max=reportToday().slice(0,7);
+  month.min=reportSinceDay(report).slice(0,7);
+  playerElement('p','В ячейке: дата и число заданий. Нажми на день, чтобы увидеть время и результаты.',area).className='report-note';
+  month.onchange=()=>{if(month.value){parentReportState.month=month.value;parentReportState.day='';openParentReports();}};
+  const calendar=playerElement('div','',area);calendar.className='report-calendar';
+  for(const label of ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'])playerElement('span',label,calendar).className='report-calendar-label';
+  const year=Number(report.month.slice(0,4)),m=Number(report.month.slice(5));
+  const offset=(new Date(Date.UTC(year,m-1,1)).getUTCDay()+6)%7,count=new Date(Date.UTC(year,m,0)).getUTCDate();
+  for(let i=0;i<offset;i++)playerElement('span','',calendar);
+  for(let d=1;d<=count;d++){
+    const key=report.month+'-'+String(d).padStart(2,'0'),day=report.days.find(item=>item.date===key);
+    const button=playerButton(calendar,'',()=>{parentReportState.day=key;paint();});button.className='report-calendar-day';button.disabled=key>reportToday()||key<reportSinceDay(report);
+    button.setAttribute('aria-pressed',String(parentReportState.day===key));button.setAttribute('aria-label',reportDate(key)+': '+(key<reportSinceDay(report)?'учёт ещё не вёлся':(day?day.questions:0)+' заданий'));
+    playerElement('strong',String(d),button);playerElement('span',day?.questions?String(day.questions):day?.mario>0?'🎮':'—',button);
+  }
+  if(parentReportState.day)renderReportDay(area,report,parentReportState.day);
+  else playerElement('p','Выбери день для просмотра занятий.',area);
+}
+
+function renderReportDay(area,report,date){
+  const row=report.days.find(day=>day.date===date);
+  playerElement('h3','Занятия '+reportDate(date),area);
+  if(!row||!row.questions&&!row.total){playerElement('p','За этот день занятий в подробном учёте пока нет.',area);return;}
+  playerElement('p','Учёба: '+reportTime(row.study)+' · Марио: '+reportTime(row.mario)+' · '+row.questions+' заданий, '+row.correct+' верно сразу, '+row.corrected+' исправлено.',area);
+  const rounds=report.rounds.filter(item=>item.date===date);
+  if(!rounds.length&&row.questions)playerElement('p','Есть ответы в незавершённых раундах.',area).className='report-note';
+  for(const item of rounds){
+    const card=playerElement('div','',area);card.className='report-session';
+    const time=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(item.at*1000));
+    playerElement('strong',time+' · '+item.score+'/'+item.total+' верно сразу',card);
+    playerElement('p',item.topics.map(reportTopic).join(' · '),card);
+    playerElement('span','Исправлено: '+item.corrected+(item.review?' · Повторение ошибок':'')+(item.minutes?' · +'+item.minutes+' мин Марио':''),card);
+  }
+  for(const item of report.topicDays.filter(item=>item.date===date))playerElement('p',reportTopic(item.topic)+': '+item.correct+'/'+item.total+' верно сразу; исправлено '+item.corrected,area).className='report-note';
+}
+
+function renderReportTopics(area,report){
+  playerElement('h2','Результаты по темам',area);
+  playerElement('p','Точность считается по первой попытке. Исправления показаны отдельно. Сравнение — с предыдущим таким же периодом.',area).className='report-note';
+  const subjects=playerElement('label','Предмет ',area),select=playerElement('select','',subjects);
+  const all=playerElement('option','Все предметы',select);all.value='';
+  for(const [key,name] of Object.entries(reportSubjects)){const option=playerElement('option',name,select);option.value=key;}
+  const rows=playerElement('div','',area);
+  const paint=()=>{
+    rows.replaceChildren();const topics=report.topics.filter(item=>item.total&&(!select.value||item.subject===select.value)).sort((a,b)=>a.accuracy-b.accuracy||b.total-a.total);
+    if(!topics.length)playerElement('p','Ответы по темам появятся после новых занятий.',rows);
+    for(const item of topics){
+      const card=playerElement('div','',rows);card.className='report-session';
+      playerElement('strong',reportTopic(item.topic)+(item.grade?' · '+item.grade+' класс':''),card);
+      playerElement('p',item.correct+'/'+item.total+' верно сразу · '+item.accuracy+'% · исправлено '+item.corrected,card);
+      if(item.total>=5&&item.accuracy<70)playerElement('span','Стоит повторить эту тему.',card).className='report-attention';
+      if(item.change!==null)playerElement('p','К предыдущему периоду: '+(item.change>0?'+':'')+item.change+' п. п.'+(item.previousTotal<5?' · пока мало ответов для сравнения.':''),card).className='report-note';
+    }
+  };select.onchange=paint;paint();
+}
+
+function renderReportWeekly(area,report){
+  const week=report.week,previous=report.lastWeek;
+  playerElement('h2','Недельный отчёт · '+report.player.name,area);
+  playerElement('p','Последние 7 дней; сравнение с предыдущими 7 днями.',area).className='report-note';
+  if(!week.questions&&!week.study){playerElement('p','Пока нет новых занятий. Отчёт будет заполняться автоматически.',area);return;}
+  const list=playerElement('ul','',area);
+  for(const text of ['Дней с занятиями: '+week.activeDays+' из 7.','На учёбу: '+reportTime(week.study)+'.','Решено '+week.questions+' заданий; верно сразу '+week.correct+(week.accuracy===null?'':', точность '+week.accuracy+'%')+'.','Исправлено после подсказки: '+week.corrected+'.','Завершено раундов: '+week.rounds+'. Новых наклеек: '+week.stickers+'.','Марио: '+reportTime(week.mario)+' на экране; заработано '+week.earnedMinutes+' мин.'])playerElement('li',text,list);
+  playerElement('h3','По сравнению с прошлой неделей',area);
+  playerElement('p',report.coverage?.lastWeekComplete===false?'Данные предыдущей недели неполные. Полное сравнение появится после накопления истории.':'Задания: '+previous.questions+' → '+week.questions+'. Учёба: '+reportTime(previous.study)+' → '+reportTime(week.study)+'.'+(previous.accuracy!==null&&week.accuracy!==null?' Точность: '+previous.accuracy+'% → '+week.accuracy+'%.':''),area);
+  const current=report.topicDays.filter(item=>item.date>=report.days.filter(day=>day.date<=report.period.end).slice(-7)[0]?.date),totals=new Map();
+  for(const item of current){const stat=totals.get(item.topic)||{total:0,correct:0};stat.total+=item.total;stat.correct+=item.correct;totals.set(item.topic,stat);}
+  const difficult=[...totals].filter(([,stat])=>stat.total>=5&&stat.correct/stat.total<.7).map(([topic])=>reportTopic(topic));
+  if(difficult.length)playerElement('p','Темы для повторения: '+difficult.join(', ')+'.',area);
+  else playerElement('p','По новым ответам пока нет тем с пятью и более попытками и точностью ниже 70%.',area).className='report-note';
+}
+
+function activityQuestion() {
+  let topic=game;
+  if(game==='russian')topic=russianDeck[round]?.[4]||russianTopic;
+  else if(game==='school')topic=schoolDeck[round]?.[4];
+  else if(game==='mission'||game==='marioMission')topic=rewardRound?.deck[round]?.topic;
+  const subject=russianTopics[topic]?'russian':typeof schoolTopics!=='undefined'&&schoolTopics[topic]?schoolTopics[topic].subject:topic==='memory'?'logic':'math';
+  return {topic,subject};
+}
+
+const activityBaseBegin=begin;
+begin=function(which,count){
+  window.bunnyActivity?.boundary();
+  activityRound=activePlayer?{id:playerRoundId(),player:activePlayer.id}:null;
+  const result=activityBaseBegin(which,count);
+  window.bunnyActivity?.boundary();
+  return result;
+};
+const activityBaseChoose=choose;
+choose=function(value){
+  const accepted=activePlayer&&activityRound?.player===activePlayer.id&&phase==='answer';
+  const correct=game==='mission'||game==='marioMission'?rewardRound?.deck[round]?.correct:answer;
+  const item=accepted?{session:activityRound.id,question:round,attempt,at:Date.now()/1000,topic:activityQuestion().topic,correct:String(value)===String(correct)}:null;
+  window.bunnyActivity?.boundary();
+  const result=activityBaseChoose(value);
+  if(item)window.bunnyActivity?.answer(item);
+  return result;
+};
+
+// Bounded, immutable batches are retried independently of academic/reward updates.
+window.bunnyActivity=(()=>{
+  const queues=new Map();let span=null,flight=false,last=performance.now(),lastInput=last,focused=true;
+  const wall=Date.now()/1000,monotonic=last;
+  const timestamp=()=>wall+(performance.now()-monotonic)/1000;
+  const queue=owner=>{
+    if(!queues.has(owner)){
+      let stored={segments:[],answers:[]};try{const saved=JSON.parse(localStorage.getItem('bunny-activity-'+owner)||'null');if(saved&&Array.isArray(saved.segments)&&Array.isArray(saved.answers))stored=saved;}catch{}
+      queues.set(owner,stored);
+    }return queues.get(owner);
+  };
+  const persist=owner=>{try{localStorage.setItem('bunny-activity-'+owner,JSON.stringify(queue(owner)));}catch{}};
+  function context(){
+    if(!activePlayer||parentSession||document.hidden||!focused)return null;
+    if(phase==='player-mario')return {owner:activePlayer.id,kind:window.bunnyMario?.isPlaying()&&!window.bunnyMario?.isPaused?.()?'mario':'pause',subject:''};
+    const studying=game&&['start','answer','feedback','transition','show'].includes(phase);
+    return {owner:activePlayer.id,kind:studying?'study':'other',subject:studying?activityQuestion().subject:''};
+  }
+  let previous=context();
+  function seal(){if(!span)return;const owner=span.owner;delete span.owner;queue(owner).segments.push(span);span=null;}
+  function sample(){
+    const now=performance.now(),current=context(),elapsed=(previous?.kind==='mario'?now-last:Math.min(now-last,Math.max(0,lastInput+120000-last)))/1000;
+    if(previous&&elapsed>0&&now-last<=30000){
+      const end=timestamp()-(now-last)/1000+elapsed,start=end-elapsed;
+      if(span&&(span.owner!==previous.owner||span.kind!==previous.kind||span.subject!==previous.subject||Math.abs(span.end-start)>.01||end-span.start>15))seal();
+      if(!span)span={id:playerRoundId(),...previous,start,end};else span.end=end;
+    }else seal();
+    previous=current;last=now;
+  }
+  async function flush(keepalive=false){
+    sample();seal();const owner=activePlayer?.id;if(!owner||parentSession)return;
+    persist(owner);if(flight)return;flight=true;
+    try{
+      const pending=queue(owner);
+      while(activePlayer?.id===owner&&!parentSession&&(pending.segments.length||pending.answers.length)){
+        const segments=pending.segments.slice(0,40),answers=pending.answers.slice(0,40);
+        await apiRequest('activity',{player:owner,segments,answers},{keepalive});
+        pending.segments.splice(0,segments.length);pending.answers.splice(0,answers.length);persist(owner);
+        if(keepalive)break;
+      }
+    }catch{}finally{flight=false;}
+  }
+  function interact(){sample();lastInput=performance.now();previous=context();}
+  for(const type of ['pointerdown','touchstart','keydown','wheel'])window.addEventListener(type,interact,{capture:true,passive:true});
+  window.addEventListener('blur',()=>{sample();focused=false;previous=null;flush(true);});
+  window.addEventListener('focus',()=>{focused=true;interact();});
+  document.addEventListener('visibilitychange',()=>{sample();if(document.hidden){seal();flush(true);}else interact();});
+  window.addEventListener('pagehide',()=>{sample();previous=null;seal();flush(true);});
+  window.addEventListener('online',()=>flush());
+  setInterval(sample,1000);setInterval(()=>flush(),15000);
+  return {boundary(){sample();seal();for(const owner of queues.keys())persist(owner);},
+    playerChanged(){last=performance.now();lastInput=last;previous=context();},
+    answer(item){if(!activePlayer||parentSession)return;queue(activePlayer.id).answers.push(item);persist(activePlayer.id);},
+    flush};
+})();
+
 loadPlayerSession().catch(() => {
   const panel = playerScreen('Вход в игру', 'Открой игру по домашнему адресу Lenovo', 'player-select');
   message('Не удалось связаться с сервером входа.');

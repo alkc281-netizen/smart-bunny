@@ -443,6 +443,7 @@
   setInterval(updateClock,250);
   setInterval(()=>{if(screenOpen&&playing)saveState();},15000);
   window.bunnyMario={open,refreshAccess,refreshButtons,isPlaying:()=>playing,
+    isPaused:()=>quotaPaused||Boolean(runtime?.isPaused()),
     screenChanged(){if(screenOpen&&phase!=='player-mario')leave();},
     playerChanged(){leave();access=null;accessVersion++;refreshButtons();refreshAccess();},
   };

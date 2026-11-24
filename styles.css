@@ -670,3 +670,40 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 .mario-mission-subject summary {cursor:pointer;padding:8px 0;}
 
 #player-nav > .hint {grid-column:1 / -1;}
+
+.parent-reports {text-align:left;min-width:0;font-size:1rem;line-height:1.5;}
+.console:has(.parent-reports:not([hidden])) {width:min(100%,960px);}
+.console:has(.parent-reports:not([hidden])) .rabbit-zone,
+.console:has(.parent-reports:not([hidden])) #message:empty {display:none;}
+.console:has(.parent-reports:not([hidden])) .display {justify-content:flex-start;}
+#parent-report-open {grid-column:1 / -1;}
+.parent-reports h2 {font-size:1.25rem;margin:16px 0 10px;}
+.parent-reports h3 {font-size:1.1rem;margin:18px 0 8px;}
+.parent-reports p {margin:10px 0;overflow-wrap:anywhere;}
+.parent-reports select,.parent-reports input[type=month] {max-width:100%;padding:10px;border:2px solid var(--edge);border-radius:12px;background:var(--button);color:var(--text);font:inherit;}
+.parent-reports button {font-size:.95rem;min-height:44px;}
+.parent-reports button:disabled {opacity:.45;cursor:default;}
+.report-controls,.report-toggle,.report-tabs {display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.report-controls {justify-content:space-between;margin-bottom:12px;}
+.report-tabs {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:12px;}
+.parent-reports button[aria-pressed=true] {background:var(--accent);color:white;}
+.report-cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.report-card {background:var(--button);border:1px solid var(--edge);border-radius:14px;padding:12px;min-width:0;}
+.report-card span {display:block;font-size:.875rem;}
+.report-card strong {display:block;font-size:1.1rem;margin-top:4px;overflow-wrap:anywhere;}
+.parent-reports .report-note {font-size:.875rem;line-height:1.5;}
+.report-subject-row {display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--edge);}
+.report-session {padding:12px;border:1px solid var(--edge);border-radius:14px;background:var(--button);margin:10px 0;}
+.report-attention {font-weight:700;}
+.report-chart {display:flex;align-items:stretch;gap:4px;overflow-x:auto;padding:14px 0 8px;max-width:100%;}
+.parent-reports .report-bar {display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 0 32px;max-width:58px;border:1px solid var(--edge);padding:4px 2px;min-height:174px;}
+.report-bar-track {display:flex;align-items:flex-end;justify-content:center;height:128px;width:100%;}
+.report-bar-track>span {display:block;background:var(--accent);width:75%;border-radius:6px 6px 0 0;min-height:2px;}
+.report-bar[aria-pressed=true] .report-bar-track>span {background:var(--panel);}
+.report-bar-day {font-size:.875rem;}
+.report-calendar {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:14px 0;}
+.report-calendar-label {text-align:center;font-size:.875rem;}
+.parent-reports .report-calendar-day {padding:6px 1px;min-width:0;display:flex;flex-direction:column;align-items:center;min-height:58px;}
+.report-calendar-day span,.report-calendar-day small {font-size:.875rem;overflow-wrap:anywhere;}
+.parent-reports li {margin:8px 0;}
+@media(max-width:360px){.report-card {padding:8px;}.report-calendar-day small {font-size:.8rem;}}
