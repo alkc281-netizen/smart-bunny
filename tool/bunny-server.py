@@ -7,6 +7,7 @@ import ipaddress
 import json
 import math
 import os
+import re
 import secrets
 import sqlite3
 import time
@@ -175,6 +176,14 @@ def initialize_database(database):
             db.execute('DROP TABLE mario_pauses_v1')
         db.execute('CREATE TABLE IF NOT EXISTS mario_bonus (player TEXT PRIMARY KEY, seconds INTEGER NOT NULL CHECK(seconds >= 0))')
         db.execute('CREATE TABLE IF NOT EXISTS mario_rewards (player TEXT, round TEXT, minutes INTEGER NOT NULL, unlock INTEGER NOT NULL, PRIMARY KEY(player,round))')
+        db.execute('CREATE TABLE IF NOT EXISTS activity_meta (key TEXT PRIMARY KEY, value REAL NOT NULL)')
+        db.execute("INSERT OR IGNORE INTO activity_meta VALUES ('since',?)", (time.time(),))
+        db.execute('CREATE TABLE IF NOT EXISTS activity_segments (player TEXT, id TEXT, start REAL NOT NULL, end REAL NOT NULL, kind TEXT NOT NULL, subject TEXT NOT NULL, PRIMARY KEY(player,id))')
+        db.execute('CREATE INDEX IF NOT EXISTS activity_segments_period ON activity_segments(player,end,start)')
+        db.execute('CREATE TABLE IF NOT EXISTS activity_answers (player TEXT, session TEXT, question INTEGER, attempt INTEGER, at REAL NOT NULL, topic TEXT NOT NULL, subject TEXT NOT NULL, grade INTEGER NOT NULL, correct INTEGER NOT NULL, PRIMARY KEY(player,session,question,attempt))')
+        db.execute('CREATE INDEX IF NOT EXISTS activity_answers_period ON activity_answers(player,at)')
+        db.execute('CREATE TABLE IF NOT EXISTS activity_rounds (player TEXT, id TEXT, at REAL NOT NULL, session TEXT, score INTEGER NOT NULL, total INTEGER NOT NULL, corrected INTEGER NOT NULL, review INTEGER NOT NULL, topics TEXT NOT NULL, minutes INTEGER NOT NULL, stickers INTEGER NOT NULL, PRIMARY KEY(player,id))')
+        db.execute('CREATE INDEX IF NOT EXISTS activity_rounds_period ON activity_rounds(player,at)')
         db.execute("CREATE TABLE IF NOT EXISTS accounts (player TEXT PRIMARY KEY, login TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, digest TEXT NOT NULL, parent INTEGER NOT NULL DEFAULT 0)")
         db.execute("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, player TEXT NOT NULL, expires REAL NOT NULL)")
         db.execute("CREATE TABLE IF NOT EXISTS auth_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
@@ -320,6 +329,149 @@ def mario_round_reward(profile, data):
     if data.get('review') or score < required:
         return 0, False
     return total // 10, False
+
+
+REPORT_TZ = timezone(timedelta(hours=3))
+REPORT_SUBJECTS = ('math', 'russian', 'english', 'world', 'logic', 'mixed')
+
+
+def valid_activity_uuid(value):
+    if not isinstance(value, str) or len(value) != 36:
+        return False
+    try:
+        return str(UUID(value)) == value
+    except ValueError:
+        return False
+
+
+def activity_topic(key):
+    if not isinstance(key, str):
+        return None
+    if key in REWARD_TOPIC_GRADES:
+        return 'russian', REWARD_TOPIC_GRADES[key]
+    if key in MARIO_SCHOOL_TOPICS:
+        return tuple(MARIO_SCHOOL_TOPICS[key])
+    if key in ('compare', 'add', 'multiply', 'divide', 'pattern'):
+        return 'math', 0
+    if key == 'memory':
+        return 'logic', 0
+    return None
+
+
+def report_day(at):
+    return datetime.fromtimestamp(at, REPORT_TZ).date().isoformat()
+
+
+def build_activity_report(db, player, days, month, now):
+    today = datetime.fromtimestamp(now, REPORT_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    start = today-timedelta(days=days-1)
+    previous_start = start-timedelta(days=days)
+    month_start = datetime.strptime(month, '%Y-%m').replace(tzinfo=REPORT_TZ)
+    month_end = (month_start.replace(day=28)+timedelta(days=4)).replace(day=1)
+    lower = min(previous_start.timestamp(), (today-timedelta(days=13)).timestamp(), month_start.timestamp())
+    upper = min(now, max((today+timedelta(days=1)).timestamp(), month_end.timestamp()))
+    records = {}
+
+    def day(at):
+        key = report_day(at)
+        if key not in records:
+            records[key] = dict(date=key, study=0, mario=0, other=0, pause=0, total=0,
+                                questions=0, correct=0, corrected=0, rounds=0, stickers=0,
+                                earnedMinutes=0, subjects={})
+        return records[key]
+
+    cursor = datetime.fromtimestamp(lower, REPORT_TZ)
+    while cursor.timestamp() <= upper:
+        day(cursor.timestamp());cursor += timedelta(days=1)
+    # Union overlapping device intervals. Category precedence keeps totals additive.
+    events = []
+    for eid, a, z, kind, subject in db.execute('SELECT id,start,end,kind,subject FROM activity_segments WHERE player=? AND end>? AND start<?', (player, lower, upper)):
+        a, z = max(a, lower), min(z, upper)
+        if z > a:
+            events.extend([(a, 1, eid, kind, subject), (z, -1, eid, kind, subject)])
+    events.sort()
+    active, prior = {}, None
+    priority = dict(pause=0, other=1, mario=2, study=3)
+    for at, delta, eid, kind, subject in events:
+        if prior is not None and at > prior and active:
+            selected = max(active.values(), key=lambda item: (priority[item[1]], item[0]))
+            _, category, selected_subject = selected
+            point = prior
+            while point < at:
+                midnight = (datetime.fromtimestamp(point, REPORT_TZ).replace(hour=0, minute=0, second=0, microsecond=0)+timedelta(days=1)).timestamp()
+                end = min(at, midnight);seconds = end-point;row = day(point)
+                row[category] += seconds
+                if category != 'pause':row['total'] += seconds
+                if category == 'study':row['subjects'][selected_subject] = row['subjects'].get(selected_subject, 0)+seconds
+                point = end
+        if delta == 1:active[eid] = (at, kind, subject)
+        else:active.pop(eid, None)
+        prior = at
+
+    answers = list(db.execute('SELECT session,question,attempt,at,topic,subject,grade,correct FROM activity_answers WHERE player=? AND at>=? AND at<=?', (player, lower, upper)))
+    first = {(a[0], a[1]): a for a in answers if a[2] == 1}
+    corrections = {(a[0], a[1]): a for a in answers if a[2] == 2 and a[7]}
+    topic_days, session_counts = {}, {}
+    for identity, a in first.items():
+        session, _, _, at, topic, subject, grade, correct = a
+        fixed = int(not correct and identity in corrections)
+        row = day(at);row['questions'] += 1;row['correct'] += correct;row['corrected'] += fixed
+        key = (report_day(at), topic)
+        stat = topic_days.setdefault(key, dict(date=key[0], topic=topic, subject=subject, grade=grade, total=0, correct=0, corrected=0))
+        stat['total'] += 1;stat['correct'] += correct;stat['corrected'] += fixed
+        counts = session_counts.setdefault(session, [0, 0, 0])
+        counts[0] += 1;counts[1] += correct;counts[2] += fixed
+
+    rounds = []
+    for rid, at, session, score, total, corrected, review, topics, minutes, stickers in db.execute('SELECT id,at,session,score,total,corrected,review,topics,minutes,stickers FROM activity_rounds WHERE player=? AND at>=? AND at<=? ORDER BY at DESC', (player, lower, upper)):
+        row = day(at);row['rounds'] += 1;row['earnedMinutes'] += minutes;row['stickers'] += stickers
+        logged = session_counts.get(session, [0, 0, 0])
+        # Completed rounds remain visible if an old browser has no per-answer telemetry,
+        # or an offline device has not delivered all its individual answers yet.
+        row['questions'] += max(0, total-logged[0]);row['correct'] += max(0, score-logged[1]);row['corrected'] += max(0, corrected-logged[2])
+        rounds.append(dict(id=rid, at=at, date=report_day(at), score=score, total=total,
+                           corrected=corrected, review=bool(review), topics=json.loads(topics), minutes=minutes, stickers=stickers))
+
+    def summary(a, z):
+        selected = [r for date, r in records.items() if a <= date <= z]
+        result = {key: round(sum(r[key] for r in selected), 2) for key in ('study', 'mario', 'other', 'pause', 'total', 'questions', 'correct', 'corrected', 'rounds', 'stickers', 'earnedMinutes')}
+        result['activeDays'] = sum(r['study'] > 0 or r['questions'] > 0 for r in selected)
+        result['accuracy'] = round(100*result['correct']/result['questions']) if result['questions'] else None
+        result['subjects'] = {subject: round(sum(r['subjects'].get(subject, 0) for r in selected), 2) for subject in REPORT_SUBJECTS}
+        return result
+
+    current, previous = summary(start.date().isoformat(), today.date().isoformat()), summary(previous_start.date().isoformat(), (start-timedelta(days=1)).date().isoformat())
+    week_start = today-timedelta(days=6)
+    week = summary(week_start.date().isoformat(), today.date().isoformat())
+    last_week = summary((today-timedelta(days=13)).date().isoformat(), (today-timedelta(days=7)).date().isoformat())
+    topics = {}
+    for stat in topic_days.values():
+        if previous_start.date().isoformat() <= stat['date'] <= today.date().isoformat():
+            result = topics.setdefault(stat['topic'], dict(topic=stat['topic'], subject=stat['subject'], grade=stat['grade'], total=0, correct=0, corrected=0, previousTotal=0, previousCorrect=0))
+            current_period = stat['date'] >= start.date().isoformat()
+            result['total' if current_period else 'previousTotal'] += stat['total']
+            result['correct' if current_period else 'previousCorrect'] += stat['correct']
+            if current_period:result['corrected'] += stat['corrected']
+    for result in topics.values():
+        result['accuracy'] = round(100*result['correct']/result['total']) if result['total'] else None
+        old = round(100*result['previousCorrect']/result['previousTotal']) if result['previousTotal'] else None
+        result['change'] = result['accuracy']-old if old is not None and result['accuracy'] is not None else None
+    raw = db.execute('SELECT name,avatar,progress FROM players WHERE id=?', (player,)).fetchone()
+    profile = json.loads(raw[2])
+    bonus = db.execute('SELECT seconds FROM mario_bonus WHERE player=?', (player,)).fetchone()
+    earned = db.execute('SELECT coalesce(sum(seconds),0) FROM mario_tickets WHERE player=? AND used IS NULL', (player,)).fetchone()[0]
+    lease = db.execute('SELECT id,expires FROM mario_sessions WHERE player=?', (player,)).fetchone()
+    frozen = db.execute('SELECT session,remaining FROM mario_pauses WHERE player=?', (player,)).fetchone()
+    remaining = frozen[1] if lease and frozen and frozen[0] == lease[0] else max(0, lease[1]-now) if lease and lease[1] is not None else 0
+    since = db.execute("SELECT value FROM activity_meta WHERE key='since'").fetchone()[0]
+    return dict(player=dict(id=player, name=raw[0], avatar=raw[1]), timezone='Europe/Moscow', since=since,
+                coverage=dict(currentComplete=since <= start.timestamp(), previousComplete=since <= previous_start.timestamp(), lastWeekComplete=since <= (today-timedelta(days=13)).timestamp()),
+                period=dict(days=days, start=start.date().isoformat(), end=today.date().isoformat()), month=month,
+                summary=current, previous=previous, week=week, lastWeek=last_week,
+                days=sorted(records.values(), key=lambda r:r['date']), topics=list(topics.values()),
+                topicDays=list(topic_days.values()), rounds=rounds,
+                lifetime=dict(rounds=profile.get('rounds', 0), correct=profile.get('correct', 0), stickers=len(profile.get('stickers', {}))),
+                mario=dict(bonusSeconds=bonus[0] if bonus else 0, earnedSeconds=earned, remaining=remaining, paused=bool(frozen and lease and frozen[0] == lease[0])))
 
 
 def public_origin(value):
@@ -598,6 +750,10 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             return self.route_auth(db, path, data)
         if path == "/api/mario":
             return self.route_mario(db, data)
+        if path == '/api/activity':
+            return self.route_activity(db, data)
+        if path == '/api/reports':
+            return self.route_reports(db, data)
         if path == "/api/players":
             if data is None:
                 accounts = self.account_list(db)
@@ -634,6 +790,72 @@ class BunnyHandler(SimpleHTTPRequestHandler):
             if receipt:
                 result['marioReward'] = dict(minutes=receipt[0], unlock=bool(receipt[1]))
         return 200, result
+
+    def route_activity(self, db, data):
+        account = self.account(db)
+        if not account:
+            return 401, dict(error='Войдите в свой профиль.')
+        if data is None:
+            return 200, dict(serverTime=time.time(), since=db.execute("SELECT value FROM activity_meta WHERE key='since'").fetchone()[0])
+        if data.get('player') != account[0]:
+            return 403, dict(error='Учёт доступен только для текущего игрока.')
+        segments, answers = data.get('segments', []), data.get('answers', [])
+        if not isinstance(segments, list) or not isinstance(answers, list) or len(segments)+len(answers) > 100:
+            raise ValueError('Слишком большой пакет учёта.')
+        now = time.time()
+        since = db.execute("SELECT value FROM activity_meta WHERE key='since'").fetchone()[0]
+
+        def valid_time(value):
+            return type(value) in (int, float) and math.isfinite(value) and since-300 <= value <= now+5
+
+        saved = db.execute('SELECT progress FROM players WHERE id=?', (account[0],)).fetchone()
+        classes = school_classes(json.loads(saved[0]))
+        for item in segments:
+            if not isinstance(item, dict):raise ValueError('Некорректное время занятия.')
+            a, z, kind, subject = (item.get(key) for key in ('start', 'end', 'kind', 'subject'))
+            if (not valid_activity_uuid(item.get('id')) or not valid_time(a) or not valid_time(z)
+                    or not 0 < z-a <= 30 or kind not in ('study', 'mario', 'other', 'pause')
+                    or (kind == 'study' and subject not in REPORT_SUBJECTS)
+                    or (kind != 'study' and subject != '')):
+                raise ValueError('Некорректное время занятия.')
+            end = min(now, z)
+            a -= z-end
+            if end > a:db.execute('INSERT OR IGNORE INTO activity_segments VALUES (?,?,?,?,?,?)', (account[0], item['id'], a, end, kind, subject))
+        for item in answers:
+            if not isinstance(item, dict):raise ValueError('Некорректный ответ в дневнике.')
+            topic = activity_topic(item.get('topic'))
+            if (not valid_activity_uuid(item.get('session')) or type(item.get('question')) is not int or not 0 <= item['question'] < 100
+                    or type(item.get('attempt')) is not int or item['attempt'] not in (1, 2)
+                    or not valid_time(item.get('at')) or type(item.get('correct')) is not bool
+                    or not topic or topic[1] and topic[1] not in classes):
+                raise ValueError('Некорректный ответ в дневнике.')
+            db.execute('INSERT OR IGNORE INTO activity_answers VALUES (?,?,?,?,?,?,?,?,?)',
+                       (account[0], item['session'], item['question'], item['attempt'], min(now, item['at']), item['topic'], *topic, int(item['correct'])))
+        return 200, dict(ok=True, serverTime=now)
+
+    def route_reports(self, db, data):
+        account = self.account(db)
+        if not account:
+            return 401, dict(error='Войдите в родительский профиль.')
+        if not account[2]:
+            return 403, dict(error='Отчёты доступны только родителю.')
+        if data is not None:
+            return 405, dict(error='Отчёт доступен для просмотра.')
+        query = parse_qs(urlsplit(self.path).query)
+        children = [dict(id=row[0], name=row[1], avatar=row[2]) for row in db.execute('SELECT p.id,p.name,p.avatar FROM players p LEFT JOIN accounts a ON p.id=a.player WHERE coalesce(a.parent,0)=0 ORDER BY p.name,p.id')]
+        if not children:
+            return 200, dict(children=[], report=None)
+        player = query.get('player', [children[0]['id']])[0]
+        if player not in {child['id'] for child in children}:
+            return 404, dict(error='Детский профиль не найден.')
+        period = query.get('days', ['7'])[0]
+        now = time.time();current_month = datetime.fromtimestamp(now, REPORT_TZ).strftime('%Y-%m')
+        month = query.get('month', [current_month])[0]
+        since = db.execute("SELECT value FROM activity_meta WHERE key='since'").fetchone()[0]
+        first_month = datetime.fromtimestamp(since, REPORT_TZ).strftime('%Y-%m')
+        if period not in ('7', '30') or not re.fullmatch(r'20\d{2}-(0[1-9]|1[0-2])', month) or not first_month <= month <= current_month:
+            raise ValueError('Выберите неделю, месяц и доступную дату.')
+        return 200, dict(children=children, report=build_activity_report(db, player, int(period), month, now))
 
     def route_mario(self, db, data):
         account = self.account(db)
@@ -738,6 +960,16 @@ class BunnyHandler(SimpleHTTPRequestHandler):
                 elif minutes:
                     db.execute('INSERT INTO mario_bonus VALUES (?,?) ON CONFLICT(player) DO UPDATE SET seconds=seconds+excluded.seconds', (player_id, minutes * 60))
                 after = set(profile['stickers'])
+                telemetry = data.get('studySession')
+                if not valid_activity_uuid(telemetry):
+                    telemetry = None
+                at = data.get('completedAt')
+                now = time.time()
+                since = db.execute("SELECT value FROM activity_meta WHERE key='since'").fetchone()[0]
+                if type(at) not in (int, float) or not math.isfinite(at) or not since-300 <= at <= now+5:
+                    at = now
+                db.execute('INSERT INTO activity_rounds VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                           (player_id, operation, min(now, at), telemetry, data['score'], data['total'], data.get('corrected', 0), int(data['review']), json.dumps(data['topics']), minutes, len(after-before)))
                 completed = [dict(id=group['id'], name=group['name']) for group in COLLECTION_REWARDS
                              if not set(group['keys']) <= before and set(group['keys']) <= after]
                 return dict(id=operation, kind='collection' if completed else 'sticker' if after-before else 'round',
