@@ -4034,7 +4034,7 @@ function openMarioMission() {
     group.className='mario-mission-subject';
     const label=playerElement('label','',legend),enabled=playerElement('input','',label);enabled.type='checkbox';enabled.checked=subject!=='english';
     label.append(document.createTextNode(' '+name));
-    const details=playerElement('details','',group);playerElement('summary','Выбрать темы',details);
+    const details=playerElement('details','',group),topicSummary=playerElement('summary','Выбрать темы',details);
     const bank=subject==='russian'?russianTopics:schoolTopics;
     const keys=Object.keys(bank).filter(key=>(bank[key].grade||1)===grade&&(subject==='russian'||bank[key].subject===subject&&!bank[key].legacyEnglish));
     const preference=subject==='russian'?'bunny-russian-studied-'+grade:'bunny-school-'+subject+'-'+(subject==='english'?'selection':'studied')+grade;
@@ -4046,13 +4046,31 @@ function openMarioMission() {
       topicLabel.className='mario-mission-topic';toggle.type='checkbox';toggle.checked=defaults.includes(key);
       topicLabel.append(document.createTextNode(' '+bank[key].name));chosen.set(key,toggle);
     }
-    selection.set(subject,{enabled,chosen});
+    selection.set(subject,{enabled,chosen,details,topicSummary,name});
   }
-  playerButton(panel,'▶ Начать миссию',()=>{
+  function selectionError(){
+    const subjects=[...selection.values()].filter(value=>value.enabled.checked);
+    if(subjects.length<3)return 'Выбрано '+subjects.length+' из 3 предметов. '+(subjects.length===2?'Отметь ещё один предмет: '+[...selection.values()].filter(value=>!value.enabled.checked).map(value=>value.name).join(' или ')+'.':'Отметь ещё '+(3-subjects.length)+' предмета.');
+    if(subjects.length>3)return 'Выбрано 4 предмета. Оставь ровно три: сними одну галочку.';
+    const missing=subjects.filter(value=>[...value.chosen.values()].filter(toggle=>toggle.checked).length<2);
+    return missing.length?'Выбери минимум две темы: '+missing.map(value=>value.name).join(', ')+'.':'';
+  }
+  function showSelectionStatus(reveal=false){
+    const error=selectionError();
+    selectionStatus.textContent=error||'Выбрано 3 из 3 предметов, темы готовы. Можно начинать миссию.';
+    selectionStatus.classList.toggle('mission-selection-error',Boolean(error));
+    for(const value of selection.values())value.topicSummary.textContent='Выбрать темы · выбрано '+[...value.chosen.values()].filter(toggle=>toggle.checked).length;
+    if(reveal&&error){
+      for(const value of selection.values())if(value.enabled.checked&&[...value.chosen.values()].filter(toggle=>toggle.checked).length<2)value.details.open=true;
+      selectionStatus.focus?.({preventScroll:true});
+      selectionStatus.scrollIntoView?.({block:'nearest'});
+    }
+    return error;
+  }
+  const start=playerButton(panel,'▶ Начать миссию',()=>{
+    if(showSelectionStatus(true))return;
     const subjects=[...selection].filter(([,value])=>value.enabled.checked);
-    if(subjects.length!==3){message('Выбери ровно три предмета.');return;}
     const topics=subjects.map(([subject,value])=>[subject,[...value.chosen].filter(([,toggle])=>toggle.checked).map(([key])=>key)]);
-    if(topics.some(([,keys])=>keys.length<2)){message('Выбери минимум две темы каждого предмета.');return;}
     const n=Number(length.value),order=shuffledRussian(subjects.map(([subject])=>subject)),queues=new Map();
     for(const [subject,keys] of topics){
       const count=Math.floor(n/3)+(order.indexOf(subject)<n%3?1:0);
@@ -4063,7 +4081,17 @@ function openMarioMission() {
     }
     const deck=[];while(deck.length<n)for(const subject of order)if(queues.get(subject).length)deck.push(queues.get(subject).shift());
     rewardRound={deck,corrected:0,rule:{...rule,required:Math.ceil(n*rule.ratio)}};begin('marioMission');
-  }).className='wide';
+    $('heading').scrollIntoView?.({block:'start'});
+  });
+  start.className='wide';start.setAttribute('aria-describedby','mario-mission-selection-status');
+  const selectionStatus=playerElement('p','',panel);
+  selectionStatus.id='mario-mission-selection-status';selectionStatus.className='mission-selection-status';selectionStatus.tabIndex=-1;
+  selectionStatus.setAttribute('role','status');selectionStatus.setAttribute('aria-live','polite');selectionStatus.setAttribute('aria-atomic','true');
+  for(const value of selection.values()){
+    value.enabled.onchange=()=>showSelectionStatus();
+    for(const toggle of value.chosen.values())toggle.onchange=()=>showSelectionStatus();
+  }
+  showSelectionStatus();
   playerElement('p','Обычные тренировки: '+Math.ceil(10*rule.ratio)+' из 10 → +1 минута; '+Math.ceil(50*rule.ratio)+' из 50 → +5 минут. Считаются ответы с первой попытки. Они пополняют запас, а игру открывает смешанная миссия. Работа над ошибками минут не даёт.',panel).className='hint';
   playerButton(panel,'← К заданиям',home);
 }
