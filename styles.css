@@ -668,6 +668,8 @@ body:has(.manual-playing) { display: block; padding: 0; overflow: hidden; backgr
 .mario-mission-topic {display:block;margin:10px 0;}
 .mario-mission-subject input {width:22px;height:22px;vertical-align:middle;}
 .mario-mission-subject summary {cursor:pointer;padding:8px 0;}
+.mission-selection-status {font-size:1rem;line-height:1.45;margin:10px 0;padding:12px;border:2px solid var(--edge);border-radius:12px;text-align:left;}
+.mission-selection-error {background:var(--button);font-weight:650;}
 
 #player-nav > .hint {grid-column:1 / -1;}
 
